@@ -20,6 +20,14 @@
           { title: 'Technical priorities', href: 'system-overview.html#data-flow' },
           { title: 'Open questions', href: 'system-overview.html#folders' },
         ]},
+        { title: 'Brain PC & Glasses', href: 'brain-pc.html', children: [
+          { title: 'The two halves', href: 'brain-pc.html#overview' },
+          { title: 'How it fits together', href: 'brain-pc.html#topology' },
+          { title: 'What moves where', href: 'brain-pc.html#data-flows' },
+          { title: 'Current understanding', href: 'brain-pc.html#current' },
+          { title: 'Open questions', href: 'brain-pc.html#unknowns' },
+          { title: 'Verifying this', href: 'brain-pc.html#explore' },
+        ]},
       ]
     },
     {
@@ -91,6 +99,7 @@
   var ORDER = [
     { title: 'Story Overview',             href: 'index.html' },
     { title: 'System Overview',            href: 'system-overview.html' },
+    { title: 'Brain PC & Glasses',         href: 'brain-pc.html' },
     { title: 'System Set Up',              href: 'system-setup.html' },
     { title: 'Cues',                       href: 'cues.html' },
     { title: 'Design Style Guide',         href: 'design-style-guide.html' },
