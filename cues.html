@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cues — Joan of the City</title>
-<meta name="description" content="The cueing system for Joan of the City — how beats are authored, edited, and fired in time with the score." />
+<meta name="description" content="The cueing system for Joan of the City — the cue sheet, how cues are authored and edited, and STOP ALL." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -19,41 +19,35 @@
     <div class="hero compact">
       <div class="hero-eyebrow">Engineering &amp; Design</div>
       <h1>Cues</h1>
-      <p>The cueing system is the heart of the show — it turns the score into timed events that move phantoms, light, and sound through the city.</p>
+      <p>The cue sheet is the heart of the show — for every moment it records what asset plays, what the audience sees in AR, what audio runs, and what the performer is doing.</p>
     </div>
 
     <!-- ===================== OVERVIEW ===================== -->
     <section id="cues-overview">
       <div class="section-tag">Cues</div>
       <h2>Overview</h2>
-      <p class="lead">A <strong>cue</strong> is a single directed moment — a phantom enters, a light shifts, a voice rises. Cues are grouped into <strong>beats</strong>, and beats are driven by the Conductor Clock in time with the music.</p>
+      <p class="lead">A <strong>cue</strong> is a single directed moment in a scene — a light builds, a particle reveal triggers, the raven flock lands, the Shadow stands. The <strong>cue sheet</strong> is the master list: for each cue it records the asset playing, the AR/visual imagery, the audio, and what the performer is doing.</p>
 
-      <h3>The vocabulary of a cue</h3>
+      <h3>What a cue captures</h3>
       <table>
-        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td><strong>Beat</strong></td><td>The smallest directed unit of action, identified by a stable id like <code>II.trial.enter</code>.</td></tr>
-          <tr><td><strong>Cue</strong></td><td>One action attached to a beat — spawn, move, light, audio, retire.</td></tr>
-          <tr><td><strong>Trigger</strong></td><td>What advances to a beat: the conductor clock, audience position, or operator action.</td></tr>
-          <tr><td><strong>Anchor</strong></td><td>The real-world point a cue's content is positioned against.</td></tr>
-          <tr><td><strong>Running Order</strong></td><td>The full ordered list of beats that makes up a performance.</td></tr>
+          <tr><td><strong>Scene</strong></td><td>Which scene the cue belongs to — Light, Voice, Shadow, Communion, etc.</td></tr>
+          <tr><td><strong>Cue</strong></td><td>The directed moment itself, in order within the scene.</td></tr>
+          <tr><td><strong>Asset</strong></td><td>What is being played — the model, particle system, skin, or effect.</td></tr>
+          <tr><td><strong>AR / Visual imagery</strong></td><td>What the audience sees in AR at this cue (from the script's imagery column + Milanote).</td></tr>
+          <tr><td><strong>Audio</strong></td><td>The stem or sound playing, from the audio cue sheet.</td></tr>
+          <tr><td><strong>Performer action</strong></td><td>What the live performer is doing during the cue.</td></tr>
+          <tr><td><strong>STOP ALL</strong></td><td>The master safety — halts and resets every running cue at once.</td></tr>
         </tbody>
       </table>
 
-      <h3>How a cue fires</h3>
-      <div class="steps">
-        <div class="step"><h4>The clock reaches a beat</h4><p>Or an audience-position / operator trigger requests it.</p></div>
-        <div class="step"><h4>The beat event is raised</h4><p>Onto the shared event bus — see <a href="system-overview.html#events" style="color:var(--gold)">System Overview</a>.</p></div>
-        <div class="step"><h4>Each cue in the beat executes</h4><p>Phantom Director, Spatial Audio, and lighting carry out their part, anchored to the world.</p></div>
-        <div class="step"><h4>The beat resolves</h4><p>The clock holds or advances to the next beat, depending on the trigger type.</p></div>
-      </div>
-
-      <h3>Cue types</h3>
+      <h3>Cue types by scene</h3>
       <div class="card-grid">
-        <div class="card"><div class="ico">🎭</div><h4>Phantom</h4><p>Spawn, move, animate, or retire a virtual performer.</p></div>
-        <div class="card"><div class="ico">💡</div><h4>Light</h4><p>Shift key light color &amp; intensity to set the movement's emotion.</p></div>
-        <div class="card"><div class="ico">🔊</div><h4>Audio</h4><p>Trigger a voice or stem at a spatial source; duck or crossfade.</p></div>
-        <div class="card"><div class="ico">⏯️</div><h4>Flow</h4><p>Hold, wait-for-audience, or advance the running order.</p></div>
+        <div class="card"><div class="ico">💡</div><h4>Light</h4><p>Lilac sky, streaks, chromatic aberration — audio-reactive builds.</p></div>
+        <div class="card"><div class="ico">🐦‍⬛</div><h4>Voice</h4><p>Raven flock &amp; landing, the Hero Raven, collage / sky-text moments.</p></div>
+        <div class="card"><div class="ico">🌑</div><h4>Shadow</h4><p>Crawl → spawn → stand → attack, surround, particle reveal.</p></div>
+        <div class="card"><div class="ico">✨</div><h4>Communion</h4><p>Ground ripples, emergence, rise &amp; levitation, mid-air ripple layer.</p></div>
       </div>
     </section>
 
@@ -63,53 +57,36 @@
     <section id="cue-editing">
       <div class="section-tag">Cues</div>
       <h2>Editing &amp; Cueing System</h2>
-      <p class="lead">Cues are authored as data, not code — so designers can shape a movement without recompiling. Each movement owns a cue sheet that the runtime loads and the operator drives.</p>
+      <p class="lead">The cue sheet is the single document that ties the show together. It's assembled from the <strong>script</strong> (the AR / visual imagery column), the <strong>scene asset list</strong>, the <strong>audio cue sheet</strong>, and the <strong>Milanote</strong> reference boards — one row per cue, in performance order.</p>
 
       <h3>The cue sheet</h3>
-      <p>Every movement has a cue sheet under <code>Assets/Movements/&lt;movement&gt;/cues.json</code>. It lists beats in order, each with the cues to run and the trigger that advances to it.</p>
-      <pre><code>{
-  <span class="tok-f">"movement"</span>: <span class="tok-s">"II-the-trial"</span>,
-  <span class="tok-f">"beats"</span>: [
-    {
-      <span class="tok-f">"id"</span>: <span class="tok-s">"II.trial.enter"</span>,
-      <span class="tok-f">"trigger"</span>: <span class="tok-s">"audience@courthouse.steps"</span>,
-      <span class="tok-f">"cues"</span>: [
-        { <span class="tok-f">"type"</span>: <span class="tok-s">"light"</span>,   <span class="tok-f">"color"</span>: <span class="tok-s">"joan/cyan"</span>, <span class="tok-f">"fade"</span>: 2.0 },
-        { <span class="tok-f">"type"</span>: <span class="tok-s">"phantom"</span>, <span class="tok-f">"id"</span>: <span class="tok-s">"judge"</span>, <span class="tok-f">"anchor"</span>: <span class="tok-s">"courthouse.dais"</span> },
-        { <span class="tok-f">"type"</span>: <span class="tok-s">"audio"</span>,   <span class="tok-f">"stem"</span>: <span class="tok-s">"trial/aria-1"</span>, <span class="tok-f">"source"</span>: <span class="tok-s">"courthouse.dais"</span> }
-      ]
-    }
-  ]
-}</code></pre>
+      <p>Each row is a cue. Keep the row itself short and scannable; put longer direction in a notes field someone can click into for more detail (so the sheet doesn't sprawl). The current working copy lives in a shared spreadsheet — see <a href="resources.html#tools" style="color:var(--gold)">Tools &amp; links</a>.</p>
+      <table>
+        <thead><tr><th>Scene</th><th>Cue</th><th>Asset</th><th>AR / Visual</th><th>Audio</th><th>Performer</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Light</td><td>1</td><td>Lilac sky FX</td><td>Sky grows from the speaker; streaks build</td><td>Radio solo</td><td>Enters, faces speaker</td><td>Audio-reactive; gradual build</td></tr>
+          <tr><td>Voice</td><td>3</td><td>Raven flock + Hero Raven</td><td>Flock lands in a semi-circle; one raven approaches Joan</td><td>Ravens stem</td><td>Holds still as raven nears</td><td>Hero Raven separates, looks at Joan, stays after flock leaves</td></tr>
+          <tr><td>Shadow</td><td>2</td><td>Shadow silhouette</td><td>Crawl → spawn → stand</td><td>Shadow drone</td><td>Backs away</td><td>Particle reveal across the cue</td></tr>
+        </tbody>
+      </table>
+      <div class="callout tip">
+        <span class="ci">✅</span>
+        <p>Anyone can read a well-kept cue sheet and know exactly what plays, what the audience sees, and what the performer does at every moment — without opening Unity.</p>
+      </div>
 
       <h3>Editing workflow</h3>
       <div class="steps">
-        <div class="step"><h4>Author in the Cue Editor</h4><p>The in-Unity <strong>Cue Editor</strong> window reads and writes the cue sheet visually — add beats, attach cues, pick anchors from the scanned map.</p></div>
-        <div class="step"><h4>Preview in the sandbox</h4><p>Scrub the timeline in <code>_Sandbox.unity</code> to see cues fire without leaving your desk (see <a href="system-setup.html#local-test" style="color:var(--gold)">Running a Local Test</a>).</p></div>
-        <div class="step"><h4>Tune timing to the score</h4><p>Align beat triggers to musical moments. Use elastic holds where the audience sets the pace by walking.</p></div>
-        <div class="step"><h4>Commit the cue sheet</h4><p>Cue sheets are plain JSON — review them in a normal pull request, no scene merge required.</p></div>
+        <div class="step"><h4>Pull from the sources</h4><p>Start from the script's AR/visual imagery column, the scene's asset list, the audio cue sheet, and the Milanote boards.</p></div>
+        <div class="step"><h4>One row per cue</h4><p>Record asset, AR/visual, audio, and performer action. Keep the row short; push detail into the notes field.</p></div>
+        <div class="step"><h4>Add performer action</h4><p>Every cue should say what the live performer is doing — it's part of the score, not an afterthought.</p></div>
+        <div class="step"><h4>Verify against the build</h4><p>Step through the cues in the sandbox or on-headset (see <a href="system-setup.html#local-test" style="color:var(--gold)">Running a Local Test</a>) and confirm each fires as written — and consistently across devices.</p></div>
       </div>
 
-      <div class="callout tip">
-        <span class="ci">✅</span>
-        <p>Because cues are data, a designer can re-time an entire movement and ship it through review <strong>without an engineer recompiling</strong>. Keep them human-readable.</p>
-      </div>
-
-      <h3>The operator console</h3>
-      <p>At performance time, a human operator drives the cue sheet from the Show-Control console. This is the only place non-diegetic UI is allowed — the audience never sees it.</p>
-      <table>
-        <thead><tr><th>Control</th><th>Effect</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Start / Resume</strong></td><td>Begins or continues the conductor clock from the current beat.</td></tr>
-          <tr><td><strong>Jump to Beat</strong></td><td>Repositions the clock — used heavily during rehearsal.</td></tr>
-          <tr><td><strong>Hold</strong></td><td>Freezes phantoms and sustains the underscore for audience pacing.</td></tr>
-          <tr><td><strong>E-Stop</strong></td><td>Fades all content to a safe neutral state immediately.</td></tr>
-        </tbody>
-      </table>
-
+      <h3>STOP ALL &amp; running the show</h3>
+      <p>At performance time an operator drives the cues from Show-Control. The one control that matters above all is <strong>STOP ALL</strong> — it halts and resets every running cue instantly. Verify it on the current build before every show.</p>
       <div class="callout warn">
         <span class="ci">🔒</span>
-        <p><strong>Never edit a cue sheet live during a performance.</strong> Editing happens in the sandbox and ships through review. The console <em>drives</em> cues; it does not author them.</p>
+        <p><strong>STOP ALL must be confirmed working before doors open.</strong> If it isn't verified on the build you're running, the show is not ready — treat it as a release blocker.</p>
       </div>
     </section>
 

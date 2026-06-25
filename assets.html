@@ -19,37 +19,49 @@
     <div class="hero compact">
       <div class="hero-eyebrow">Reference</div>
       <h1>Assets Documentation</h1>
-      <p>How every audio stem, model, phantom, and material is named, formatted, and brought into the project — plus the visual language they all serve.</p>
+      <p>How every audio stem, model, silhouette, particle system, and material is named, formatted, and brought into the project — plus the visual language they all serve.</p>
     </div>
 
     <section id="pipeline">
       <div class="section-tag">Assets</div>
       <h2>The asset pipeline</h2>
-      <p class="lead">Assets flow from source tools into the Unity project through a consistent path. Everything heavy is tracked with Git LFS so the repo stays usable.</p>
+      <p class="lead">Most character assets begin as <strong>T-poses</strong> and become custom silhouettes and skins — primarily for Shadow and Communion. Particle systems carry libretto text and data. Everything heavy is tracked with Git LFS so the repo stays usable.</p>
       <div class="steps">
-        <div class="step"><h4>Author in source tools</h4><p>Audio in the DAW, models in Blender/Maya, textures in the painter of choice. Keep editable source files in the team drive, not the repo.</p></div>
-        <div class="step"><h4>Export to spec</h4><p>Export to the formats below, named to convention. Bake what can be baked.</p></div>
-        <div class="step"><h4>Drop into the right folder</h4><p>Place under <code>Assets/Audio</code>, <code>Assets/Phantoms</code>, or <code>Assets/Art</code> as appropriate.</p></div>
-        <div class="step"><h4>Commit via LFS</h4><p>Binary assets must land on LFS-tracked paths. Confirm with <code>git lfs status</code> before pushing.</p></div>
+        <div class="step"><h4>Start from the T-pose</h4><p>Custom silhouettes &amp; skins are built from T-poses for the Shadow and Communion presences, and for the remaining Joans as they come online (owner: Jack).</p></div>
+        <div class="step"><h4>Clean up &amp; optimize textures</h4><p>Texture cleanup and an optimization pass keep each scene inside its particle/texture budget — performance is a standing priority.</p></div>
+        <div class="step"><h4>Build particle &amp; FX assets</h4><p>Particle systems carry <strong>libretto text / data</strong> (owner: KK). Light FX (lilac sky, streaks, chromatic aberration) and Communion ripples are authored here too.</p></div>
+        <div class="step"><h4>Bring into Unity via LFS</h4><p>Place under the right scene folder and commit on an LFS-tracked path. Confirm with <code>git lfs status</code> before pushing.</p></div>
       </div>
+
+      <h3>Asset categories</h3>
+      <table>
+        <thead><tr><th>Category</th><th>Examples</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td>Custom silhouettes / skins</td><td>Shadow &amp; Communion presences, remaining Joans</td><td>Jack</td></tr>
+          <tr><td>Particle / libretto systems</td><td>Particles carrying libretto text &amp; data</td><td>KK (Kamala / Kristin)</td></tr>
+          <tr><td>Ravens &amp; bird states</td><td>Flock, landing, Hero Raven animation states</td><td>Voice team</td></tr>
+          <tr><td>Light FX</td><td>Lilac sky, streaks, chromatic aberration layer</td><td>Nina</td></tr>
+          <tr><td>Audio</td><td>Scene stems &amp; the audio cue sheet entries</td><td>Audio</td></tr>
+        </tbody>
+      </table>
       <div class="callout warn">
         <span class="ci">📦</span>
-        <p><strong>Never commit a binary outside an LFS-tracked path.</strong> A raw model or stem in normal git bloats the repo permanently for everyone.</p>
+        <p><strong>Never commit a binary outside an LFS-tracked path.</strong> A raw model, texture, or stem in normal git bloats the repo permanently for everyone.</p>
       </div>
     </section>
 
     <section id="formats">
       <div class="section-tag">Assets</div>
       <h2>Formats &amp; budgets</h2>
-      <p class="lead">Target specs per asset type. Budgets exist so a movement holds its frame rate on mobile-class XR hardware.</p>
+      <p class="lead">Indicative target specs per asset type. Agreed particle and texture budgets per scene are still to be set (see <a href="system-overview.html#folders" style="color:var(--gold)">Open questions</a>) — until then, optimize aggressively and profile on-device.</p>
       <table>
         <thead><tr><th>Type</th><th>Format</th><th>Spec / budget</th></tr></thead>
         <tbody>
-          <tr><td>Score &amp; voice stems</td><td><code>.wav</code> → streamed</td><td>48 kHz / 24-bit source; stream at runtime, don't preload a full movement.</td></tr>
+          <tr><td>Score &amp; voice stems</td><td><code>.wav</code> → streamed</td><td>48 kHz / 24-bit source; stream at runtime, don't preload a full scene.</td></tr>
           <tr><td>Spatial SFX</td><td><code>.wav</code></td><td>Mono sources for positional audio; keep short clips in-memory.</td></tr>
-          <tr><td>Phantom models</td><td><code>.fbx</code> / <code>.glb</code></td><td>Per-movement poly budget; LODs where a phantom is seen at range.</td></tr>
+          <tr><td>Character models</td><td><code>.fbx</code> / <code>.glb</code></td><td>Per-scene poly budget; LODs where a character is seen at range.</td></tr>
           <tr><td>Textures</td><td><code>.png</code> / <code>.tga</code></td><td>Power-of-two; compressed for the target device. Emissive maps for glow.</td></tr>
-          <tr><td>Animation</td><td>Clips on the rig</td><td>Shared humanoid rig so clips retarget across phantoms.</td></tr>
+          <tr><td>Animation</td><td>Clips on the rig</td><td>Shared humanoid rig (from the T-pose) so clips retarget across characters.</td></tr>
         </tbody>
       </table>
     </section>
@@ -57,26 +69,27 @@
     <section id="naming">
       <div class="section-tag">Assets</div>
       <h2>Naming conventions</h2>
-      <p class="lead">Predictable names make cues, search, and reviews painless. Lowercase, hyphen-separated, scoped by movement.</p>
-      <pre><code><span class="tok-c"># pattern:  &lt;movement&gt;_&lt;category&gt;_&lt;name&gt;[_&lt;variant&gt;]</span>
+      <p class="lead">Predictable names make the cue sheet, search, and reviews painless. Lowercase, hyphen-separated, scoped by scene.</p>
+      <pre><code><span class="tok-c"># pattern:  &lt;scene&gt;_&lt;category&gt;_&lt;name&gt;[_&lt;variant&gt;]</span>
 
-II_phantom_judge.fbx
-II_audio_aria-1.wav
-II_tex_judge-robe_emissive.png
-II_anim_judge-rise.anim
-shared_phantom_chorus.fbx        <span class="tok-c"># reused across movements</span></code></pre>
+shadow_silhouette_crawl.fbx
+voice_raven_hero.fbx
+voice_anim_raven-land.anim
+light_particle_streak.prefab
+communion_skin_01.png
+shared_particle_libretto.prefab     <span class="tok-c"># reused across scenes</span></code></pre>
       <table>
         <thead><tr><th>Token</th><th>Values</th></tr></thead>
         <tbody>
-          <tr><td><code>movement</code></td><td><code>I</code>, <code>II</code>, <code>III</code>, or <code>shared</code></td></tr>
-          <tr><td><code>category</code></td><td><code>phantom</code>, <code>audio</code>, <code>tex</code>, <code>anim</code>, <code>mat</code></td></tr>
-          <tr><td><code>name</code></td><td>Descriptive, hyphen-separated (<code>judge-robe</code>)</td></tr>
+          <tr><td><code>scene</code></td><td><code>light</code>, <code>voice</code>, <code>shadow</code>, <code>communion</code>, <code>real</code>, <code>hustle</code>, <code>ground</code>, or <code>shared</code></td></tr>
+          <tr><td><code>category</code></td><td><code>silhouette</code>, <code>skin</code>, <code>particle</code>, <code>raven</code>, <code>audio</code>, <code>tex</code>, <code>anim</code>, <code>mat</code></td></tr>
+          <tr><td><code>name</code></td><td>Descriptive, hyphen-separated (<code>raven-land</code>)</td></tr>
           <tr><td><code>variant</code></td><td>Optional (<code>emissive</code>, <code>lod1</code>, <code>alt</code>)</td></tr>
         </tbody>
       </table>
       <div class="callout note">
         <span class="ci">🔗</span>
-        <p>Asset names should match the ids used in <a href="cues.html#cue-editing" style="color:var(--gold)">cue sheets</a>. A cue that spawns <code>"judge"</code> should resolve to <code>II_phantom_judge</code> with no guesswork.</p>
+        <p>Asset names should match the <strong>Asset</strong> column in the <a href="cues.html#cue-editing" style="color:var(--gold)">cue sheet</a>, so a cue and its asset resolve to each other with no guesswork.</p>
       </div>
     </section>
 
@@ -85,31 +98,43 @@ shared_phantom_chorus.fbx        <span class="tok-c"># reused across movements</
     <section id="visual-language">
       <div class="section-tag">Design</div>
       <h2>Visual language</h2>
-      <p class="lead">A coherent world for Joan: candlelit golds, sacred violets, and the cold blue of judgement. Operatic — high contrast, theatrical light, restraint everywhere else. Every asset should serve this palette.</p>
+      <p class="lead">Each scene has its own visual language, defined by design (Deborah) and the Milanote boards. The notes below capture the signature cues per scene; the palette is a working reference, not a locked spec.</p>
 
-      <h3>Palette</h3>
+      <h3>Per-scene visual cues</h3>
+      <table>
+        <thead><tr><th>Scene</th><th>Signature visuals</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Light</strong></td><td>Lilac sky growing from the speaker, streaks, a chromatic-aberration layer, audio-reactive build.</td></tr>
+          <tr><td><strong>Voice</strong></td><td>Raven flock landing in a semi-circle (illusion of occlusion), the Hero Raven, thunder-triggered collage / sky text.</td></tr>
+          <tr><td><strong>Shadow</strong></td><td>Custom silhouettes, crawl→stand→attack states, floor movement &amp; drift, particle reveal across cues.</td></tr>
+          <tr><td><strong>Communion</strong></td><td>Ground ripples, emergence, rise &amp; levitation, a mid-air ripple layer; ~12′ radius.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Working palette</h3>
+      <p>A starting palette for UI, docs, and placeholder material — defer to each scene's own design where they differ.</p>
       <table>
         <thead><tr><th>Token</th><th>Swatch</th><th>Hex</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><code>joan/gold</code></td><td><span class="swatch" style="background:#d4af6a"></span>Candle Gold</td><td><code>#d4af6a</code></td><td>Sacred light, Joan's presence, key accents.</td></tr>
-          <tr><td><code>joan/rose</code></td><td><span class="swatch" style="background:#c8688a"></span>Martyr Rose</td><td><code>#c8688a</code></td><td>Emotion, blood, warmth, the human voice.</td></tr>
-          <tr><td><code>joan/violet</code></td><td><span class="swatch" style="background:#8a7bd8"></span>Vision Violet</td><td><code>#8a7bd8</code></td><td>The supernatural, visions, apparitions.</td></tr>
-          <tr><td><code>joan/cyan</code></td><td><span class="swatch" style="background:#5fb8c4"></span>Judgement Blue</td><td><code>#5fb8c4</code></td><td>Cold institutional light, the trial.</td></tr>
-          <tr><td><code>joan/night</code></td><td><span class="swatch" style="background:#0a0a0f"></span>City Night</td><td><code>#0a0a0f</code></td><td>The void around the world; the unlit city.</td></tr>
+          <tr><td><code>joan/gold</code></td><td><span class="swatch" style="background:#d4af6a"></span>Gold</td><td><code>#d4af6a</code></td><td>Joan's presence, key accents, doc highlights.</td></tr>
+          <tr><td><code>joan/rose</code></td><td><span class="swatch" style="background:#c8688a"></span>Rose</td><td><code>#c8688a</code></td><td>Emotion, warmth, the human voice.</td></tr>
+          <tr><td><code>joan/lilac</code></td><td><span class="swatch" style="background:#8a7bd8"></span>Lilac</td><td><code>#8a7bd8</code></td><td>The Light scene sky; visions and apparitions.</td></tr>
+          <tr><td><code>joan/cyan</code></td><td><span class="swatch" style="background:#5fb8c4"></span>Cyan</td><td><code>#5fb8c4</code></td><td>Cool accents and atmospheric effects.</td></tr>
+          <tr><td><code>joan/night</code></td><td><span class="swatch" style="background:#0a0a0f"></span>Night</td><td><code>#0a0a0f</code></td><td>The dark the AR content reads against.</td></tr>
         </tbody>
       </table>
 
       <h3>Typography</h3>
       <p><strong>Display — Cormorant Garamond.</strong> A high-contrast serif for titles, libretto, and any sacred text. It carries the operatic, historical weight.</p>
       <p><strong>Interface — Inter.</strong> Neutral and legible for the rare diegetic labels and all operator/console tooling.</p>
-      <p><strong>Mono — JetBrains Mono.</strong> Code, beat ids, anchor names, cue sheets.</p>
+      <p><strong>Mono — JetBrains Mono.</strong> Code, cue ids, asset names, cue sheets.</p>
 
       <h3>Light &amp; material principles</h3>
       <ul>
-        <li><strong>Light tells the story.</strong> A movement's emotion is set by its key light color before any phantom appears.</li>
-        <li><strong>Subtractive design.</strong> The real city is busy — virtual content should be sparse, deliberate, and luminous against the dark.</li>
-        <li><strong>Glow as voice.</strong> Phantoms emit soft light; emissive intensity follows their vocal line.</li>
-        <li><strong>Readable in daylight.</strong> Assets must hold up in changing outdoor light — test at the real performance time.</li>
+        <li><strong>Light tells the story.</strong> A scene's emotion is set by its key light and color before any character appears.</li>
+        <li><strong>Subtractive design.</strong> The real venue is busy — virtual content should be sparse, deliberate, and luminous against the dark.</li>
+        <li><strong>Glow &amp; audio-reactivity.</strong> Characters and particles emit soft light; emissive intensity follows the audio.</li>
+        <li><strong>Readable on-site.</strong> Assets must hold up in the venue's real light — test at the actual performance time and place.</li>
       </ul>
     </section>
 

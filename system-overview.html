@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>System Overview — Joan of the City</title>
-<meta name="description" content="System architecture for Joan of the City — the systems, the conductor clock, and how they communicate." />
+<meta name="description" content="System overview for Joan of the City — anchoring, cueing and STOP ALL, positioning, performance, and the current technical priorities." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -19,78 +19,81 @@
     <div class="hero compact">
       <div class="hero-eyebrow">Engineering</div>
       <h1>System Overview</h1>
-      <p>How the show is built: independent systems, coordinated by a single timeline, communicating through events.</p>
+      <p>How the show is built in Unity: anchoring, cueing &amp; STOP ALL, positioning, and performance — plus the current technical priorities and open questions.</p>
     </div>
 
     <section id="philosophy">
       <div class="section-tag">Architecture</div>
       <h2>Architecture at a glance</h2>
-      <p class="lead">Joan is built as a set of independent systems coordinated by one master timeline. Each system does exactly one thing and talks to the others only through events — so movements stay swappable and the show stays resilient if any single system stalls.</p>
-      <div class="callout tip">
+      <p class="lead">The show is built in Unity as a set of concerns layered over each scene: <strong>anchoring</strong> holds content in the real world, <strong>cueing</strong> drives what happens and when, <strong>positioning</strong> keeps spawns consistent, and a <strong>performance</strong> budget keeps it all running on-headset. The whole thing must behave identically across every device in the room.</p>
+      <div class="callout warn">
         <span class="ci">🧱</span>
-        <p><strong>Rule of thumb:</strong> if you find yourself referencing one manager from inside another, raise an event instead. Movements should be assemblable and removable without touching engine code.</p>
+        <p>This page documents the project as a set of <strong>subsystems and known priorities</strong>, not a fixed code architecture. Where a mechanism is still being decided (anchoring strategy, networking), it's flagged in <a href="#folders" style="color:var(--gold)">Open questions</a> rather than described as settled.</p>
       </div>
     </section>
 
     <section id="systems">
       <div class="section-tag">Architecture</div>
-      <h2>The Systems</h2>
-      <p class="lead">Six systems make up the runtime. Everything else is content layered on top of them.</p>
+      <h2>The Subsystems</h2>
+      <p class="lead">Five concerns make up the runtime. Each scene (Light, Voice, Shadow, Communion) is content layered on top of them.</p>
       <table>
-        <thead><tr><th>System</th><th>Responsibility</th></tr></thead>
+        <thead><tr><th>Subsystem</th><th>Responsibility</th><th>Current focus</th></tr></thead>
         <tbody>
-          <tr><td><strong>Conductor Clock</strong></td><td>Master timeline. Emits beat events that every other system listens to.</td></tr>
-          <tr><td><strong>Anchor Service</strong></td><td>Resolves and persists real-world anchors; keeps virtual content pinned to the city.</td></tr>
-          <tr><td><strong>Phantom Director</strong></td><td>Spawns, animates, and retires virtual performers per beat.</td></tr>
-          <tr><td><strong>Spatial Audio</strong></td><td>Positions voices &amp; score in 3D; ducks and crossfades between movements.</td></tr>
-          <tr><td><strong>Show-Control</strong></td><td>Operator console: start, pause, jump-to-beat, emergency stop.</td></tr>
-          <tr><td><strong>Presence Sync</strong></td><td>Keeps co-located audience members in a consistent shared scene.</td></tr>
+          <tr><td><strong>Anchoring</strong></td><td>Pins virtual content to the real world and keeps it there.</td><td>Move from Follow → <strong>Anchor</strong> behavior; a permanent anchoring solution; GUID investigation; image-marker strategy.</td></tr>
+          <tr><td><strong>Cueing &amp; Stability</strong></td><td>Fires the events that drive each scene; the <strong>STOP ALL</strong> safety.</td><td>Debug unpredictable cue behavior (Light / Voice); verify STOP ALL rewiring; cue consistency across devices.</td></tr>
+          <tr><td><strong>Positioning</strong></td><td>Where content spawns and how it's oriented.</td><td>Fix spawn-position and orientation consistency.</td></tr>
+          <tr><td><strong>Performance</strong></td><td>Keeps the show within frame &amp; memory budget on-headset.</td><td>Audio lag, device chugging, a general optimization pass; particle/texture budgets.</td></tr>
+          <tr><td><strong>Scene behaviors</strong></td><td>Per-scene choreography: Light, Voice (ravens), Shadow, Communion.</td><td>Scripted animation states, particle reveals, audio-reactivity (see Technical priorities).</td></tr>
         </tbody>
       </table>
     </section>
 
     <section id="events">
       <div class="section-tag">Architecture</div>
-      <h2>Communication: events, not references</h2>
-      <p class="lead">Systems never call each other directly. The Conductor Clock raises beat events; subscribers react. This keeps movements swappable and makes the show fault-tolerant.</p>
-      <pre><code><span class="tok-c">// One event bus. Every cue is a beat.</span>
-<span class="tok-k">public static class</span> <span class="tok-f">ConductorClock</span> {
-    <span class="tok-k">public static event</span> Action&lt;Beat&gt; OnBeat;
-
-    <span class="tok-k">public static void</span> <span class="tok-f">Fire</span>(Beat beat) =&gt; OnBeat?.Invoke(beat);
-}
-
-<span class="tok-c">// The Phantom Director just listens.</span>
-ConductorClock.OnBeat += beat =&gt; {
-    <span class="tok-k">if</span> (beat.id == <span class="tok-s">"II.trial.enter"</span>)
-        phantomDirector.<span class="tok-f">Spawn</span>(<span class="tok-s">"judge"</span>, anchor: <span class="tok-s">"courthouse.dais"</span>);
-};</code></pre>
+      <h2>Cueing &amp; STOP ALL</h2>
+      <p class="lead">Each scene advances through cues that trigger light, particles, ravens, shadow states, and audio. Two things matter above all: cues must fire <strong>the same way on every device</strong>, and the operator must always be able to halt safely.</p>
+      <h3>Cue consistency</h3>
+      <ul>
+        <li>The same cue must produce the same result on every headset in the room — divergence breaks the shared experience.</li>
+        <li>Known issue under active work: unpredictable cue behavior in <strong>Light</strong> and <strong>Voice</strong>.</li>
+        <li>Cue placement and timing are authored as data — see the <a href="cues.html" style="color:var(--gold)">Cues</a> page for the cue-sheet model.</li>
+      </ul>
+      <h3>STOP ALL</h3>
+      <p><strong>STOP ALL</strong> is the master safety: it halts and resets running cues across the show. Its rewiring and functionality must be verified before every performance — never run an audience without confirming it.</p>
+      <div class="callout warn">
+        <span class="ci">🛟</span>
+        <p>Treat STOP ALL as a release blocker. If it isn't confirmed working on the current build, the show is not ready.</p>
+      </div>
     </section>
 
     <section id="data-flow">
       <div class="section-tag">Architecture</div>
-      <h2>Runtime data flow</h2>
-      <p class="lead">A single beat travels a predictable path from the operator's intent to the audience's senses.</p>
-      <div class="steps">
-        <div class="step"><h4>Operator or trigger</h4><p>The Show-Control console (or an audience-position trigger) advances the Conductor Clock.</p></div>
-        <div class="step"><h4>Beat fires</h4><p>The clock raises a <code>Beat</code> event onto the bus.</p></div>
-        <div class="step"><h4>Systems react</h4><p>Phantom Director, Spatial Audio, and lighting each respond to the beats they care about.</p></div>
-        <div class="step"><h4>Anchored to the world</h4><p>The Anchor Service positions all content against real-world anchors.</p></div>
-        <div class="step"><h4>Synced across audience</h4><p>Presence Sync ensures every headset sees the same world state.</p></div>
-      </div>
+      <h2>Current technical priorities</h2>
+      <p class="lead">The post-workshop priorities, by area. This is the live list driving engineering — keep it in sync with the tracker.</p>
+      <table>
+        <thead><tr><th>Area</th><th>Priorities</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Anchoring</strong></td><td>Anchor vs Follow (must become Anchor); permanent anchoring solution; GUID solution investigation; image-marker strategy.</td></tr>
+          <tr><td><strong>Cueing / Stability</strong></td><td>Debug Light / Voice cue behavior; verify STOP ALL; cue consistency across devices.</td></tr>
+          <tr><td><strong>Positioning</strong></td><td>Spawn-position consistency; orientation consistency.</td></tr>
+          <tr><td><strong>Shadow</strong></td><td>Script movement states; position jumps linked to animation states; refine particle reveal across cues.</td></tr>
+          <tr><td><strong>Performance</strong></td><td>Audio lag; device performance / chugging; general optimization pass.</td></tr>
+          <tr><td><strong>Communion</strong></td><td>Debug behavior (with Nina); revise scale / radius / growth; permanent audio-reactivity fix.</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section id="folders">
       <div class="section-tag">Architecture</div>
-      <h2>Project layout</h2>
-      <p class="lead">Where things live in the Unity project. Content (movements, audio, art) is kept separate from systems (engine code).</p>
-      <pre><code>Assets/
-├─ <span class="tok-f">Scenes/</span>          <span class="tok-c"># _Sandbox + one scene per movement</span>
-├─ <span class="tok-f">Systems/</span>         <span class="tok-c"># Clock, Anchors, Audio, ShowControl, Presence</span>
-├─ <span class="tok-f">Phantoms/</span>        <span class="tok-c"># Performer prefabs, rigs, animation</span>
-├─ <span class="tok-f">Movements/</span>       <span class="tok-c"># Per-movement config (beats, anchors, cues)</span>
-├─ <span class="tok-f">Audio/</span>           <span class="tok-c"># Score stems + spatial SFX (LFS)</span>
-└─ <span class="tok-f">Art/</span>             <span class="tok-c"># Materials, shaders, light rigs</span></code></pre>
+      <h2>Open questions</h2>
+      <p class="lead">Decisions still in flight. These block or shape downstream work and should be resolved with owners assigned.</p>
+      <ul>
+        <li><strong>Anchoring strategy</strong> — final approach to permanent anchoring; whether GUIDs solve persistence; the long-term image-marker decision.</li>
+        <li><strong>Networking requirements</strong> — how multiple headsets stay in sync (still to be specified).</li>
+        <li><strong>Device compatibility</strong> — the supported headset list and target headset count.</li>
+        <li><strong>Performance budgets</strong> — agreed particle and texture budgets per scene.</li>
+        <li><strong>Scene measurements</strong> — real-world dimensions per scene (captured during setup; see <a href="system-setup.html#larger-system" style="color:var(--gold)">Larger System Set Up</a>).</li>
+      </ul>
       <div class="callout note">
         <span class="ci">🧭</span>
         <p>Ready to run it? Head to <a href="system-setup.html" style="color:var(--gold)">System Set Up</a> for a local test, then the larger on-site rig.</p>

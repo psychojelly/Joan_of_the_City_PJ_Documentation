@@ -52,7 +52,7 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
     <section id="local-test">
       <div class="section-tag">Setup · Path 1</div>
       <h2>Running a Local Test</h2>
-      <p class="lead">The fastest way to see a movement working — a single machine, a single headset (or the in-editor simulator), no city required.</p>
+      <p class="lead">The fastest way to see a scene working — a single machine, a single headset (or the in-editor simulator), no venue required.</p>
 
       <div class="steps">
         <div class="step">
@@ -61,7 +61,7 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
         </div>
         <div class="step">
           <h4>Load the sandbox scene</h4>
-          <p>Open <code>Assets/Scenes/_Sandbox.unity</code> — a desk-friendly scene that simulates one movement without leaving the building.</p>
+          <p>Open <code>Assets/Scenes/_Sandbox.unity</code> — a desk-friendly scene that simulates a single scene without leaving the building.</p>
         </div>
         <div class="step">
           <h4>Play in the Editor (simulator)</h4>
@@ -69,11 +69,11 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
         </div>
         <div class="step">
           <h4>Or deploy to a single headset</h4>
-          <p>Build &amp; Run to your device, put on the glasses, and trigger the opening beat from the Show-Control panel.</p>
+          <p>Build &amp; Run to your device, put on the glasses, and trigger the opening cue from the Show-Control console.</p>
         </div>
         <div class="step">
           <h4>Drive it from Show-Control</h4>
-          <p>Use <code>Jump to Beat</code> to scrub through the movement and confirm phantoms, audio, and light all fire correctly.</p>
+          <p>Step through the cues to confirm light, particles, ravens/shadow, and audio all fire correctly — and that <strong>STOP ALL</strong> halts everything cleanly.</p>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
       </div>
       <div class="callout warn">
         <span class="ci">⚠️</span>
-        <p>The Editor lies about XR frame cost. Always confirm a movement's performance <strong>on-device</strong> before calling it done.</p>
+        <p>The Editor lies about XR frame cost. Always confirm a scene's performance <strong>on-device</strong> before calling it done.</p>
       </div>
     </section>
 
@@ -96,43 +96,55 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
       <p class="lead">The full performance configuration: multiple synchronized headsets, a real-world anchor map, an operator running Show-Control, and audio routed for the venue.</p>
 
       <h3>Topology</h3>
-      <p>One <strong>operator station</strong> runs Show-Control and holds the master Conductor Clock. Each audience headset runs the client build and subscribes to clock + presence over the local network. A real-world <strong>anchor map</strong> (captured during the location scout) localizes every device to the same physical stage.</p>
+      <p>One <strong>operator station</strong> runs Show-Control and drives the cue sequence. Each audience headset runs the client build and stays in sync over the local network. A real-world <strong>anchor map</strong> (captured during the location scout) localizes every device to the same physical stage. Target headset count is still to be set — see <a href="system-overview.html#folders" style="color:var(--gold)">Open questions</a>.</p>
       <table>
         <thead><tr><th>Node</th><th>Role</th></tr></thead>
         <tbody>
-          <tr><td><strong>Operator Station</strong></td><td>Master clock, Show-Control console, E-stop authority.</td></tr>
-          <tr><td><strong>Audience Headsets</strong></td><td>Client build; render phantoms/audio against shared anchors.</td></tr>
-          <tr><td><strong>Anchor Map</strong></td><td>Pre-scanned spatial map of each Stage Volume; shared to all devices.</td></tr>
-          <tr><td><strong>Local Network</strong></td><td>Low-latency link carrying clock + presence sync.</td></tr>
+          <tr><td><strong>Operator Station</strong></td><td>Runs the show, Show-Control console, <strong>STOP ALL</strong> authority.</td></tr>
+          <tr><td><strong>Audience Headsets</strong></td><td>Client build; render virtual content &amp; audio against shared anchors.</td></tr>
+          <tr><td><strong>Anchor Map</strong></td><td>Pre-scanned spatial map of each scene's stage; shared to all devices.</td></tr>
+          <tr><td><strong>Local Network</strong></td><td>Low-latency link carrying cue sync &amp; shared state.</td></tr>
         </tbody>
       </table>
 
       <h3>Bring-up sequence</h3>
       <div class="steps">
-        <div class="step"><h4>Stage the location</h4><p>Arrive on-site, confirm the Stage Volume matches the scanned anchor map, and re-scan if the environment has changed (new construction, signage, season).</p></div>
-        <div class="step"><h4>Start the operator station</h4><p>Launch Show-Control. Confirm the Conductor Clock is healthy and the master timeline loads the running order.</p></div>
+        <div class="step"><h4>Stage the location</h4><p>Arrive on-site, confirm the scene's stage matches the scanned anchor map, and re-scan if the environment has changed (moved furniture, new construction, lighting).</p></div>
+        <div class="step"><h4>Start the operator station</h4><p>Launch Show-Control and confirm it loads the scene's cue sequence and that STOP ALL is wired.</p></div>
         <div class="step"><h4>Localize each headset</h4><p>Deploy the client build to every headset and run the localization routine until each device resolves the shared anchors. Verify alignment against a known physical reference point.</p></div>
-        <div class="step"><h4>Verify presence sync</h4><p>Confirm all headsets report into Presence Sync and see a consistent world state — phantoms appear in the same place for everyone.</p></div>
+        <div class="step"><h4>Verify shared state</h4><p>Confirm all headsets see a consistent world — content appears in the same place for everyone, and cues fire identically across devices.</p></div>
         <div class="step"><h4>Sound check</h4><p>Walk the route; confirm spatial audio sources sit where they should and attenuate naturally with distance and occlusion.</p></div>
-        <div class="step"><h4>Dry run the running order</h4><p>Operator advances each movement; the team watches for tracking drift, dropped cues, and comfort issues before any audience arrives.</p></div>
+        <div class="step"><h4>Dry run the scenes</h4><p>Operator advances each scene's cues; the team watches for tracking drift, anchor slippage, dropped or inconsistent cues, audio lag, and comfort issues before any audience arrives.</p></div>
       </div>
 
       <div class="callout warn">
         <span class="ci">📍</span>
-        <p><strong>Tracking budget:</strong> outdoor city environments are hostile to tracking — moving people, changing light, reflective glass. Keep critical phantoms anchored near stable, textured surfaces, and never place a key dramatic moment where tracking is known to drift.</p>
+        <p><strong>Tracking budget:</strong> real-world venues are hostile to tracking — moving people, changing light, reflective surfaces. Anchor critical content near stable, textured surfaces, and never place a key dramatic moment where tracking is known to drift. This is why anchoring (Anchor, not Follow) is a top priority.</p>
       </div>
       <div class="callout tip">
         <span class="ci">🛟</span>
-        <p>Always rehearse the <strong>E-stop</strong> before doors open. Every operator must know how to fade all content to a safe neutral state instantly. See <a href="cues.html#cue-editing" style="color:var(--gold)">Cues → Editing &amp; Cueing System</a>.</p>
+        <p>Always verify <strong>STOP ALL</strong> before doors open. Every operator must know how to halt and reset the show to a safe state instantly. See <a href="cues.html#cue-editing" style="color:var(--gold)">Cues → Editing &amp; Cueing System</a>.</p>
       </div>
+
+      <h3>Scene measurements to capture</h3>
+      <p>Each scene needs real-world dimensions recorded on-site so content places correctly. Capture these during bring-up and file them with the scene's spec.</p>
+      <table>
+        <thead><tr><th>Scene</th><th>Measurements needed</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Light</strong></td><td>Placement measurements, radius, height.</td></tr>
+          <tr><td><strong>Voice</strong></td><td>Placement measurements, raven distances, landing locations.</td></tr>
+          <tr><td><strong>Shadow</strong></td><td>Spawn zones, movement ranges, surround radius.</td></tr>
+          <tr><td><strong>Communion</strong></td><td>Final ~12′ radius, height ranges, audience clearance.</td></tr>
+        </tbody>
+      </table>
 
       <h3>Pre-show checklist</h3>
       <ul>
         <li>All headsets charged and localized to the shared anchor map.</li>
         <li>Operator station on mains power with network confirmed stable.</li>
-        <li>Running order loaded and verified against the latest movement builds.</li>
+        <li>Cue sequences loaded and verified against the latest scene builds.</li>
         <li>Audio levels checked at the real performance time of day.</li>
-        <li>E-stop tested; safe route and seated/limited-mobility paths confirmed.</li>
+        <li><strong>STOP ALL</strong> verified on the current build; safe route and seated/limited-mobility paths confirmed.</li>
       </ul>
     </section>
 

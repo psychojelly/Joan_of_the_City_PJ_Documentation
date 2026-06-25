@@ -11,14 +11,14 @@
         { title: 'Story Overview',  href: 'index.html', children: [
           { title: 'Story Overview', href: 'index.html#story' },
           { title: 'Pillars', href: 'index.html#pillars' },
-          { title: 'The Movements', href: 'index.html#structure' },
+          { title: 'The Scenes', href: 'index.html#structure' },
         ]},
         { title: 'System Overview', href: 'system-overview.html', children: [
           { title: 'Architecture at a glance', href: 'system-overview.html#philosophy' },
-          { title: 'The Systems', href: 'system-overview.html#systems' },
-          { title: 'Events, not references', href: 'system-overview.html#events' },
-          { title: 'Runtime data flow', href: 'system-overview.html#data-flow' },
-          { title: 'Project layout', href: 'system-overview.html#folders' },
+          { title: 'The Subsystems', href: 'system-overview.html#systems' },
+          { title: 'Cueing & STOP ALL', href: 'system-overview.html#events' },
+          { title: 'Technical priorities', href: 'system-overview.html#data-flow' },
+          { title: 'Open questions', href: 'system-overview.html#folders' },
         ]},
       ]
     },
@@ -50,6 +50,7 @@
           { title: 'Contributing & reviews', href: 'resources.html#contributing' },
           { title: 'Tools & links', href: 'resources.html#tools' },
           { title: 'Who to ask', href: 'resources.html#contacts' },
+          { title: 'Open items & PM', href: 'resources.html#open-items' },
         ]},
       ]
     }

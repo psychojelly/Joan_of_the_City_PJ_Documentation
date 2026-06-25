@@ -29,15 +29,17 @@
       <table>
         <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td><strong>Movement</strong></td><td>A self-contained scene of the opera, bound to a location and a section of the score.</td></tr>
-          <tr><td><strong>Anchor</strong></td><td>A persistent real-world point (geo or spatial) that virtual content is pinned to.</td></tr>
-          <tr><td><strong>Beat</strong></td><td>The smallest directed unit of action, triggered by the conductor clock or audience position.</td></tr>
-          <tr><td><strong>Cue</strong></td><td>One action attached to a beat — spawn, move, light, audio, retire.</td></tr>
-          <tr><td><strong>Conductor Clock</strong></td><td>The master timeline that synchronizes music, performers, and show-control.</td></tr>
-          <tr><td><strong>Phantom</strong></td><td>A virtual performer rendered in AR (vocalist, chorus member, or apparition).</td></tr>
-          <tr><td><strong>Stage Volume</strong></td><td>The mapped bounds of a real location where a movement is performed.</td></tr>
-          <tr><td><strong>Show-Control</strong></td><td>The system that cues lights, audio, and phantoms in time with the score.</td></tr>
-          <tr><td><strong>Running Order</strong></td><td>The full ordered list of beats that makes up a performance.</td></tr>
+          <tr><td><strong>Scene</strong></td><td>A self-contained part of the show — Light, Voice, Shadow, Communion, and the new Joan of the Real / Hustle / Ground.</td></tr>
+          <tr><td><strong>Cue</strong></td><td>A single directed moment within a scene; one row in the cue sheet.</td></tr>
+          <tr><td><strong>Cue sheet</strong></td><td>The master list of cues — asset, AR/visual imagery, audio, and performer action.</td></tr>
+          <tr><td><strong>Anchor vs Follow</strong></td><td><strong>Anchor</strong> pins content to a fixed real-world point; <strong>Follow</strong> tracks the headset. Target behavior is Anchor.</td></tr>
+          <tr><td><strong>STOP ALL</strong></td><td>The master safety — halts and resets every running cue at once.</td></tr>
+          <tr><td><strong>Hero Raven</strong></td><td>The single raven that separates from the flock, approaches Joan, acts intentionally, and remains after the flock leaves.</td></tr>
+          <tr><td><strong>Collage</strong></td><td>Tear-off / fly-off transition and thunder-triggered sky text in the Voice scene.</td></tr>
+          <tr><td><strong>Communion</strong></td><td>The scene where a presence emerges, rises, and levitates over ground ripples (~12′ radius).</td></tr>
+          <tr><td><strong>Particle / libretto</strong></td><td>Particle systems that carry libretto text and data.</td></tr>
+          <tr><td><strong>T-pose</strong></td><td>The neutral pose source from which custom silhouettes and skins are built.</td></tr>
+          <tr><td><strong>Show-Control</strong></td><td>The operator side that drives cues during a performance.</td></tr>
         </tbody>
       </table>
     </section>
@@ -48,16 +50,16 @@
       <p class="lead">How we work together in the repo. Small, reviewable changes keep a complex show stable.</p>
       <h3>Branch &amp; commit</h3>
       <ul>
-        <li>Branch from <code>main</code> using <code>feat/&lt;movement&gt;-&lt;short-desc&gt;</code> or <code>fix/&lt;area&gt;-&lt;short-desc&gt;</code>.</li>
-        <li>Commit in present tense: <code>add phantom rig to movement II</code>.</li>
+        <li>Branch from <code>main</code> using <code>feat/&lt;scene&gt;-&lt;short-desc&gt;</code> or <code>fix/&lt;area&gt;-&lt;short-desc&gt;</code>.</li>
+        <li>Commit in present tense: <code>add hero raven states to voice</code>.</li>
         <li>Never commit large binaries outside LFS-tracked paths.</li>
       </ul>
       <h3>Pull requests</h3>
       <ul>
-        <li>Keep PRs scoped to one movement or one system where possible.</li>
+        <li>Keep PRs scoped to one scene or one subsystem where possible.</li>
         <li>Include a short clip or screenshot of the change in-headset or in-simulator.</li>
         <li>Update the relevant doc page in the <em>same</em> PR.</li>
-        <li>At least one engineering review + one design review for anything that touches a staged movement.</li>
+        <li>At least one engineering review + one design review for anything that touches a live scene.</li>
       </ul>
       <div class="callout warn">
         <span class="ci">🔒</span>
@@ -68,12 +70,18 @@
     <section id="tools">
       <div class="section-tag">Reference</div>
       <h2>Tools &amp; links</h2>
-      <p class="lead">The external tools and references the project depends on. Replace the placeholder links with your real ones.</p>
+      <p class="lead">The working references the project depends on. Most live in access-controlled Google Drive / Milanote — links are intentionally <strong>not embedded here</strong> because this site is public. Add them to a private index or the team channel instead.</p>
       <div class="card-grid">
-        <a class="card" href="#"><div class="ico">📁</div><h4>Repository</h4><p>Source, cue sheets, and LFS-tracked assets.</p><span class="arrow">→</span></a>
-        <a class="card" href="#"><div class="ico">🎚️</div><h4>Score &amp; stems</h4><p>The DAW project and exported audio stems.</p><span class="arrow">→</span></a>
-        <a class="card" href="#"><div class="ico">🗺️</div><h4>Anchor maps</h4><p>Scanned spatial maps per Stage Volume.</p><span class="arrow">→</span></a>
-        <a class="card" href="#"><div class="ico">💬</div><h4>Team channel</h4><p><code>#joan-eng</code> · <code>#joan-design</code></p><span class="arrow">→</span></a>
+        <div class="card"><div class="ico">📜</div><h4>The Script</h4><p>Source of the AR / visual imagery column that drives the cue sheet.</p></div>
+        <div class="card"><div class="ico">🎬</div><h4>Cue sheet</h4><p>Master cue list (spreadsheet): asset, AR/visual, audio, performer.</p></div>
+        <div class="card"><div class="ico">📦</div><h4>Asset list / tracker</h4><p>Assets per scene with priority, split into parts.</p></div>
+        <div class="card"><div class="ico">🗺️</div><h4>Narrative map</h4><p>The narrative laid out across scenes.</p></div>
+        <div class="card"><div class="ico">🧵</div><h4>Milanote boards</h4><p>Visual reference and mood per scene.</p></div>
+        <a class="card" href="https://github.com/psychojelly/Joan_of_the_City_PJ_Documentation"><div class="ico">📁</div><h4>This repo</h4><p>The documentation source you're reading now.</p><span class="arrow">→</span></a>
+      </div>
+      <div class="callout warn">
+        <span class="ci">🔐</span>
+        <p>Keep private Google Doc / Sheet URLs and Milanote links <strong>off this public site</strong>. Store them in the team's private space and reference them by name here.</p>
       </div>
       <table>
         <thead><tr><th>Dependency</th><th>Version / Notes</th></tr></thead>
@@ -89,20 +97,45 @@
     <section id="contacts">
       <div class="section-tag">Reference</div>
       <h2>Who to ask</h2>
-      <p class="lead">Point people for each area of the production. Fill in names as the team forms.</p>
+      <p class="lead">Point people by area, from the kickoff. Update as ownership shifts.</p>
       <table>
-        <thead><tr><th>Area</th><th>Owner</th><th>Channel</th></tr></thead>
+        <thead><tr><th>Area</th><th>Owner(s)</th></tr></thead>
         <tbody>
-          <tr><td>Engineering / systems</td><td><em>TBD</em></td><td><code>#joan-eng</code></td></tr>
-          <tr><td>Design / staging</td><td><em>TBD</em></td><td><code>#joan-design</code></td></tr>
-          <tr><td>Music / score</td><td><em>TBD</em></td><td><code>#joan-music</code></td></tr>
-          <tr><td>Production / show-control</td><td><em>TBD</em></td><td><code>#joan-production</code></td></tr>
+          <tr><td>Design lead</td><td>Deborah</td></tr>
+          <tr><td>Light</td><td>Nina</td></tr>
+          <tr><td>Voice</td><td>David + Deborah</td></tr>
+          <tr><td>Shadow</td><td>David + Nina</td></tr>
+          <tr><td>Communion</td><td>Nina</td></tr>
+          <tr><td>Assets — silhouettes / skins</td><td>Jack</td></tr>
+          <tr><td>Assets — particle / libretto</td><td>KK (Kamala / Kristin)</td></tr>
+          <tr><td>New scenes (Real / Hustle / Ground) — design</td><td>Deborah</td></tr>
+          <tr><td>Implementation</td><td><em>TBD</em></td></tr>
+          <tr><td>Production / PM / tracking</td><td><em>TBD</em></td></tr>
         </tbody>
       </table>
-      <div class="callout note">
-        <span class="ci">📌</span>
-        <p>This page is intentionally a stub in places — fill in real links, owners, and channels as the production comes together.</p>
+    </section>
+
+    <section id="open-items">
+      <div class="section-tag">Reference</div>
+      <h2>Open items &amp; PM</h2>
+      <p class="lead">The big "to establish" list from the kickoff. These are tracked elsewhere; this is the at-a-glance reference of what's still open.</p>
+
+      <h3>PM deliverables to stand up</h3>
+      <div class="card-grid">
+        <div class="card"><div class="ico">🗂️</div><h4>Tracking</h4><p>Master task list, ownership chart, asset tracker, technical tracker, revision tracker.</p></div>
+        <div class="card"><div class="ico">📅</div><h4>Scheduling</h4><p>August milestone schedule, weekly check-ins, build &amp; testing deadlines.</p></div>
+        <div class="card"><div class="ico">📝</div><h4>Documentation</h4><p>Meeting notes, action items, dependency tracking, follow-up assignments.</p></div>
       </div>
+
+      <h3>Per-scene "needs" (new scenes)</h3>
+      <p>Each new Joan (Real, Hustle, Ground) needs: visual-language definition, AR interaction strategy, asset requirements, technical requirements, cue structure, scene measurements, and a build schedule. Design: Deborah · Implementation: TBD.</p>
+
+      <h3>Still to be decided</h3>
+      <ul>
+        <li><strong>Measurements / scene specs</strong> — real-world dimensions per scene (see <a href="system-setup.html#larger-system" style="color:var(--gold)">System Set Up</a>).</li>
+        <li><strong>Performance / deployment</strong> — target headset count, device compatibility list, performance budget, particle/texture budgets, networking requirements, testing schedule.</li>
+        <li><strong>Anchoring</strong> — permanent anchoring solution, GUID investigation, image-marker strategy (see <a href="system-overview.html#folders" style="color:var(--gold)">Open questions</a>).</li>
+      </ul>
     </section>
 
     <div class="page-nav" id="pageNav"></div>
