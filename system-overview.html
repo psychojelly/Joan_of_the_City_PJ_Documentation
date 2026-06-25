@@ -40,7 +40,7 @@
         <thead><tr><th>Subsystem</th><th>Responsibility</th><th>Current focus</th></tr></thead>
         <tbody>
           <tr><td><strong>Anchoring</strong></td><td>Pins virtual content to the real world and keeps it there.</td><td>Move from Follow → <strong>Anchor</strong> behavior; a permanent anchoring solution; GUID investigation; image-marker strategy.</td></tr>
-          <tr><td><strong>Cueing &amp; Stability</strong></td><td>Fires the events that drive each scene; the <strong>STOP ALL</strong> safety.</td><td>Debug unpredictable cue behavior (Light / Voice); verify STOP ALL rewiring; cue consistency across devices.</td></tr>
+          <tr><td><strong>Cueing &amp; Stability</strong></td><td>Fires cues (sent over OSC) that drive each scene; the <strong>STOP ALL</strong> safety.</td><td>Debug unpredictable cue behavior (Light / Voice); verify STOP ALL rewiring; cue consistency across devices.</td></tr>
           <tr><td><strong>Positioning</strong></td><td>Where content spawns and how it's oriented.</td><td>Fix spawn-position and orientation consistency.</td></tr>
           <tr><td><strong>Performance</strong></td><td>Keeps the show within frame &amp; memory budget on-headset.</td><td>Audio lag, device chugging, a general optimization pass; particle/texture budgets.</td></tr>
           <tr><td><strong>Scene behaviors</strong></td><td>Per-scene choreography: Light, Voice (ravens), Shadow, Communion.</td><td>Scripted animation states, particle reveals, audio-reactivity (see Technical priorities).</td></tr>
@@ -52,6 +52,7 @@
       <div class="section-tag">Architecture</div>
       <h2>Cueing &amp; STOP ALL</h2>
       <p class="lead">Each scene advances through cues that trigger light, particles, ravens, shadow states, and audio. Two things matter above all: cues must fire <strong>the same way on every device</strong>, and the operator must always be able to halt safely.</p>
+      <p>Cues are fired over <strong>OSC</strong> from a web-based operator controller through a small proxy — see <a href="cues.html#osc-control" style="color:var(--gold)">The OSC control system</a>.</p>
       <h3>Cue consistency</h3>
       <ul>
         <li>The same cue must produce the same result on every headset in the room — divergence breaks the shared experience.</li>

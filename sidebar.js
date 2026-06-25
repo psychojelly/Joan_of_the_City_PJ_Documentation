@@ -29,10 +29,12 @@
           { title: 'Prerequisites', href: 'system-setup.html#prerequisites' },
           { title: 'Running a Local Test', href: 'system-setup.html#local-test' },
           { title: 'Larger System Set Up', href: 'system-setup.html#larger-system' },
+          { title: 'Running the OSC controller', href: 'system-setup.html#osc-controller' },
         ]},
         { title: 'Cues', href: 'cues.html', children: [
           { title: 'Overview', href: 'cues.html#cues-overview' },
           { title: 'Editing & Cueing System', href: 'cues.html#cue-editing' },
+          { title: 'The OSC control system', href: 'cues.html#osc-control' },
         ]},
       ]
     },

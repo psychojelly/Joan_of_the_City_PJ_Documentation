@@ -34,6 +34,7 @@
           <tr><td>XR SDK packages</td><td>Resolved automatically on first project open</td></tr>
           <tr><td>Git LFS</td><td>Required — audio &amp; model assets are LFS-tracked</td></tr>
           <tr><td>Headset</td><td>Supported XR glasses with developer mode enabled</td></tr>
+          <tr><td>Python</td><td>3.9+ with <code>python-osc</code> — for the OSC cue controller (see <a href="#osc-controller" style="color:var(--gold)">Running the OSC controller</a>)</td></tr>
         </tbody>
       </table>
       <div class="callout note">
@@ -145,7 +146,44 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
         <li>Cue sequences loaded and verified against the latest scene builds.</li>
         <li>Audio levels checked at the real performance time of day.</li>
         <li><strong>STOP ALL</strong> verified on the current build; safe route and seated/limited-mobility paths confirmed.</li>
+        <li>OSC controller proxy running and reaching the target (see below).</li>
       </ul>
+    </section>
+
+    <hr/>
+
+    <section id="osc-controller">
+      <div class="section-tag">Setup · Operating</div>
+      <h2>Running the OSC controller</h2>
+      <p class="lead">The OSC controller is how cues are fired during a show — a web page of buttons backed by a small Python proxy. See <a href="cues.html#osc-control" style="color:var(--gold)">Cues → The OSC control system</a> for how it works; this is how to run it.</p>
+
+      <h3>One-time setup</h3>
+      <div class="steps">
+        <div class="step"><h4>Install Python 3.9+</h4><p>From <a href="https://www.python.org/downloads/" target="_blank" rel="noopener" style="color:var(--gold)">python.org/downloads</a>. <strong>Windows:</strong> tick <strong>“Add Python to PATH”</strong> on the first install screen.</p></div>
+        <div class="step"><h4>Confirm it's installed</h4><p>In a terminal: <code>python --version</code> and <code>pip --version</code> (Mac: <code>python3</code> / <code>pip3</code>). You should see version numbers.</p></div>
+        <div class="step"><h4>Install the one dependency</h4><p><code>pip install python-osc</code> (Mac: <code>pip3 install python-osc</code>).</p></div>
+      </div>
+
+      <h3>Every time you run it</h3>
+      <div class="steps">
+        <div class="step"><h4>Go to the folder</h4><p><code>cd "C:\path\to\the\osc\files"</code> (use your real path; Mac uses the matching path).</p></div>
+        <div class="step"><h4>Start the proxy</h4><p><code>python proxy.py</code> (Mac: <code>python3 proxy.py</code>). You should see <code>OSC proxy listening on http://localhost:8765</code>. <strong>Leave this terminal open.</strong></p></div>
+        <div class="step"><h4>Open the controller</h4><p>Double-click <code>osc-controller.html</code> (or drag it into a browser).</p></div>
+        <div class="step"><h4>Point it at the target</h4><p>Set <strong>Host</strong> and <strong>Port</strong> to your OSC target (defaults <code>127.0.0.1</code> / <code>7000</code>) and use the buttons.</p></div>
+      </div>
+
+      <h3>Stopping</h3>
+      <p>Close the browser tab, then click the terminal and press <strong>Ctrl+C</strong> to stop the proxy.</p>
+
+      <h3>Troubleshooting</h3>
+      <table>
+        <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>python is not recognized</code></td><td>Python isn't on PATH. Reinstall and tick <em>Add Python to PATH</em>, then reopen the terminal.</td></tr>
+          <tr><td><code>ModuleNotFoundError: No module named 'pythonosc'</code></td><td>Run <code>pip install python-osc</code> again in the same terminal.</td></tr>
+          <tr><td>Buttons in the page do nothing</td><td>The proxy isn't running — confirm the <code>proxy.py</code> terminal is open and shows the “listening” message.</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <div class="page-nav" id="pageNav"></div>
