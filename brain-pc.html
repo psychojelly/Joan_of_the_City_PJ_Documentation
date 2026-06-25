@@ -36,51 +36,52 @@
 
     <div class="callout note">
       <span class="ci">✅</span>
-      <p><strong>Grounded in the project.</strong> The cue, OSC, and XREAL details below were verified against the Unity project (<code>joan-of-the-city-xreal</code>). A couple of operational details — asset sync and PuTTY — aren't evidenced in the repo yet and stay marked <em>(to confirm)</em>.</p>
+      <p><strong>Grounded in the project.</strong> The cue, OSC, XREAL, Android-build and audio-loader details below were verified against the Unity project (<code>joan-of-the-city-xreal</code>); the wireless brain↔headset link is confirmed by the team. The cue fan-out, stem server URL, and PuTTY's role aren't pinned down yet and stay marked <em>(to confirm)</em>.</p>
     </div>
 
     <section id="overview">
       <div class="section-tag">Brain PC</div>
       <h2>The two halves</h2>
-      <p class="lead">XREAL glasses are display-and-sensor devices — they show images and report head movement, but they don't run the experience on their own. The experience runs on a host machine, the <strong>brain PC</strong>.</p>
+      <p class="lead">The show is an <strong>Android build</strong> that runs on each headset's own compute and renders locally to the XREAL glasses. The <strong>brain PC</strong> does not render — it's a control &amp; content server that sends cues and serves assets to the headsets over a <strong>local Wi-Fi network</strong>.</p>
       <div class="card-grid">
-        <div class="card"><div class="ico">🕶️</div><h4>XREAL glasses</h4><p>Show what the brain renders and feed head tracking back. Worn by the audience.</p></div>
-        <div class="card"><div class="ico">🧠</div><h4>Brain PC</h4><p>Runs the Unity build, stores the synced project assets, and receives cues. The compute behind each pair of glasses.</p></div>
+        <div class="card"><div class="ico">🕶️</div><h4>Headset (XREAL + Android compute)</h4><p>An Android build of the show runs on the headset's own compute and renders locally to the glasses. Worn by the audience.</p></div>
+        <div class="card"><div class="ico">🧠</div><h4>Brain PC</h4><p>The control &amp; content server — fires cues and serves assets/audio stems to the headsets over the local Wi-Fi network. It doesn't render the show.</p></div>
       </div>
     </section>
 
     <section id="topology">
       <div class="section-tag">Brain PC</div>
       <h2>How it fits together</h2>
-      <p class="lead">The brain PC is the hub. Cues come in from the operator, assets sync in from the source, and rendered frames go out to the glasses.</p>
+      <p class="lead">Everything between the brain and the headsets runs over a <strong>local Wi-Fi network</strong>. The brain sends cues and serves the assets/stems each headset downloads; each headset renders the show itself and drives its own glasses.</p>
 
       <div class="dgm">
         <div class="dgm-row">
-          <div class="dgm-node"><div class="dgm-ico">🎛️</div><b>Operator</b><span>OSC controller + proxy</span></div>
-          <div class="dgm-edge">OSC<br/>:7000 →</div>
-          <div class="dgm-node dgm-hub"><div class="dgm-ico">🧠</div><b>Brain PC</b><span>Unity build · synced assets</span></div>
-          <div class="dgm-edge">USB-C<br/>display ⇄ tracking</div>
+          <div class="dgm-node dgm-hub"><div class="dgm-ico">🧠</div><b>Brain PC</b><span>controller + proxy · asset/stem server</span></div>
+          <div class="dgm-edge">local Wi-Fi →<br/>cues + downloads</div>
+          <div class="dgm-node"><div class="dgm-ico">🤖</div><b>Headset compute</b><span>Android build of the show</span></div>
+          <div class="dgm-edge">USB-C →<br/>render + tracking</div>
           <div class="dgm-node"><div class="dgm-ico">🕶️</div><b>XREAL glasses</b><span>display + head tracking</span></div>
         </div>
         <div class="dgm-row dgm-feeds">
-          <div class="dgm-node dgm-sm"><div class="dgm-ico">📦</div><b>Asset source</b><span>PSFTP / PSCP sync ↑</span></div>
-          <div class="dgm-node dgm-sm"><div class="dgm-ico">🔌</div><b>PuTTY</b><span>SSH / serial ↑</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">🎬</div><b>/cue</b><span>visual toggles</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">🔊</div><b>/audio/*</b><span>stem engine</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">📦</div><b>stem / asset pull</b><span>HTTP over Wi-Fi, cached</span></div>
         </div>
       </div>
-      <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px">Asset sync and PuTTY both connect into the brain PC. Connection types are <em>(to confirm)</em>.</p>
+      <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px">The three lower items all travel the same local Wi-Fi from the brain to each headset.</p>
 
       <table>
         <thead><tr><th>Link</th><th>What travels</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td>Glasses ⇄ Brain PC</td><td>Rendered frames out; head tracking in</td><td>Tethered XREAL link <em>(exact cabling to confirm)</em></td></tr>
-          <tr><td>Operator → Brain PC</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP to the brain at <code>:7000</code>, via <code>proxy.py</code></td></tr>
-          <tr><td>Asset source → Brain PC</td><td>Project files / assets</td><td>File sync — <code>PSFTP</code> / <code>PSCP</code> or similar <em>(to confirm)</em></td></tr>
-          <tr><td>Operator/Admin → Brain PC</td><td>Commands, management</td><td>PuTTY over SSH or serial <em>(to confirm)</em></td></tr>
+          <tr><td>Brain PC → Headsets</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP across the local Wi-Fi, via <code>proxy.py</code>, to each headset's receiver on <code>:7000</code></td></tr>
+          <tr><td>Brain PC → Headsets</td><td>Audio stems / assets</td><td>Pulled over Wi-Fi (HTTP) and cached on each headset — loader default <code>RemoteWithLocalFallback</code></td></tr>
+          <tr><td>Headset compute ⇄ Glasses</td><td>Rendered frames out; head tracking in</td><td>Local to the headset (USB-C); the Android build renders here</td></tr>
+          <tr><td>Admin → Brain / Headsets</td><td>Management, file moves</td><td>PuTTY / PSFTP <em>(role to confirm)</em></td></tr>
         </tbody>
       </table>
       <div class="callout warn">
         <span class="ci">📡</span>
-        <p>The OSC target IP is <strong>hardcoded to <code>10.0.1.32</code></strong> on the OSC Manager in the scene — it must be updated to the brain PC's address on each venue network.</p>
+        <p>The OSC receiver IP is <strong>hardcoded to <code>10.0.1.32</code></strong> on the scene's OSC Manager — it must be updated per venue network. A single hardcoded address also raises the open question of <strong>how cues currently fan out to multiple headsets</strong> (broadcast? a per-headset target list?).</p>
       </div>
     </section>
 
@@ -89,17 +90,21 @@
       <h2>What moves where</h2>
       <p class="lead">Four flows run through the brain PC during a show.</p>
       <div class="card-grid">
-        <div class="card"><div class="ico">🖼️</div><h4>Render &amp; tracking</h4><p>The brain renders the scene and sends it to the glasses; the glasses send head pose back so content stays anchored.</p></div>
-        <div class="card"><div class="ico">🎬</div><h4>Cues</h4><p>The operator fires cues over OSC; the Unity build on the brain receives them and runs the moment. See <a href="cues.html#osc-control" style="color:var(--gold)">OSC control system</a>.</p></div>
-        <div class="card"><div class="ico">📦</div><h4>Asset sync</h4><p>New or changed assets are synced onto the brain so its build has the latest content.</p></div>
-        <div class="card"><div class="ico">🛠️</div><h4>Management</h4><p>Terminal access to start/stop the build, check status, or move files.</p></div>
+        <div class="card"><div class="ico">🖼️</div><h4>Render &amp; tracking</h4><p>Each headset renders the scene itself; its glasses report head pose locally. The brain isn't in this loop — no frames cross the network.</p></div>
+        <div class="card"><div class="ico">🎬</div><h4>Cues</h4><p>The brain fires cues over OSC across Wi-Fi; each headset's Android build receives them and runs the moment. See <a href="cues.html#osc-control" style="color:var(--gold)">OSC control system</a>.</p></div>
+        <div class="card"><div class="ico">📦</div><h4>Asset / stem pull</h4><p>Headsets download audio stems (and assets) from the brain over Wi-Fi and cache them locally — fetched on demand unless pre-warmed.</p></div>
+        <div class="card"><div class="ico">🛠️</div><h4>Management</h4><p>Terminal / file access to the brain (and possibly headsets) to start the build, check status, or move files.</p></div>
       </div>
     </section>
 
     <section id="current">
       <div class="section-tag">Brain PC</div>
-      <h2>What runs on the brain</h2>
-      <p class="lead">The brain PC runs the Unity build (Unity 6, URP, XREAL SDK) and listens for two streams of OSC cues that drive the show. Both arrive at UDP <code>:7000</code> through <code>proxy.py</code>.</p>
+      <h2>What runs where</h2>
+      <p class="lead">The <strong>Android build</strong> (Unity 6, URP, XREAL SDK) runs on each headset and listens for two streams of OSC cues sent from the brain over Wi-Fi. Both arrive at UDP <code>:7000</code> via <code>proxy.py</code>.</p>
+      <div class="callout note">
+        <span class="ci">🔊</span>
+        <p>Audio stems load via <code>AudioStemLoader</code>, whose default mode is <code>RemoteWithLocalFallback</code> — it <strong>downloads stems from a server URL over Wi-Fi and caches them</strong>, falling back to bundled files only if the download fails. Pre-warm that cache before a show to avoid first-play audio lag.</p>
+      </div>
 
       <h3>Two cue streams</h3>
       <table>
@@ -133,12 +138,12 @@
       <h2>Open questions</h2>
       <p class="lead">What the code <em>doesn't</em> answer — the operational and multi-user pieces still to pin down.</p>
       <ul>
-        <li><strong>Glasses ↔ brain cabling</strong> — the exact tether/host mode for the XREAL hardware.</li>
-        <li><strong>One brain per headset, or shared?</strong> — the project runs as “multi-user,” but how many brain PCs per show and how they relate isn't in the repo.</li>
-        <li><strong>Cross-device consistency</strong> — how multiple headsets/brains stay in sync (the OSC host is a single hardcoded IP today).</li>
-        <li><strong>Asset sync</strong> — which tool/folders and manual vs automatic (no sync tooling found in the project).</li>
-        <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain (not evidenced in the repo).</li>
-        <li><strong>How the build is launched</strong> — manually, on boot, or remotely on each brain.</li>
+        <li><strong>Cue fan-out</strong> — how one controller reaches multiple headsets over Wi-Fi (broadcast, multicast, or a per-headset target list?). The single hardcoded receiver IP makes this the biggest open question.</li>
+        <li><strong>Stem/asset server</strong> — what the <code>AudioStemLoader</code> <code>BaseUrl</code> points to (the brain's HTTP server?), and whether stems are pre-cached before shows.</li>
+        <li><strong>How many headsets</strong> — target count, and whether each has its own compute (assumed) on the shared Wi-Fi.</li>
+        <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has the headroom for several headsets pulling stems at once.</li>
+        <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
+        <li><strong>How the build is launched</strong> — manually, on boot, or remotely on each headset.</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
     </section>
@@ -154,6 +159,8 @@
           <tr><td>Audio cues &amp; StopAll</td><td><code>JoanAudio/</code> — <code>OscCueReceiver</code>, <code>AudioCueConfig</code>, <code>AudioSceneController</code></td></tr>
           <tr><td>OSC host/port</td><td>OSC Manager <code>LocalHost 10.0.1.32</code>, port <code>7000</code>; <code>proxy.py</code> on <code>:8765</code></td></tr>
           <tr><td>XREAL stack</td><td><code>Packages/manifest.json</code> — <code>com.xreal.xr</code>, XRI, AR Foundation, XR Hands</td></tr>
+          <tr><td>Runs on headset (Android)</td><td><code>ProjectSettings</code> Android player settings + <code>BuildPresets/XReal.preset</code></td></tr>
+          <tr><td>Stems pulled over Wi-Fi</td><td><code>AudioStemLoader.cs</code> — <code>SourceMode.RemoteWithLocalFallback</code>, <code>UnityWebRequest</code> + disk cache</td></tr>
           <tr><td>Audio-reactivity</td><td><code>SpectrumExtractor</code> → <code>AmplitudeFloat_VFXBinder</code> → VFX Graph</td></tr>
           <tr><td>Communion radius</td><td><code>CommunionPlacement.cs</code> (bodies arranged in a circle facing center)</td></tr>
         </tbody>

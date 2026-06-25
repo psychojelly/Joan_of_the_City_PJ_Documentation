@@ -24,7 +24,7 @@
           { title: 'The two halves', href: 'brain-pc.html#overview' },
           { title: 'How it fits together', href: 'brain-pc.html#topology' },
           { title: 'What moves where', href: 'brain-pc.html#data-flows' },
-          { title: 'What runs on the brain', href: 'brain-pc.html#current' },
+          { title: 'What runs where', href: 'brain-pc.html#current' },
           { title: 'Open questions', href: 'brain-pc.html#unknowns' },
           { title: 'Where this came from', href: 'brain-pc.html#explore' },
         ]},
