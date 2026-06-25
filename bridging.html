@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bridging Dev &amp; Show Design — Joan of the City</title>
+<meta name="description" content="A shared vocabulary that maps engineering/dev terms to theatre/show-design terms for Joan of the City — so both disciplines mean the same thing." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Bridging Dev &amp; Show Design</h1>
+      <p>Engineers and show designers describe the same work in different words. This page is the translation layer — so a "cue," a "scene," or "done" means one thing to everyone on <strong>Joan of the City</strong>.</p>
+    </div>
+
+    <section id="why">
+      <div class="section-tag">Bridge</div>
+      <h2>Why a shared language</h2>
+      <p class="lead">An AR opera lives where a Unity project meets a theatre production. The same object is a "prefab" to one person and a "prop" to another; "it's done" can mean compiled or it can mean rehearsed and locked.</p>
+      <p>Most friction on a project like this isn't technical or artistic — it's vocabulary. When the two sides use each other's words on purpose, hand-offs get faster and fewer things get lost between the design pass and the stage.</p>
+      <div class="callout tip">
+        <span class="ci">🤝</span>
+        <p>Use this page in stand-ups and reviews. When someone says a loaded word — <em>scene, cue, asset, done</em> — point at the row and say which meaning you mean.</p>
+      </div>
+    </section>
+
+    <section id="rosetta">
+      <div class="section-tag">Bridge</div>
+      <h2>The translation table</h2>
+      <p class="lead">Read it both ways: when dev says the left, design hears the middle — and vice versa.</p>
+      <table>
+        <thead><tr><th>Dev / engineering</th><th>Show / theatre</th><th>What it is in Joan</th></tr></thead>
+        <tbody>
+          <tr><td>Cue / event / trigger</td><td>Cue</td><td>A directed moment fired in order within a scene.</td></tr>
+          <tr><td>STOP ALL / kill switch</td><td>Blackout / stop / panic</td><td>The master safety that halts and resets every running cue.</td></tr>
+          <tr><td>Anchor / transform / world space</td><td>Blocking / marks / staging</td><td>Where virtual content sits in the real room.</td></tr>
+          <tr><td>Spawn position</td><td>Entrance / mark</td><td>Where a character or element appears.</td></tr>
+          <tr><td>Prefab / asset / mesh</td><td>Prop / set piece / costume</td><td>A reusable element — a raven, a silhouette, a particle system.</td></tr>
+          <tr><td>Particle system / VFX</td><td>Effect / FX / atmospherics</td><td>Lilac sky, ripples, libretto particles.</td></tr>
+          <tr><td>Animation state machine</td><td>Choreography / staging</td><td>Crawl → stand → attack; flock → land → fly off.</td></tr>
+          <tr><td>Audio stem / mixer</td><td>Score / sound design / band</td><td>The music, delivered as stems and triggered from the cue sheet.</td></tr>
+          <tr><td>Headset client / networking</td><td>The house / the audience's view</td><td>What each audience member sees, kept consistent across devices.</td></tr>
+          <tr><td>Build / deploy</td><td>Load-in / tech</td><td>Getting the current show onto the hardware on-site.</td></tr>
+          <tr><td>QA / test pass</td><td>Dry run / dress rehearsal</td><td>Running the show before an audience to catch problems.</td></tr>
+          <tr><td>Bug / regression</td><td>Missed cue / dropped line</td><td>Something didn't fire as written.</td></tr>
+          <tr><td>Latency / lag</td><td>Being late on a cue / off the music</td><td>Audio or visuals arriving after the moment they belong to.</td></tr>
+          <tr><td>Release candidate / version</td><td>Locked / frozen</td><td>Signed off — no more changes before the show.</td></tr>
+          <tr><td>Branch / PR / review</td><td>Draft / notes / sign-off</td><td>Proposing a change and getting it approved.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="overloaded">
+      <div class="section-tag">Bridge</div>
+      <h2>Overloaded words</h2>
+      <p class="lead">A few words mean different things to each side. These cause the most confusion — say which you mean.</p>
+      <table>
+        <thead><tr><th>Word</th><th>To dev</th><th>To show design</th><th>We use it to mean…</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Scene</strong></td><td>A Unity <code>.unity</code> file</td><td>A part of the show</td><td>A part of the show (Light, Voice, Shadow, Communion). For the file, say "Unity scene."</td></tr>
+          <tr><td><strong>Cue</strong></td><td>A code event / trigger</td><td>A stage cue</td><td>A directed moment in a scene — same thing, both sides.</td></tr>
+          <tr><td><strong>Anchor</strong></td><td>A spatial anchor / transform</td><td>A blocking mark</td><td>A fixed real-world point content is pinned to.</td></tr>
+          <tr><td><strong>Asset</strong></td><td>A file in the project</td><td>A prop / costume / element</td><td>Any reusable show element — model, particle, skin, stem.</td></tr>
+          <tr><td><strong>Done</strong></td><td>Built &amp; merged</td><td>Rehearsed &amp; locked</td><td>Locked: built, verified on-device, and signed off in rehearsal.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p>"<strong>It works on my machine</strong>" is not "<strong>it works in the show</strong>." A cue is only done when it fires consistently <em>across every headset</em>, on-device — not just in the Editor.</p>
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <div class="section-tag">Bridge</div>
+      <h2>From idea to opening</h2>
+      <p class="lead">The dev pipeline and the production timeline are the same path under two names. Lining them up makes planning legible to both sides.</p>
+      <table>
+        <thead><tr><th>Stage</th><th>Dev language</th><th>Show language</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Spec / requirements</td><td>Script &amp; concept</td></tr>
+          <tr><td>2</td><td>Design pass</td><td>Blocking &amp; visual design</td></tr>
+          <tr><td>3</td><td>Implementation</td><td>Building the scene</td></tr>
+          <tr><td>4</td><td>QA / test</td><td>Tech &amp; dress rehearsal</td></tr>
+          <tr><td>5</td><td>Release candidate</td><td>Locked / frozen</td></tr>
+          <tr><td>6</td><td>Deploy / ship</td><td>Opening night</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="handoffs">
+      <div class="section-tag">Bridge</div>
+      <h2>Hand-offs &amp; sign-off</h2>
+      <p class="lead">The two points where work crosses the line between disciplines — and who has to say yes.</p>
+      <div class="steps">
+        <div class="step"><h4>Design → Dev</h4><p>A scene's visual language, AR interaction, asset requirements, cue structure, and measurements are handed to implementation. The clearer the cue sheet, the cleaner the build.</p></div>
+        <div class="step"><h4>Dev → Design (rehearsal)</h4><p>The built scene comes back for tech/dress rehearsal. Design gives notes against the real room, light, and timing; dev folds them in.</p></div>
+        <div class="step"><h4>Dual sign-off</h4><p>Anything touching a live scene gets <strong>one engineering review and one design review</strong> before it's locked (see <a href="resources.html#contributing" style="color:var(--gold)">Contributing</a>).</p></div>
+      </div>
+    </section>
+
+    <section id="gotchas">
+      <div class="section-tag">Bridge</div>
+      <h2>Common miscommunications</h2>
+      <p class="lead">The recurring ones, and how to avoid them.</p>
+      <ul>
+        <li><strong>"Scene" ambiguity</strong> — clarify Unity scene vs show scene whenever it could go either way.</li>
+        <li><strong>"Done" mismatch</strong> — agree that done = locked: built, on-device, and rehearsed.</li>
+        <li><strong>Editor ≠ headset</strong> — looks and performance must be judged on-device, in the venue's light.</li>
+        <li><strong>Silent cross-device drift</strong> — a cue that works on one headset can differ on another; verify across all.</li>
+        <li><strong>Anchored vs follow</strong> — if content "moves with my head," it's Follow; the target is Anchor.</li>
+      </ul>
+      <div class="callout note">
+        <span class="ci">🔗</span>
+        <p>See also: <a href="resources.html#glossary" style="color:var(--gold)">Glossary</a> (project terms), <a href="terminology.html" style="color:var(--gold)">Opera Terminology</a> (art-form terms), and the <a href="cues.html" style="color:var(--gold)">Cues</a> page.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.5</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

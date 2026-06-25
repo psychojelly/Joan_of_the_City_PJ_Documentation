@@ -12,8 +12,10 @@ little JavaScript. No build step, no dependencies.
 | System Overview | `system-overview.html` | Architecture · Systems · Events · Data flow · Layout |
 | System Set Up | `system-setup.html` | Prerequisites · Running a Local Test · Larger System Set Up |
 | Cues | `cues.html` | Overview · Editing & Cueing System |
+| Design Style Guide | `design-style-guide.html` | Principles · Color · Typography · Motion · Spatial/AR UX · Review |
 | Assets Documentation | `assets.html` | Pipeline · Formats · Naming · Visual language |
 | Opera Terminology | `terminology.html` | Text & Score · Solo Forms · Ensemble · Structure · Voices · In Joan |
+| Bridging Dev & Show Design | `bridging.html` | Why · Translation table · Overloaded words · Lifecycle · Hand-offs · Gotchas |
 | Resources | `resources.html` | Glossary · Contributing · Tools · Contacts |
 
 Shared across every page:

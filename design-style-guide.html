@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design Style Guide — Joan of the City</title>
+<meta name="description" content="The visual and experiential style guide for Joan of the City — principles, color, type, motion, and spatial/AR UX." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Design</div>
+      <h1>Design Style Guide</h1>
+      <p>The shared visual and experiential language for <strong>Joan of the City</strong>. It keeps every scene, asset, and interface feeling like one world — operatic, restrained, and anchored in real space.</p>
+    </div>
+
+    <section id="principles">
+      <div class="section-tag">Style Guide</div>
+      <h2>Design principles</h2>
+      <p class="lead">Six commitments. When a decision is hard, return to these.</p>
+      <div class="card-grid">
+        <div class="card"><div class="ico">🎭</div><h4>Operatic</h4><p>High contrast, theatrical light, emotional scale. The medium is new; the feeling is opera.</p></div>
+        <div class="card"><div class="ico">➖</div><h4>Subtractive</h4><p>The real venue is busy. Virtual content is sparse, deliberate, and luminous against the dark.</p></div>
+        <div class="card"><div class="ico">📍</div><h4>Anchored</h4><p>Content belongs to a place in the real world — Anchor, not Follow. It never drifts with the head.</p></div>
+        <div class="card"><div class="ico">🎶</div><h4>Audio-reactive</h4><p>Light, particles, and Communion respond to the score. Sound and image move as one.</p></div>
+        <div class="card"><div class="ico">🕊️</div><h4>Character, not effect</h4><p>The Hero Raven, the Shadow, the Communion presence act with intention — never decoration.</p></div>
+        <div class="card"><div class="ico">🛟</div><h4>Safe &amp; legible</h4><p>Comfortable to watch, readable on-site, and always able to STOP ALL to a safe state.</p></div>
+      </div>
+    </section>
+
+    <section id="color">
+      <div class="section-tag">Style Guide</div>
+      <h2>Color</h2>
+      <p class="lead">A working palette for UI, docs, and placeholder material. Each scene may push its own direction (see <a href="assets.html#visual-language" style="color:var(--gold)">Assets → Visual language</a>) — defer to the scene where they differ.</p>
+      <table>
+        <thead><tr><th>Token</th><th>Swatch</th><th>Hex</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>joan/gold</code></td><td><span class="swatch" style="background:#d4af6a"></span>Gold</td><td><code>#d4af6a</code></td><td>Joan's presence, key accents, highlights.</td></tr>
+          <tr><td><code>joan/rose</code></td><td><span class="swatch" style="background:#c8688a"></span>Rose</td><td><code>#c8688a</code></td><td>Emotion, warmth, the human voice.</td></tr>
+          <tr><td><code>joan/lilac</code></td><td><span class="swatch" style="background:#8a7bd8"></span>Lilac</td><td><code>#8a7bd8</code></td><td>The Light scene sky; visions &amp; apparitions.</td></tr>
+          <tr><td><code>joan/cyan</code></td><td><span class="swatch" style="background:#5fb8c4"></span>Cyan</td><td><code>#5fb8c4</code></td><td>Cool accents, atmospheric effects.</td></tr>
+          <tr><td><code>joan/night</code></td><td><span class="swatch" style="background:#0a0a0f"></span>Night</td><td><code>#0a0a0f</code></td><td>The dark the AR content reads against.</td></tr>
+        </tbody>
+      </table>
+      <h3>Per-scene accent</h3>
+      <table>
+        <thead><tr><th>Scene</th><th>Lead color</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Light</strong></td><td><span class="swatch" style="background:#8a7bd8"></span>Lilac sky, building from the speaker.</td></tr>
+          <tr><td><strong>Voice</strong></td><td><span class="swatch" style="background:#0a0a0f"></span>Black ravens against sky; collage text.</td></tr>
+          <tr><td><strong>Shadow</strong></td><td><span class="swatch" style="background:#5fb8c4"></span>Cool, low-key; silhouettes &amp; particle reveal.</td></tr>
+          <tr><td><strong>Communion</strong></td><td><span class="swatch" style="background:#d4af6a"></span>Warm emergence; ripples &amp; levitation.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="type">
+      <div class="section-tag">Style Guide</div>
+      <h2>Typography</h2>
+      <p class="lead">Three typefaces, three jobs. Used consistently across the docs, decks, and any in-experience text.</p>
+      <table>
+        <thead><tr><th>Role</th><th>Typeface</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Display</strong></td><td>Cormorant Garamond</td><td>Titles, libretto, any sacred / operatic text. Carries the historical weight.</td></tr>
+          <tr><td><strong>Interface</strong></td><td>Inter</td><td>Body copy, labels, UI, console tooling. Neutral and legible.</td></tr>
+          <tr><td><strong>Mono</strong></td><td>JetBrains Mono</td><td>Code, cue ids, asset names, cue sheets.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">🔤</span>
+        <p>Pair a <strong>large display serif</strong> with <strong>quiet sans-serif body</strong>. Don't set long passages in the display serif, and don't use mono for anything but data and code.</p>
+      </div>
+    </section>
+
+    <section id="motion">
+      <div class="section-tag">Style Guide</div>
+      <h2>Motion &amp; feel</h2>
+      <p class="lead">How things move sells the world. Motion should feel composed, not switched on.</p>
+      <ul>
+        <li><strong>Gradual evolution.</strong> Builds are slow and continuous — sky grows, streaks accumulate, ripples spread. Avoid hard on/off pops.</li>
+        <li><strong>Audio-reactive.</strong> Tie intensity, growth, and glow to the score so visuals breathe with the music.</li>
+        <li><strong>Intentional entrances &amp; exits.</strong> The Hero Raven separates, approaches, and stays; the collage tears off and flies away rather than fading.</li>
+        <li><strong>Atmosphere over flash.</strong> Chromatic aberration, drift, and particle reveals add depth — used as seasoning, not spectacle.</li>
+      </ul>
+    </section>
+
+    <section id="spatial">
+      <div class="section-tag">Style Guide</div>
+      <h2>Spatial &amp; AR UX</h2>
+      <p class="lead">Designing for a head-worn, in-the-room experience. Comfort and safety come before spectacle.</p>
+      <div class="callout tip">
+        <span class="ci">✅</span>
+        <p><strong>Do:</strong> keep key action within a comfortable cone of vision; anchor content to stable, textured surfaces; lead attention with light and sound; design for the audience's real standing points; test in the venue's actual light.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">🚫</span>
+        <p><strong>Don't:</strong> head-lock UI or float menus during a scene; force rapid head-turns to follow a beat; lure anyone toward hazards; rely on a single sense for a critical cue; trust how it looks in the Editor over how it looks on-device.</p>
+      </div>
+    </section>
+
+    <section id="review">
+      <div class="section-tag">Style Guide</div>
+      <h2>Design review checklist</h2>
+      <p class="lead">Run a scene or asset against this before it's called done.</p>
+      <ul>
+        <li>Reads as one world — palette, type, and light match the rest of the show.</li>
+        <li>Content is anchored and holds its place across devices.</li>
+        <li>Motion builds gradually and reacts to audio.</li>
+        <li>Named elements (ravens, presences) behave with intention, not as effects.</li>
+        <li>Comfortable to watch; no head-locked UI during the scene.</li>
+        <li>Legible in the venue's real light at performance time.</li>
+        <li>STOP ALL returns the scene to a safe, neutral state.</li>
+      </ul>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.5</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

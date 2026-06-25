@@ -37,6 +37,19 @@
       ]
     },
     {
+      label: 'Design',
+      items: [
+        { title: 'Design Style Guide', href: 'design-style-guide.html', children: [
+          { title: 'Design principles', href: 'design-style-guide.html#principles' },
+          { title: 'Color', href: 'design-style-guide.html#color' },
+          { title: 'Typography', href: 'design-style-guide.html#type' },
+          { title: 'Motion & feel', href: 'design-style-guide.html#motion' },
+          { title: 'Spatial & AR UX', href: 'design-style-guide.html#spatial' },
+          { title: 'Design review', href: 'design-style-guide.html#review' },
+        ]},
+      ]
+    },
+    {
       label: 'Reference',
       items: [
         { title: 'Assets Documentation', href: 'assets.html', children: [
@@ -53,6 +66,14 @@
           { title: 'Voices & the Pit', href: 'terminology.html#voices' },
           { title: 'In Joan of the City', href: 'terminology.html#in-joan' },
         ]},
+        { title: 'Bridging Dev & Show Design', href: 'bridging.html', children: [
+          { title: 'Why a shared language', href: 'bridging.html#why' },
+          { title: 'The translation table', href: 'bridging.html#rosetta' },
+          { title: 'Overloaded words', href: 'bridging.html#overloaded' },
+          { title: 'From idea to opening', href: 'bridging.html#lifecycle' },
+          { title: 'Hand-offs & sign-off', href: 'bridging.html#handoffs' },
+          { title: 'Miscommunications', href: 'bridging.html#gotchas' },
+        ]},
         { title: 'Resources', href: 'resources.html', children: [
           { title: 'Glossary', href: 'resources.html#glossary' },
           { title: 'Contributing & reviews', href: 'resources.html#contributing' },
@@ -66,13 +87,15 @@
 
   // Ordered flat list for prev/next page navigation
   var ORDER = [
-    { title: 'Story Overview',        href: 'index.html' },
-    { title: 'System Overview',       href: 'system-overview.html' },
-    { title: 'System Set Up',         href: 'system-setup.html' },
-    { title: 'Cues',                  href: 'cues.html' },
-    { title: 'Assets Documentation',  href: 'assets.html' },
-    { title: 'Opera Terminology',     href: 'terminology.html' },
-    { title: 'Resources',             href: 'resources.html' },
+    { title: 'Story Overview',             href: 'index.html' },
+    { title: 'System Overview',            href: 'system-overview.html' },
+    { title: 'System Set Up',              href: 'system-setup.html' },
+    { title: 'Cues',                       href: 'cues.html' },
+    { title: 'Design Style Guide',         href: 'design-style-guide.html' },
+    { title: 'Assets Documentation',       href: 'assets.html' },
+    { title: 'Opera Terminology',          href: 'terminology.html' },
+    { title: 'Bridging Dev & Show Design', href: 'bridging.html' },
+    { title: 'Resources',                  href: 'resources.html' },
   ];
 
   function currentFile() {
