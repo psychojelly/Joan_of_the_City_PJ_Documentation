@@ -26,6 +26,20 @@
       <div class="section-tag">Architecture</div>
       <h2>Architecture at a glance</h2>
       <p class="lead">The show is built in Unity as a set of concerns layered over each scene: <strong>anchoring</strong> holds content in the real world, <strong>cueing</strong> drives what happens and when, <strong>positioning</strong> keeps spawns consistent, and a <strong>performance</strong> budget keeps it all running on-headset. The whole thing must behave identically across every device in the room.</p>
+
+      <h3>Tech stack</h3>
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+        <tbody>
+          <tr><td>Engine</td><td>Unity 6 (<code>6000.0.26f1</code>), URP 17.0.3</td></tr>
+          <tr><td>XR platform</td><td>XREAL (<code>com.xreal.xr</code>)</td></tr>
+          <tr><td>XR framework</td><td>XR Interaction Toolkit 3.0.9, AR Foundation 6.0.6, XR Hands 1.7.2</td></tr>
+          <tr><td>Cueing</td><td>extOSC (UDP) ← browser controller + Python proxy</td></tr>
+          <tr><td>Audio</td><td>BroAudio + the <code>JoanAudio</code> stem engine</td></tr>
+          <tr><td>VFX</td><td>Visual Effect Graph 17.0.3 (audio-reactive)</td></tr>
+        </tbody>
+      </table>
+
       <div class="callout warn">
         <span class="ci">🧱</span>
         <p>This page documents the project as a set of <strong>subsystems and known priorities</strong>, not a fixed code architecture. Where a mechanism is still being decided (anchoring strategy, networking), it's flagged in <a href="#folders" style="color:var(--gold)">Open questions</a> rather than described as settled.</p>

@@ -34,9 +34,9 @@
       <p>How the headset hardware actually runs the show: the XREAL glasses display and track, while a host <strong>“brain” PC</strong> does the thinking — running the Unity build, holding the synced assets, and receiving cues.</p>
     </div>
 
-    <div class="callout warn">
-      <span class="ci">🚧</span>
-      <p><strong>Working understanding.</strong> This page is our current best picture, assembled from what we know so far. Items marked <em>(to confirm)</em> still need verifying against the real Unity project and rig — see <a href="#explore" style="color:var(--gold)">Verifying this</a>.</p>
+    <div class="callout note">
+      <span class="ci">✅</span>
+      <p><strong>Grounded in the project.</strong> The cue, OSC, and XREAL details below were verified against the Unity project (<code>joan-of-the-city-xreal</code>). A couple of operational details — asset sync and PuTTY — aren't evidenced in the repo yet and stay marked <em>(to confirm)</em>.</p>
     </div>
 
     <section id="overview">
@@ -70,14 +70,18 @@
       <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px">Asset sync and PuTTY both connect into the brain PC. Connection types are <em>(to confirm)</em>.</p>
 
       <table>
-        <thead><tr><th>Link</th><th>What travels</th><th>How <em>(to confirm)</em></th></tr></thead>
+        <thead><tr><th>Link</th><th>What travels</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td>Glasses ⇄ Brain PC</td><td>Rendered frames out; head tracking in</td><td>Tethered, likely USB-C</td></tr>
-          <tr><td>Operator → Brain PC</td><td>Cues (incl. STOP ALL)</td><td>OSC over the network to <code>:7000</code>, via the proxy</td></tr>
-          <tr><td>Asset source → Brain PC</td><td>Project files / assets</td><td>File sync — <code>PSFTP</code> / <code>PSCP</code> or similar</td></tr>
-          <tr><td>Operator/Admin → Brain PC</td><td>Commands, management</td><td>PuTTY over SSH or serial</td></tr>
+          <tr><td>Glasses ⇄ Brain PC</td><td>Rendered frames out; head tracking in</td><td>Tethered XREAL link <em>(exact cabling to confirm)</em></td></tr>
+          <tr><td>Operator → Brain PC</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP to the brain at <code>:7000</code>, via <code>proxy.py</code></td></tr>
+          <tr><td>Asset source → Brain PC</td><td>Project files / assets</td><td>File sync — <code>PSFTP</code> / <code>PSCP</code> or similar <em>(to confirm)</em></td></tr>
+          <tr><td>Operator/Admin → Brain PC</td><td>Commands, management</td><td>PuTTY over SSH or serial <em>(to confirm)</em></td></tr>
         </tbody>
       </table>
+      <div class="callout warn">
+        <span class="ci">📡</span>
+        <p>The OSC target IP is <strong>hardcoded to <code>10.0.1.32</code></strong> on the OSC Manager in the scene — it must be updated to the brain PC's address on each venue network.</p>
+      </div>
     </section>
 
     <section id="data-flows">
@@ -94,54 +98,69 @@
 
     <section id="current">
       <div class="section-tag">Brain PC</div>
-      <h2>Current understanding</h2>
-      <p class="lead">As best we know today, two things flow between the brain and the rest of the system:</p>
-      <ol>
-        <li><strong>Asset syncing</strong> — project assets are kept in sync onto the brain PC so the build it runs is up to date.</li>
-        <li><strong>A cue system to the glasses</strong> — cues are sent (over OSC) to the Unity build on the brain, which drives what the glasses show.</li>
-      </ol>
+      <h2>What runs on the brain</h2>
+      <p class="lead">The brain PC runs the Unity build (Unity 6, URP, XREAL SDK) and listens for two streams of OSC cues that drive the show. Both arrive at UDP <code>:7000</code> through <code>proxy.py</code>.</p>
+
+      <h3>Two cue streams</h3>
+      <table>
+        <thead><tr><th>Stream</th><th>OSC address</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Visual cues</strong></td><td><code>/cue</code> + integer</td><td>Toggles a mapped scene element on/off (via <code>SimpleMessageReceiver</code>).</td></tr>
+          <tr><td><strong>Audio cues</strong></td><td><code>/audio/cue</code>, <code>/audio/jump</code>, <code>/audio/seek</code>, <code>/audio/vol</code></td><td>Drives the <code>JoanAudio</code> stem engine — play, jump, seek, volume, and <strong>StopAll</strong>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Visual cue map (current build)</h3>
+      <table>
+        <thead><tr><th>Cue</th><th>Element</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Video quad locked to camera view</td></tr>
+          <tr><td>2</td><td><strong>First Signs</strong> — droplets + floor ripple VFX</td></tr>
+          <tr><td>3</td><td>Water splash (31-frame mesh sequence)</td></tr>
+          <tr><td>4</td><td>Joan's crown (SDF particle system)</td></tr>
+          <tr><td>5</td><td><strong>Communion bodies</strong> + audio-reactive VFX + BGM</td></tr>
+          <tr><td>6–8</td><td><em>Unassigned</em> — would throw a NullReference if triggered</td></tr>
+        </tbody>
+      </table>
       <div class="callout note">
-        <span class="ci">🧩</span>
-        <p>That's the skeleton. The details below are what we still need to pin down before this is a reliable reference.</p>
+        <span class="ci">🔊</span>
+        <p><strong>STOP ALL</strong> is implemented on the audio side (<code>StemAction.StopAll</code> — "stop all" / "kill all" fades every stem to 0). Visual cues are individual toggles; a single global visual STOP ALL would live in the still-open cue slots.</p>
       </div>
     </section>
 
     <section id="unknowns">
       <div class="section-tag">Brain PC</div>
       <h2>Open questions</h2>
-      <p class="lead">The specifics to verify. Each answer turns a <em>(to confirm)</em> above into a fact.</p>
+      <p class="lead">What the code <em>doesn't</em> answer — the operational and multi-user pieces still to pin down.</p>
       <ul>
-        <li><strong>Glasses ↔ brain link</strong> — USB-C tether? Anything wireless? Which XREAL model and host mode?</li>
-        <li><strong>One brain per headset, or shared?</strong> — how many brain PCs for a performance, and how they relate.</li>
-        <li><strong>How the build runs</strong> — is the Unity build launched on the brain manually, on boot, or remotely?</li>
-        <li><strong>How assets sync</strong> — which tool, which folders, and is it triggered manually or automatically?</li>
-        <li><strong>How cues reach Unity</strong> — does OSC hit the brain's Unity app directly on <code>:7000</code>, or pass through something first?</li>
-        <li><strong>Tracking &amp; anchoring on XREAL</strong> — how anchors hold on this hardware (ties to the anchoring priority in <a href="system-overview.html#data-flow" style="color:var(--gold)">Technical priorities</a>).</li>
-        <li><strong>Multi-brain networking</strong> — if there are several, how they stay in sync.</li>
+        <li><strong>Glasses ↔ brain cabling</strong> — the exact tether/host mode for the XREAL hardware.</li>
+        <li><strong>One brain per headset, or shared?</strong> — the project runs as “multi-user,” but how many brain PCs per show and how they relate isn't in the repo.</li>
+        <li><strong>Cross-device consistency</strong> — how multiple headsets/brains stay in sync (the OSC host is a single hardcoded IP today).</li>
+        <li><strong>Asset sync</strong> — which tool/folders and manual vs automatic (no sync tooling found in the project).</li>
+        <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain (not evidenced in the repo).</li>
+        <li><strong>How the build is launched</strong> — manually, on boot, or remotely on each brain.</li>
+        <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
     </section>
 
     <section id="explore">
       <div class="section-tag">Brain PC</div>
-      <h2>Verifying this</h2>
-      <p class="lead">Two ways to replace the guesses with the real architecture — both straightforward.</p>
-      <div class="steps">
-        <div class="step"><h4>Read the Unity project directly</h4><p>Point me at the Unity project folder and I can read the C# scripts, packages, and build settings — the OSC receiver, the XREAL SDK in use, any asset-sync scripts, and how the scene is wired. This needs no extra tooling.</p></div>
-        <div class="step"><h4>Or connect a Unity MCP</h4><p>A Unity MCP server would let me inspect the live Editor — scene hierarchy, components, and inspector values — for a deeper, running view.</p></div>
-      </div>
-      <h3>What I'd look for</h3>
+      <h2>Where this came from</h2>
+      <p class="lead">The architecture above was read straight from the Unity project, <code>joan-of-the-city-xreal</code>. The source of each fact:</p>
       <table>
-        <thead><tr><th>Question</th><th>Where the answer lives</th></tr></thead>
+        <thead><tr><th>Fact</th><th>Source in the project</th></tr></thead>
         <tbody>
-          <tr><td>How cues are received</td><td>OSC listener script(s); the port and address pattern handlers.</td></tr>
-          <tr><td>Which XREAL stack</td><td>The XREAL/NRSDK package in <code>Packages/manifest.json</code> and SDK prefabs in the scene.</td></tr>
-          <tr><td>Asset sync</td><td>Any build/sync scripts, batch files, or editor tooling in the project.</td></tr>
-          <tr><td>Anchoring approach</td><td>Anchor/tracking components and how content is parented in the scene.</td></tr>
+          <tr><td>Visual cues / cue map</td><td><code>SimpleMessageReceiver.cs</code> + the scene's OSC Manager (extOSC)</td></tr>
+          <tr><td>Audio cues &amp; StopAll</td><td><code>JoanAudio/</code> — <code>OscCueReceiver</code>, <code>AudioCueConfig</code>, <code>AudioSceneController</code></td></tr>
+          <tr><td>OSC host/port</td><td>OSC Manager <code>LocalHost 10.0.1.32</code>, port <code>7000</code>; <code>proxy.py</code> on <code>:8765</code></td></tr>
+          <tr><td>XREAL stack</td><td><code>Packages/manifest.json</code> — <code>com.xreal.xr</code>, XRI, AR Foundation, XR Hands</td></tr>
+          <tr><td>Audio-reactivity</td><td><code>SpectrumExtractor</code> → <code>AmplitudeFloat_VFXBinder</code> → VFX Graph</td></tr>
+          <tr><td>Communion radius</td><td><code>CommunionPlacement.cs</code> (bodies arranged in a circle facing center)</td></tr>
         </tbody>
       </table>
       <div class="callout tip">
         <span class="ci">🔭</span>
-        <p>Once I've explored the project, I'll replace every <em>(to confirm)</em> on this page with what's actually there — and add a real "how to run the brain" sequence.</p>
+        <p>For the next level of detail — exact inspector values, scene wiring, and per-prefab settings — a <strong>Unity MCP</strong> connected to the live Editor would let us read it directly. The static project read above covers the architecture; the MCP would cover the runtime configuration.</p>
       </div>
     </section>
 

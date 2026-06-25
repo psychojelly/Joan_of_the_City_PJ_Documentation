@@ -57,7 +57,7 @@
     <section id="cue-editing">
       <div class="section-tag">Cues</div>
       <h2>Editing &amp; Cueing System</h2>
-      <p class="lead">The cue sheet is the single document that ties the show together. It's assembled from the <strong>script</strong> (the AR / visual imagery column), the <strong>scene asset list</strong>, the <strong>audio cue sheet</strong>, and the <strong>Milanote</strong> reference boards — one row per cue, in performance order.</p>
+      <p class="lead">The cue sheet is the single document that ties the show together. It's assembled from the <strong>script</strong> (the AR / visual imagery column), the <strong>scene asset list</strong>, the <strong>audio cue sheet</strong>, and the <strong>Milanote</strong> reference boards — one row per cue, in performance order. It's the human <em>plan</em>; the technical firing happens over OSC — see <a href="#osc-control" style="color:var(--gold)">The OSC control system</a> below.</p>
 
       <h3>The cue sheet</h3>
       <p>Each row is a cue. Keep the row itself short and scannable; put longer direction in a notes field someone can click into for more detail (so the sheet doesn't sprawl). The current working copy lives in a shared spreadsheet — see <a href="resources.html#tools" style="color:var(--gold)">Tools &amp; links</a>.</p>
@@ -109,7 +109,38 @@
         <tbody>
           <tr><td><code>osc-controller.html</code></td><td>The operator's button panel (the front end). Set <strong>Host</strong> and <strong>Port</strong> to the OSC target here.</td></tr>
           <tr><td><code>proxy.py</code></td><td>A small Python helper that bridges the browser to OSC — listens on <code>localhost:8765</code>, sends OSC out.</td></tr>
-          <tr><td>OSC target</td><td>Whatever receives the OSC and acts on it — the Unity show — at <code>host : port</code> (default <code>127.0.0.1 : 7000</code>).</td></tr>
+          <tr><td>OSC target</td><td>The Unity show on the brain PC — an <strong>extOSC</strong> receiver on the in-scene <em>OSC Manager</em>, UDP port <code>7000</code> (host IP hardcoded to <code>10.0.1.32</code>, update per venue).</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12.5px;color:var(--text-mute)">Controller files live at <code>Assets/ThirdParty/OSC_Controller/</code> in the Unity project.</p>
+
+      <h3>Visual cues — <code>/cue</code></h3>
+      <p>The controller sends an integer to the OSC address <code>/cue</code>. <code>SimpleMessageReceiver</code> <strong>toggles</strong> the mapped scene element on or off — it's a toggle, not a one-shot.</p>
+      <table>
+        <thead><tr><th>Cue</th><th>Element</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Video quad locked to camera view</td></tr>
+          <tr><td>2</td><td><strong>First Signs</strong> — droplets + floor ripple VFX</td></tr>
+          <tr><td>3</td><td>Water splash (31-frame mesh sequence)</td></tr>
+          <tr><td>4</td><td>Joan's crown (SDF particle system)</td></tr>
+          <tr><td>5</td><td><strong>Communion bodies</strong> + audio-reactive VFX + BGM</td></tr>
+          <tr><td>6–8</td><td><em>Unassigned</em> in the current build</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p>Cues <strong>6–8</strong> are not mapped yet — triggering one would throw a NullReference. Don't wire those buttons to live content until they're assigned.</p>
+      </div>
+
+      <h3>Audio cues — <code>/audio/*</code></h3>
+      <p>Audio runs on a separate stem engine (<code>JoanAudio</code>) with its own OSC addresses, so music can be cued independently of the visuals.</p>
+      <table>
+        <thead><tr><th>Address</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code>/audio/cue</code></td><td>Trigger an audio cue.</td></tr>
+          <tr><td><code>/audio/jump</code> · <code>/audio/seek</code></td><td>Jump or seek within a stem.</td></tr>
+          <tr><td><code>/audio/vol</code></td><td>Set volume.</td></tr>
+          <tr><td><strong>StopAll</strong></td><td>“stop all” / “kill all” — fades every active stem to 0. This is the audio-side <strong>STOP ALL</strong>.</td></tr>
         </tbody>
       </table>
 
