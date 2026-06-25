@@ -45,6 +45,14 @@
           { title: 'Naming conventions', href: 'assets.html#naming' },
           { title: 'Visual language', href: 'assets.html#visual-language' },
         ]},
+        { title: 'Opera Terminology', href: 'terminology.html', children: [
+          { title: 'Text & Score', href: 'terminology.html#text-score' },
+          { title: 'Solo Forms', href: 'terminology.html#solo-forms' },
+          { title: 'Ensemble & Chorus', href: 'terminology.html#ensemble' },
+          { title: 'Structure', href: 'terminology.html#structure' },
+          { title: 'Voices & the Pit', href: 'terminology.html#voices' },
+          { title: 'In Joan of the City', href: 'terminology.html#in-joan' },
+        ]},
         { title: 'Resources', href: 'resources.html', children: [
           { title: 'Glossary', href: 'resources.html#glossary' },
           { title: 'Contributing & reviews', href: 'resources.html#contributing' },
@@ -63,6 +71,7 @@
     { title: 'System Set Up',         href: 'system-setup.html' },
     { title: 'Cues',                  href: 'cues.html' },
     { title: 'Assets Documentation',  href: 'assets.html' },
+    { title: 'Opera Terminology',     href: 'terminology.html' },
     { title: 'Resources',             href: 'resources.html' },
   ];
 

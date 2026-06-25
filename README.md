@@ -13,6 +13,7 @@ little JavaScript. No build step, no dependencies.
 | System Set Up | `system-setup.html` | Prerequisites · Running a Local Test · Larger System Set Up |
 | Cues | `cues.html` | Overview · Editing & Cueing System |
 | Assets Documentation | `assets.html` | Pipeline · Formats · Naming · Visual language |
+| Opera Terminology | `terminology.html` | Text & Score · Solo Forms · Ensemble · Structure · Voices · In Joan |
 | Resources | `resources.html` | Glossary · Contributing · Tools · Contacts |
 
 Shared across every page:
