@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>System Overview — Joan of the City</title>
+<meta name="description" content="System architecture for Joan of the City — the systems, the conductor clock, and how they communicate." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Engineering</div>
+      <h1>System Overview</h1>
+      <p>How the show is built: independent systems, coordinated by a single timeline, communicating through events.</p>
+    </div>
+
+    <section id="philosophy">
+      <div class="section-tag">Architecture</div>
+      <h2>Architecture at a glance</h2>
+      <p class="lead">Joan is built as a set of independent systems coordinated by one master timeline. Each system does exactly one thing and talks to the others only through events — so movements stay swappable and the show stays resilient if any single system stalls.</p>
+      <div class="callout tip">
+        <span class="ci">🧱</span>
+        <p><strong>Rule of thumb:</strong> if you find yourself referencing one manager from inside another, raise an event instead. Movements should be assemblable and removable without touching engine code.</p>
+      </div>
+    </section>
+
+    <section id="systems">
+      <div class="section-tag">Architecture</div>
+      <h2>The Systems</h2>
+      <p class="lead">Six systems make up the runtime. Everything else is content layered on top of them.</p>
+      <table>
+        <thead><tr><th>System</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Conductor Clock</strong></td><td>Master timeline. Emits beat events that every other system listens to.</td></tr>
+          <tr><td><strong>Anchor Service</strong></td><td>Resolves and persists real-world anchors; keeps virtual content pinned to the city.</td></tr>
+          <tr><td><strong>Phantom Director</strong></td><td>Spawns, animates, and retires virtual performers per beat.</td></tr>
+          <tr><td><strong>Spatial Audio</strong></td><td>Positions voices &amp; score in 3D; ducks and crossfades between movements.</td></tr>
+          <tr><td><strong>Show-Control</strong></td><td>Operator console: start, pause, jump-to-beat, emergency stop.</td></tr>
+          <tr><td><strong>Presence Sync</strong></td><td>Keeps co-located audience members in a consistent shared scene.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="events">
+      <div class="section-tag">Architecture</div>
+      <h2>Communication: events, not references</h2>
+      <p class="lead">Systems never call each other directly. The Conductor Clock raises beat events; subscribers react. This keeps movements swappable and makes the show fault-tolerant.</p>
+      <pre><code><span class="tok-c">// One event bus. Every cue is a beat.</span>
+<span class="tok-k">public static class</span> <span class="tok-f">ConductorClock</span> {
+    <span class="tok-k">public static event</span> Action&lt;Beat&gt; OnBeat;
+
+    <span class="tok-k">public static void</span> <span class="tok-f">Fire</span>(Beat beat) =&gt; OnBeat?.Invoke(beat);
+}
+
+<span class="tok-c">// The Phantom Director just listens.</span>
+ConductorClock.OnBeat += beat =&gt; {
+    <span class="tok-k">if</span> (beat.id == <span class="tok-s">"II.trial.enter"</span>)
+        phantomDirector.<span class="tok-f">Spawn</span>(<span class="tok-s">"judge"</span>, anchor: <span class="tok-s">"courthouse.dais"</span>);
+};</code></pre>
+    </section>
+
+    <section id="data-flow">
+      <div class="section-tag">Architecture</div>
+      <h2>Runtime data flow</h2>
+      <p class="lead">A single beat travels a predictable path from the operator's intent to the audience's senses.</p>
+      <div class="steps">
+        <div class="step"><h4>Operator or trigger</h4><p>The Show-Control console (or an audience-position trigger) advances the Conductor Clock.</p></div>
+        <div class="step"><h4>Beat fires</h4><p>The clock raises a <code>Beat</code> event onto the bus.</p></div>
+        <div class="step"><h4>Systems react</h4><p>Phantom Director, Spatial Audio, and lighting each respond to the beats they care about.</p></div>
+        <div class="step"><h4>Anchored to the world</h4><p>The Anchor Service positions all content against real-world anchors.</p></div>
+        <div class="step"><h4>Synced across audience</h4><p>Presence Sync ensures every headset sees the same world state.</p></div>
+      </div>
+    </section>
+
+    <section id="folders">
+      <div class="section-tag">Architecture</div>
+      <h2>Project layout</h2>
+      <p class="lead">Where things live in the Unity project. Content (movements, audio, art) is kept separate from systems (engine code).</p>
+      <pre><code>Assets/
+├─ <span class="tok-f">Scenes/</span>          <span class="tok-c"># _Sandbox + one scene per movement</span>
+├─ <span class="tok-f">Systems/</span>         <span class="tok-c"># Clock, Anchors, Audio, ShowControl, Presence</span>
+├─ <span class="tok-f">Phantoms/</span>        <span class="tok-c"># Performer prefabs, rigs, animation</span>
+├─ <span class="tok-f">Movements/</span>       <span class="tok-c"># Per-movement config (beats, anchors, cues)</span>
+├─ <span class="tok-f">Audio/</span>           <span class="tok-c"># Score stems + spatial SFX (LFS)</span>
+└─ <span class="tok-f">Art/</span>             <span class="tok-c"># Materials, shaders, light rigs</span></code></pre>
+      <div class="callout note">
+        <span class="ci">🧭</span>
+        <p>Ready to run it? Head to <a href="system-setup.html" style="color:var(--gold)">System Set Up</a> for a local test, then the larger on-site rig.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

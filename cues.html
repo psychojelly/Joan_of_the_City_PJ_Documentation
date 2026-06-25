@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cues — Joan of the City</title>
+<meta name="description" content="The cueing system for Joan of the City — how beats are authored, edited, and fired in time with the score." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Engineering &amp; Design</div>
+      <h1>Cues</h1>
+      <p>The cueing system is the heart of the show — it turns the score into timed events that move phantoms, light, and sound through the city.</p>
+    </div>
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <section id="cues-overview">
+      <div class="section-tag">Cues</div>
+      <h2>Overview</h2>
+      <p class="lead">A <strong>cue</strong> is a single directed moment — a phantom enters, a light shifts, a voice rises. Cues are grouped into <strong>beats</strong>, and beats are driven by the Conductor Clock in time with the music.</p>
+
+      <h3>The vocabulary of a cue</h3>
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Beat</strong></td><td>The smallest directed unit of action, identified by a stable id like <code>II.trial.enter</code>.</td></tr>
+          <tr><td><strong>Cue</strong></td><td>One action attached to a beat — spawn, move, light, audio, retire.</td></tr>
+          <tr><td><strong>Trigger</strong></td><td>What advances to a beat: the conductor clock, audience position, or operator action.</td></tr>
+          <tr><td><strong>Anchor</strong></td><td>The real-world point a cue's content is positioned against.</td></tr>
+          <tr><td><strong>Running Order</strong></td><td>The full ordered list of beats that makes up a performance.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>How a cue fires</h3>
+      <div class="steps">
+        <div class="step"><h4>The clock reaches a beat</h4><p>Or an audience-position / operator trigger requests it.</p></div>
+        <div class="step"><h4>The beat event is raised</h4><p>Onto the shared event bus — see <a href="system-overview.html#events" style="color:var(--gold)">System Overview</a>.</p></div>
+        <div class="step"><h4>Each cue in the beat executes</h4><p>Phantom Director, Spatial Audio, and lighting carry out their part, anchored to the world.</p></div>
+        <div class="step"><h4>The beat resolves</h4><p>The clock holds or advances to the next beat, depending on the trigger type.</p></div>
+      </div>
+
+      <h3>Cue types</h3>
+      <div class="card-grid">
+        <div class="card"><div class="ico">🎭</div><h4>Phantom</h4><p>Spawn, move, animate, or retire a virtual performer.</p></div>
+        <div class="card"><div class="ico">💡</div><h4>Light</h4><p>Shift key light color &amp; intensity to set the movement's emotion.</p></div>
+        <div class="card"><div class="ico">🔊</div><h4>Audio</h4><p>Trigger a voice or stem at a spatial source; duck or crossfade.</p></div>
+        <div class="card"><div class="ico">⏯️</div><h4>Flow</h4><p>Hold, wait-for-audience, or advance the running order.</p></div>
+      </div>
+    </section>
+
+    <hr/>
+
+    <!-- ===================== EDITING & CUEING SYSTEM ===================== -->
+    <section id="cue-editing">
+      <div class="section-tag">Cues</div>
+      <h2>Editing &amp; Cueing System</h2>
+      <p class="lead">Cues are authored as data, not code — so designers can shape a movement without recompiling. Each movement owns a cue sheet that the runtime loads and the operator drives.</p>
+
+      <h3>The cue sheet</h3>
+      <p>Every movement has a cue sheet under <code>Assets/Movements/&lt;movement&gt;/cues.json</code>. It lists beats in order, each with the cues to run and the trigger that advances to it.</p>
+      <pre><code>{
+  <span class="tok-f">"movement"</span>: <span class="tok-s">"II-the-trial"</span>,
+  <span class="tok-f">"beats"</span>: [
+    {
+      <span class="tok-f">"id"</span>: <span class="tok-s">"II.trial.enter"</span>,
+      <span class="tok-f">"trigger"</span>: <span class="tok-s">"audience@courthouse.steps"</span>,
+      <span class="tok-f">"cues"</span>: [
+        { <span class="tok-f">"type"</span>: <span class="tok-s">"light"</span>,   <span class="tok-f">"color"</span>: <span class="tok-s">"joan/cyan"</span>, <span class="tok-f">"fade"</span>: 2.0 },
+        { <span class="tok-f">"type"</span>: <span class="tok-s">"phantom"</span>, <span class="tok-f">"id"</span>: <span class="tok-s">"judge"</span>, <span class="tok-f">"anchor"</span>: <span class="tok-s">"courthouse.dais"</span> },
+        { <span class="tok-f">"type"</span>: <span class="tok-s">"audio"</span>,   <span class="tok-f">"stem"</span>: <span class="tok-s">"trial/aria-1"</span>, <span class="tok-f">"source"</span>: <span class="tok-s">"courthouse.dais"</span> }
+      ]
+    }
+  ]
+}</code></pre>
+
+      <h3>Editing workflow</h3>
+      <div class="steps">
+        <div class="step"><h4>Author in the Cue Editor</h4><p>The in-Unity <strong>Cue Editor</strong> window reads and writes the cue sheet visually — add beats, attach cues, pick anchors from the scanned map.</p></div>
+        <div class="step"><h4>Preview in the sandbox</h4><p>Scrub the timeline in <code>_Sandbox.unity</code> to see cues fire without leaving your desk (see <a href="system-setup.html#local-test" style="color:var(--gold)">Running a Local Test</a>).</p></div>
+        <div class="step"><h4>Tune timing to the score</h4><p>Align beat triggers to musical moments. Use elastic holds where the audience sets the pace by walking.</p></div>
+        <div class="step"><h4>Commit the cue sheet</h4><p>Cue sheets are plain JSON — review them in a normal pull request, no scene merge required.</p></div>
+      </div>
+
+      <div class="callout tip">
+        <span class="ci">✅</span>
+        <p>Because cues are data, a designer can re-time an entire movement and ship it through review <strong>without an engineer recompiling</strong>. Keep them human-readable.</p>
+      </div>
+
+      <h3>The operator console</h3>
+      <p>At performance time, a human operator drives the cue sheet from the Show-Control console. This is the only place non-diegetic UI is allowed — the audience never sees it.</p>
+      <table>
+        <thead><tr><th>Control</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Start / Resume</strong></td><td>Begins or continues the conductor clock from the current beat.</td></tr>
+          <tr><td><strong>Jump to Beat</strong></td><td>Repositions the clock — used heavily during rehearsal.</td></tr>
+          <tr><td><strong>Hold</strong></td><td>Freezes phantoms and sustains the underscore for audience pacing.</td></tr>
+          <tr><td><strong>E-Stop</strong></td><td>Fades all content to a safe neutral state immediately.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <span class="ci">🔒</span>
+        <p><strong>Never edit a cue sheet live during a performance.</strong> Editing happens in the sandbox and ships through review. The console <em>drives</em> cues; it does not author them.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

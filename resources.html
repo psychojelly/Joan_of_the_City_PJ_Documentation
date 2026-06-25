@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resources — Joan of the City</title>
+<meta name="description" content="Resources for Joan of the City — glossary, links, contribution rules, and contacts." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Resources</h1>
+      <p>Shared vocabulary, links, contribution rules, and who to ask — everything that supports the rest of the documentation.</p>
+    </div>
+
+    <section id="glossary">
+      <div class="section-tag">Reference</div>
+      <h2>Glossary</h2>
+      <p class="lead">Shared vocabulary keeps design and engineering aligned. Use these terms in code, in tickets, and in the rehearsal room.</p>
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Movement</strong></td><td>A self-contained scene of the opera, bound to a location and a section of the score.</td></tr>
+          <tr><td><strong>Anchor</strong></td><td>A persistent real-world point (geo or spatial) that virtual content is pinned to.</td></tr>
+          <tr><td><strong>Beat</strong></td><td>The smallest directed unit of action, triggered by the conductor clock or audience position.</td></tr>
+          <tr><td><strong>Cue</strong></td><td>One action attached to a beat — spawn, move, light, audio, retire.</td></tr>
+          <tr><td><strong>Conductor Clock</strong></td><td>The master timeline that synchronizes music, performers, and show-control.</td></tr>
+          <tr><td><strong>Phantom</strong></td><td>A virtual performer rendered in AR (vocalist, chorus member, or apparition).</td></tr>
+          <tr><td><strong>Stage Volume</strong></td><td>The mapped bounds of a real location where a movement is performed.</td></tr>
+          <tr><td><strong>Show-Control</strong></td><td>The system that cues lights, audio, and phantoms in time with the score.</td></tr>
+          <tr><td><strong>Running Order</strong></td><td>The full ordered list of beats that makes up a performance.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contributing">
+      <div class="section-tag">Reference</div>
+      <h2>Contributing &amp; reviews</h2>
+      <p class="lead">How we work together in the repo. Small, reviewable changes keep a complex show stable.</p>
+      <h3>Branch &amp; commit</h3>
+      <ul>
+        <li>Branch from <code>main</code> using <code>feat/&lt;movement&gt;-&lt;short-desc&gt;</code> or <code>fix/&lt;area&gt;-&lt;short-desc&gt;</code>.</li>
+        <li>Commit in present tense: <code>add phantom rig to movement II</code>.</li>
+        <li>Never commit large binaries outside LFS-tracked paths.</li>
+      </ul>
+      <h3>Pull requests</h3>
+      <ul>
+        <li>Keep PRs scoped to one movement or one system where possible.</li>
+        <li>Include a short clip or screenshot of the change in-headset or in-simulator.</li>
+        <li>Update the relevant doc page in the <em>same</em> PR.</li>
+        <li>At least one engineering review + one design review for anything that touches a staged movement.</li>
+      </ul>
+      <div class="callout warn">
+        <span class="ci">🔒</span>
+        <p><strong>Scene merges are dangerous.</strong> Unity scene &amp; prefab files conflict badly. Coordinate before two people edit the same <code>.unity</code> file, and prefer prefab-based composition over giant scenes.</p>
+      </div>
+    </section>
+
+    <section id="tools">
+      <div class="section-tag">Reference</div>
+      <h2>Tools &amp; links</h2>
+      <p class="lead">The external tools and references the project depends on. Replace the placeholder links with your real ones.</p>
+      <div class="card-grid">
+        <a class="card" href="#"><div class="ico">📁</div><h4>Repository</h4><p>Source, cue sheets, and LFS-tracked assets.</p><span class="arrow">→</span></a>
+        <a class="card" href="#"><div class="ico">🎚️</div><h4>Score &amp; stems</h4><p>The DAW project and exported audio stems.</p><span class="arrow">→</span></a>
+        <a class="card" href="#"><div class="ico">🗺️</div><h4>Anchor maps</h4><p>Scanned spatial maps per Stage Volume.</p><span class="arrow">→</span></a>
+        <a class="card" href="#"><div class="ico">💬</div><h4>Team channel</h4><p><code>#joan-eng</code> · <code>#joan-design</code></p><span class="arrow">→</span></a>
+      </div>
+      <table>
+        <thead><tr><th>Dependency</th><th>Version / Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Unity</td><td><a href="https://unity.com/releases/editor/whats-new/6000.0.26f1#installs" target="_blank" rel="noopener"><code>6000.0.26f1</code></a> (Unity 6) — <a href="https://unity.com/releases/editor/whats-new/6000.0.26f1#installs" target="_blank" rel="noopener" style="color:var(--gold)">release notes &amp; installs ↗</a></td></tr>
+          <tr><td>Render pipeline</td><td>URP (XR-tuned), Linear color space</td></tr>
+          <tr><td>Git LFS</td><td>Required for all binary assets</td></tr>
+          <tr><td>Target frame rate</td><td>72–90 fps on-device</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contacts">
+      <div class="section-tag">Reference</div>
+      <h2>Who to ask</h2>
+      <p class="lead">Point people for each area of the production. Fill in names as the team forms.</p>
+      <table>
+        <thead><tr><th>Area</th><th>Owner</th><th>Channel</th></tr></thead>
+        <tbody>
+          <tr><td>Engineering / systems</td><td><em>TBD</em></td><td><code>#joan-eng</code></td></tr>
+          <tr><td>Design / staging</td><td><em>TBD</em></td><td><code>#joan-design</code></td></tr>
+          <tr><td>Music / score</td><td><em>TBD</em></td><td><code>#joan-music</code></td></tr>
+          <tr><td>Production / show-control</td><td><em>TBD</em></td><td><code>#joan-production</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">📌</span>
+        <p>This page is intentionally a stub in places — fill in real links, owners, and channels as the production comes together.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

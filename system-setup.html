@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>System Set Up — Joan of the City</title>
+<meta name="description" content="Setting up Joan of the City — running a local test and standing up the larger on-site system." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Engineering</div>
+      <h1>System Set Up</h1>
+      <p>Two paths: get the show running on one headset at your desk, then scale up to the full multi-headset on-site rig.</p>
+    </div>
+
+    <section id="prerequisites">
+      <div class="section-tag">Setup</div>
+      <h2>Prerequisites</h2>
+      <p class="lead">Install these once before either path below.</p>
+      <table>
+        <thead><tr><th>Requirement</th><th>Version / Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Unity</td><td><a href="https://unity.com/releases/editor/whats-new/6000.0.26f1#installs" target="_blank" rel="noopener"><code>6000.0.26f1</code></a> (Unity 6) — pinned exactly in <code>ProjectSettings/ProjectVersion.txt</code></td></tr>
+          <tr><td>Render pipeline</td><td>URP (XR-tuned), Linear color space</td></tr>
+          <tr><td>XR SDK packages</td><td>Resolved automatically on first project open</td></tr>
+          <tr><td>Git LFS</td><td>Required — audio &amp; model assets are LFS-tracked</td></tr>
+          <tr><td>Headset</td><td>Supported XR glasses with developer mode enabled</td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">⬇️</span>
+        <p><strong>Get the exact editor:</strong> install Unity <code>6000.0.26f1</code> from the official release page — <a href="https://unity.com/releases/editor/whats-new/6000.0.26f1#installs" target="_blank" rel="noopener" style="color:var(--gold)">What's new &amp; installs ↗</a>. Match this build exactly so plugins and XR packages stay consistent across the team.</p>
+      </div>
+      <pre><code><span class="tok-c"># one-time: install LFS, then clone with assets</span>
+git lfs install
+git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</span>
+<span class="tok-k">cd</span> joan-of-the-city &amp;&amp; git lfs pull</code></pre>
+    </section>
+
+    <hr/>
+
+    <!-- ===================== LOCAL TEST ===================== -->
+    <section id="local-test">
+      <div class="section-tag">Setup · Path 1</div>
+      <h2>Running a Local Test</h2>
+      <p class="lead">The fastest way to see a movement working — a single machine, a single headset (or the in-editor simulator), no city required.</p>
+
+      <div class="steps">
+        <div class="step">
+          <h4>Open the project in Unity Hub</h4>
+          <p>Add the cloned folder and open with Unity <code>6000.0.26f1</code>. Let packages resolve on first launch.</p>
+        </div>
+        <div class="step">
+          <h4>Load the sandbox scene</h4>
+          <p>Open <code>Assets/Scenes/_Sandbox.unity</code> — a desk-friendly scene that simulates one movement without leaving the building.</p>
+        </div>
+        <div class="step">
+          <h4>Play in the Editor (simulator)</h4>
+          <p>Press Play with the <strong>XR Device Simulator</strong> active to walk the scene with mouse + keyboard. No hardware needed.</p>
+        </div>
+        <div class="step">
+          <h4>Or deploy to a single headset</h4>
+          <p>Build &amp; Run to your device, put on the glasses, and trigger the opening beat from the Show-Control panel.</p>
+        </div>
+        <div class="step">
+          <h4>Drive it from Show-Control</h4>
+          <p>Use <code>Jump to Beat</code> to scrub through the movement and confirm phantoms, audio, and light all fire correctly.</p>
+        </div>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">🧪</span>
+        <p>The sandbox uses a <strong>fixed local anchor</strong> instead of a real-world scan, so you can iterate on staging and cues without on-site tracking. Treat its layout as indicative, not final.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p>The Editor lies about XR frame cost. Always confirm a movement's performance <strong>on-device</strong> before calling it done.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <!-- ===================== LARGER SYSTEM ===================== -->
+    <section id="larger-system">
+      <div class="section-tag">Setup · Path 2</div>
+      <h2>Larger System Set Up</h2>
+      <p class="lead">The full performance configuration: multiple synchronized headsets, a real-world anchor map, an operator running Show-Control, and audio routed for the venue.</p>
+
+      <h3>Topology</h3>
+      <p>One <strong>operator station</strong> runs Show-Control and holds the master Conductor Clock. Each audience headset runs the client build and subscribes to clock + presence over the local network. A real-world <strong>anchor map</strong> (captured during the location scout) localizes every device to the same physical stage.</p>
+      <table>
+        <thead><tr><th>Node</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Operator Station</strong></td><td>Master clock, Show-Control console, E-stop authority.</td></tr>
+          <tr><td><strong>Audience Headsets</strong></td><td>Client build; render phantoms/audio against shared anchors.</td></tr>
+          <tr><td><strong>Anchor Map</strong></td><td>Pre-scanned spatial map of each Stage Volume; shared to all devices.</td></tr>
+          <tr><td><strong>Local Network</strong></td><td>Low-latency link carrying clock + presence sync.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Bring-up sequence</h3>
+      <div class="steps">
+        <div class="step"><h4>Stage the location</h4><p>Arrive on-site, confirm the Stage Volume matches the scanned anchor map, and re-scan if the environment has changed (new construction, signage, season).</p></div>
+        <div class="step"><h4>Start the operator station</h4><p>Launch Show-Control. Confirm the Conductor Clock is healthy and the master timeline loads the running order.</p></div>
+        <div class="step"><h4>Localize each headset</h4><p>Deploy the client build to every headset and run the localization routine until each device resolves the shared anchors. Verify alignment against a known physical reference point.</p></div>
+        <div class="step"><h4>Verify presence sync</h4><p>Confirm all headsets report into Presence Sync and see a consistent world state — phantoms appear in the same place for everyone.</p></div>
+        <div class="step"><h4>Sound check</h4><p>Walk the route; confirm spatial audio sources sit where they should and attenuate naturally with distance and occlusion.</p></div>
+        <div class="step"><h4>Dry run the running order</h4><p>Operator advances each movement; the team watches for tracking drift, dropped cues, and comfort issues before any audience arrives.</p></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">📍</span>
+        <p><strong>Tracking budget:</strong> outdoor city environments are hostile to tracking — moving people, changing light, reflective glass. Keep critical phantoms anchored near stable, textured surfaces, and never place a key dramatic moment where tracking is known to drift.</p>
+      </div>
+      <div class="callout tip">
+        <span class="ci">🛟</span>
+        <p>Always rehearse the <strong>E-stop</strong> before doors open. Every operator must know how to fade all content to a safe neutral state instantly. See <a href="cues.html#cue-editing" style="color:var(--gold)">Cues → Editing &amp; Cueing System</a>.</p>
+      </div>
+
+      <h3>Pre-show checklist</h3>
+      <ul>
+        <li>All headsets charged and localized to the shared anchor map.</li>
+        <li>Operator station on mains power with network confirmed stable.</li>
+        <li>Running order loaded and verified against the latest movement builds.</li>
+        <li>Audio levels checked at the real performance time of day.</li>
+        <li>E-stop tested; safe route and seated/limited-mobility paths confirmed.</li>
+      </ul>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

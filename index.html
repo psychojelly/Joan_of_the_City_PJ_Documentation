@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Story Overview — Joan of the City</title>
+<meta name="description" content="Story Overview for Joan of the City, an augmented-reality opera built in Unity for XR glasses." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero">
+      <div class="hero-eyebrow">An Augmented-Reality Opera</div>
+      <h1>The <span class="grad">Joan of the City</span><br/>Documentation</h1>
+      <p>The single source of truth for building <strong>Joan of the City</strong> — a site-specific opera performed through XR glasses, where the audience walks the city and the drama unfolds in the air around them. Built in Unity <code>6000.0.26f1</code>.</p>
+      <div class="hero-meta">
+        <span class="chip">🎭 <b>Medium</b> AR Opera</span>
+        <span class="chip">🕶️ <b>Hardware</b> XR Glasses</span>
+        <span class="chip">⚙️ <b>Engine</b> Unity 6</span>
+        <span class="chip">🌆 <b>Stage</b> The City</span>
+      </div>
+    </div>
+
+    <section id="story">
+      <div class="section-tag">Overview</div>
+      <h2>Story Overview</h2>
+      <p class="lead">Joan of the City reimagines opera as a spatial, walkable experience. The audience becomes the chorus; the city becomes the stage; XR glasses dissolve the boundary between the score and the street.</p>
+
+      <h3>The core experience</h3>
+      <p>A single audience member — or a synchronized group — moves through a route in the real city. Through their XR glasses, virtual performers, light, text, and architecture appear anchored to real locations. Music and voice are spatialized: a duet might rise from a balcony that is physically empty. Joan's story is told in <strong>movements</strong>, each tied to a place.</p>
+
+      <div class="callout tip">
+        <span class="ci">💡</span>
+        <p><strong>North star:</strong> a stranger watching from across the street should sense that something is happening — even without glasses — because the performers, sound, and audience movement make it real.</p>
+      </div>
+    </section>
+
+    <section id="pillars">
+      <div class="section-tag">Overview</div>
+      <h2>Pillars</h2>
+      <p class="lead">Four commitments shape every creative and technical decision.</p>
+      <div class="card-grid">
+        <div class="card"><div class="ico">🌍</div><h4>Site-specific</h4><p>Every scene belongs to a real location. The world reacts to where you stand.</p></div>
+        <div class="card"><div class="ico">🎶</div><h4>Music-led</h4><p>The score drives timing. Visuals and show-control follow the conductor's clock.</p></div>
+        <div class="card"><div class="ico">👁️</div><h4>Diegetic AR</h4><p>UI is part of the world. No floating menus during a movement — the opera never breaks character.</p></div>
+        <div class="card"><div class="ico">🤝</div><h4>Shared presence</h4><p>Multiple audience members see a consistent world, co-located in the same scene.</p></div>
+      </div>
+    </section>
+
+    <section id="structure">
+      <div class="section-tag">Overview</div>
+      <h2>The Movements</h2>
+      <p class="lead">The opera is told in movements — self-contained scenes, each bound to a location and a section of the score.</p>
+      <table>
+        <thead><tr><th>Movement</th><th>Location</th><th>Dramatic beat</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>I — The Summons</strong></td><td>Old Market Square</td><td>Joan hears the voices; the call to act.</td><td><span class="badge b-done">Ready</span></td></tr>
+          <tr><td><strong>II — The Trial</strong></td><td>Courthouse Steps</td><td>Judgement under cold institutional light.</td><td><span class="badge b-wip">In&nbsp;Build</span></td></tr>
+          <tr><td><strong>III — The Fire</strong></td><td>River Bridge</td><td>The martyrdom; ascent and release.</td><td><span class="badge b-plan">Planned</span></td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">📌</span>
+        <p>This is a <strong>living document</strong>. If you change how something works, update the page that describes it in the same pull request. Stale docs are bugs.</p>
+      </div>
+    </section>
+
+    <section id="where-next">
+      <div class="section-tag">Overview</div>
+      <h2>Where to go next</h2>
+      <div class="card-grid">
+        <a class="card" href="system-overview.html"><div class="ico">🧩</div><h4>System Overview</h4><p>How scenes, anchors, audio, and show-control fit together.</p><span class="arrow">→</span></a>
+        <a class="card" href="system-setup.html"><div class="ico">🚀</div><h4>System Set Up</h4><p>Run a local test, then stand up the full on-site system.</p><span class="arrow">→</span></a>
+        <a class="card" href="cues.html"><div class="ico">🎬</div><h4>Cues</h4><p>How beats are authored, edited, and fired in time with the score.</p><span class="arrow">→</span></a>
+        <a class="card" href="assets.html"><div class="ico">📦</div><h4>Assets</h4><p>Naming, formats, and the pipeline for audio, models, and phantoms.</p><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong> — Design &amp; Tech Documentation</div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Assets Documentation — Joan of the City</title>
+<meta name="description" content="Asset pipeline, naming, formats, and visual language for Joan of the City." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Assets Documentation</h1>
+      <p>How every audio stem, model, phantom, and material is named, formatted, and brought into the project — plus the visual language they all serve.</p>
+    </div>
+
+    <section id="pipeline">
+      <div class="section-tag">Assets</div>
+      <h2>The asset pipeline</h2>
+      <p class="lead">Assets flow from source tools into the Unity project through a consistent path. Everything heavy is tracked with Git LFS so the repo stays usable.</p>
+      <div class="steps">
+        <div class="step"><h4>Author in source tools</h4><p>Audio in the DAW, models in Blender/Maya, textures in the painter of choice. Keep editable source files in the team drive, not the repo.</p></div>
+        <div class="step"><h4>Export to spec</h4><p>Export to the formats below, named to convention. Bake what can be baked.</p></div>
+        <div class="step"><h4>Drop into the right folder</h4><p>Place under <code>Assets/Audio</code>, <code>Assets/Phantoms</code>, or <code>Assets/Art</code> as appropriate.</p></div>
+        <div class="step"><h4>Commit via LFS</h4><p>Binary assets must land on LFS-tracked paths. Confirm with <code>git lfs status</code> before pushing.</p></div>
+      </div>
+      <div class="callout warn">
+        <span class="ci">📦</span>
+        <p><strong>Never commit a binary outside an LFS-tracked path.</strong> A raw model or stem in normal git bloats the repo permanently for everyone.</p>
+      </div>
+    </section>
+
+    <section id="formats">
+      <div class="section-tag">Assets</div>
+      <h2>Formats &amp; budgets</h2>
+      <p class="lead">Target specs per asset type. Budgets exist so a movement holds its frame rate on mobile-class XR hardware.</p>
+      <table>
+        <thead><tr><th>Type</th><th>Format</th><th>Spec / budget</th></tr></thead>
+        <tbody>
+          <tr><td>Score &amp; voice stems</td><td><code>.wav</code> → streamed</td><td>48 kHz / 24-bit source; stream at runtime, don't preload a full movement.</td></tr>
+          <tr><td>Spatial SFX</td><td><code>.wav</code></td><td>Mono sources for positional audio; keep short clips in-memory.</td></tr>
+          <tr><td>Phantom models</td><td><code>.fbx</code> / <code>.glb</code></td><td>Per-movement poly budget; LODs where a phantom is seen at range.</td></tr>
+          <tr><td>Textures</td><td><code>.png</code> / <code>.tga</code></td><td>Power-of-two; compressed for the target device. Emissive maps for glow.</td></tr>
+          <tr><td>Animation</td><td>Clips on the rig</td><td>Shared humanoid rig so clips retarget across phantoms.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="naming">
+      <div class="section-tag">Assets</div>
+      <h2>Naming conventions</h2>
+      <p class="lead">Predictable names make cues, search, and reviews painless. Lowercase, hyphen-separated, scoped by movement.</p>
+      <pre><code><span class="tok-c"># pattern:  &lt;movement&gt;_&lt;category&gt;_&lt;name&gt;[_&lt;variant&gt;]</span>
+
+II_phantom_judge.fbx
+II_audio_aria-1.wav
+II_tex_judge-robe_emissive.png
+II_anim_judge-rise.anim
+shared_phantom_chorus.fbx        <span class="tok-c"># reused across movements</span></code></pre>
+      <table>
+        <thead><tr><th>Token</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td><code>movement</code></td><td><code>I</code>, <code>II</code>, <code>III</code>, or <code>shared</code></td></tr>
+          <tr><td><code>category</code></td><td><code>phantom</code>, <code>audio</code>, <code>tex</code>, <code>anim</code>, <code>mat</code></td></tr>
+          <tr><td><code>name</code></td><td>Descriptive, hyphen-separated (<code>judge-robe</code>)</td></tr>
+          <tr><td><code>variant</code></td><td>Optional (<code>emissive</code>, <code>lod1</code>, <code>alt</code>)</td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">🔗</span>
+        <p>Asset names should match the ids used in <a href="cues.html#cue-editing" style="color:var(--gold)">cue sheets</a>. A cue that spawns <code>"judge"</code> should resolve to <code>II_phantom_judge</code> with no guesswork.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="visual-language">
+      <div class="section-tag">Design</div>
+      <h2>Visual language</h2>
+      <p class="lead">A coherent world for Joan: candlelit golds, sacred violets, and the cold blue of judgement. Operatic — high contrast, theatrical light, restraint everywhere else. Every asset should serve this palette.</p>
+
+      <h3>Palette</h3>
+      <table>
+        <thead><tr><th>Token</th><th>Swatch</th><th>Hex</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>joan/gold</code></td><td><span class="swatch" style="background:#d4af6a"></span>Candle Gold</td><td><code>#d4af6a</code></td><td>Sacred light, Joan's presence, key accents.</td></tr>
+          <tr><td><code>joan/rose</code></td><td><span class="swatch" style="background:#c8688a"></span>Martyr Rose</td><td><code>#c8688a</code></td><td>Emotion, blood, warmth, the human voice.</td></tr>
+          <tr><td><code>joan/violet</code></td><td><span class="swatch" style="background:#8a7bd8"></span>Vision Violet</td><td><code>#8a7bd8</code></td><td>The supernatural, visions, apparitions.</td></tr>
+          <tr><td><code>joan/cyan</code></td><td><span class="swatch" style="background:#5fb8c4"></span>Judgement Blue</td><td><code>#5fb8c4</code></td><td>Cold institutional light, the trial.</td></tr>
+          <tr><td><code>joan/night</code></td><td><span class="swatch" style="background:#0a0a0f"></span>City Night</td><td><code>#0a0a0f</code></td><td>The void around the world; the unlit city.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Typography</h3>
+      <p><strong>Display — Cormorant Garamond.</strong> A high-contrast serif for titles, libretto, and any sacred text. It carries the operatic, historical weight.</p>
+      <p><strong>Interface — Inter.</strong> Neutral and legible for the rare diegetic labels and all operator/console tooling.</p>
+      <p><strong>Mono — JetBrains Mono.</strong> Code, beat ids, anchor names, cue sheets.</p>
+
+      <h3>Light &amp; material principles</h3>
+      <ul>
+        <li><strong>Light tells the story.</strong> A movement's emotion is set by its key light color before any phantom appears.</li>
+        <li><strong>Subtractive design.</strong> The real city is busy — virtual content should be sparse, deliberate, and luminous against the dark.</li>
+        <li><strong>Glow as voice.</strong> Phantoms emit soft light; emissive intensity follows their vocal line.</li>
+        <li><strong>Readable in daylight.</strong> Assets must hold up in changing outdoor light — test at the real performance time.</li>
+      </ul>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
