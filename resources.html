@@ -93,12 +93,12 @@
           <tr><td>Target frame rate</td><td>72–90 fps on-device</td></tr>
           <tr><td>Python</td><td>3.9+ with <code>python-osc</code> — runs the OSC cue controller proxy</td></tr>
           <tr><td>OSC target</td><td>Default <code>127.0.0.1 : 7000</code>; proxy listens on <code>localhost:8765</code></td></tr>
-          <tr><td>PuTTY</td><td>SSH / serial / Telnet client — <em>role in the rig to confirm</em> (see note below)</td></tr>
+          <tr><td>PuTTY</td><td>SSH / serial client — used to reach the host <strong>“brain” PC</strong> that drives the XREAL glasses <em>(connection details to confirm)</em></td></tr>
         </tbody>
       </table>
       <div class="callout note">
         <span class="ci">🔌</span>
-        <p><strong>PuTTY:</strong> installed in the rig but its exact use isn't documented yet — likely an SSH or serial connection to a device. Add what it connects to and the steps, then remove this note.</p>
+        <p><strong>PuTTY → brain PC:</strong> the XREAL glasses are driven by a host "brain" PC, and PuTTY is the way in — most likely <strong>SSH</strong> (a hostname/IP on port 22) or <strong>serial</strong> (a COM port + baud rate). To finish this entry, add the actual address/port, the credentials location, and what commands get run there, then remove this note.</p>
       </div>
     </section>
 
