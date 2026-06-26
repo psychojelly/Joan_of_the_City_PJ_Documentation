@@ -95,6 +95,10 @@
         <div class="card"><div class="ico">📦</div><h4>Asset / stem pull</h4><p>Headsets download audio stems (and assets) from the brain over Wi-Fi and cache them locally — fetched on demand unless pre-warmed.</p></div>
         <div class="card"><div class="ico">🛠️</div><h4>Management</h4><p>Terminal / file access to the brain (and possibly headsets) to start the build, check status, or move files.</p></div>
       </div>
+      <div class="callout warn">
+        <span class="ci">📥</span>
+        <p><strong>Two separate paths onto a headset.</strong> The <strong>app build is manually uploaded</strong> to each headset <em>(believed — confirm the method)</em>, while <strong>audio stems &amp; assets are pulled over Wi-Fi at runtime</strong> and cached. Because the build is per-device and manual, every headset must be on the <strong>same version</strong> — a missed upload means one headset runs an old build and diverges from the rest.</p>
+      </div>
     </section>
 
     <section id="current">
@@ -143,7 +147,7 @@
         <li><strong>How many headsets</strong> — target count, and whether each has its own compute (assumed) on the shared Wi-Fi.</li>
         <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has the headroom for several headsets pulling stems at once.</li>
         <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
-        <li><strong>How the build is launched</strong> — manually, on boot, or remotely on each headset.</li>
+        <li><strong>Build deployment</strong> — the build is <strong>manually uploaded</strong> to each headset (believed). Confirm the method (USB / adb sideload / file copy) and how versions are kept matching across headsets.</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
     </section>
