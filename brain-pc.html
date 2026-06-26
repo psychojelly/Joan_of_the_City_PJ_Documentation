@@ -42,46 +42,46 @@
     <section id="overview">
       <div class="section-tag">Brain PC</div>
       <h2>The two halves</h2>
-      <p class="lead">The show is an <strong>Android build</strong> that runs on each headset's own compute and renders locally to the XREAL glasses. The <strong>brain PC</strong> does not render — it's a control &amp; content server that sends cues and serves assets to the headsets over a <strong>local Wi-Fi network</strong>.</p>
+      <p class="lead">The show is an <strong>Android build</strong> that runs on each headset's own compute and renders locally to the XREAL glasses. The <strong>brain PC</strong> doesn't render — it's the operator's <strong>control machine</strong>: it runs the cue controller and fires cues to the headsets over a <strong>local Wi-Fi network</strong>. Audio content is pulled by the headsets from a remote (GitHub) URL, not from the brain.</p>
       <div class="card-grid">
         <div class="card"><div class="ico">🕶️</div><h4>Headset (XREAL + Android compute)</h4><p>An Android build of the show runs on the headset's own compute and renders locally to the glasses. Worn by the audience.</p></div>
-        <div class="card"><div class="ico">🧠</div><h4>Brain PC</h4><p>The control &amp; content server — fires cues and serves assets/audio stems to the headsets over the local Wi-Fi network. It doesn't render the show.</p></div>
+        <div class="card"><div class="ico">🧠</div><h4>Brain PC</h4><p>The operator's control machine — runs the OSC cue controller + proxy and fires cues to every headset over local Wi-Fi. It doesn't render the show or host the audio.</p></div>
       </div>
     </section>
 
     <section id="topology">
       <div class="section-tag">Brain PC</div>
       <h2>How it fits together</h2>
-      <p class="lead">Everything between the brain and the headsets runs over a <strong>local Wi-Fi network</strong>. The brain sends cues and serves the assets/stems each headset downloads; each headset renders the show itself and drives its own glasses.</p>
+      <p class="lead">Cues travel from the brain to the headsets over a <strong>local Wi-Fi network</strong>. Audio content takes a different path — each headset pulls stems from a <strong>remote GitHub URL over the internet</strong>. Each headset renders the show itself and drives its own glasses.</p>
 
       <div class="dgm">
         <div class="dgm-row">
-          <div class="dgm-node dgm-hub"><div class="dgm-ico">🧠</div><b>Brain PC</b><span>controller + proxy · asset/stem server</span></div>
-          <div class="dgm-edge">local Wi-Fi →<br/>cues + downloads</div>
+          <div class="dgm-node dgm-hub"><div class="dgm-ico">🧠</div><b>Brain PC</b><span>cue controller + proxy</span></div>
+          <div class="dgm-edge">local Wi-Fi →<br/>OSC cues (to all)</div>
           <div class="dgm-node"><div class="dgm-ico">🤖</div><b>Headset compute</b><span>Android build of the show</span></div>
           <div class="dgm-edge">USB-C →<br/>render + tracking</div>
           <div class="dgm-node"><div class="dgm-ico">🕶️</div><b>XREAL glasses</b><span>display + head tracking</span></div>
         </div>
         <div class="dgm-row dgm-feeds">
-          <div class="dgm-node dgm-sm"><div class="dgm-ico">🎬</div><b>/cue</b><span>visual toggles</span></div>
-          <div class="dgm-node dgm-sm"><div class="dgm-ico">🔊</div><b>/audio/*</b><span>stem engine</span></div>
-          <div class="dgm-node dgm-sm"><div class="dgm-ico">📦</div><b>stem / asset pull</b><span>HTTP over Wi-Fi, cached</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">🎬</div><b>/cue</b><span>visual toggles · Wi-Fi</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">🔊</div><b>/audio/*</b><span>stem engine · Wi-Fi</span></div>
+          <div class="dgm-node dgm-sm"><div class="dgm-ico">☁️</div><b>stems + CSV</b><span>from GitHub · internet</span></div>
         </div>
       </div>
-      <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px">The three lower items all travel the same local Wi-Fi from the brain to each headset.</p>
+      <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px"><code>/cue</code> and <code>/audio/*</code> are cues from the brain over local Wi-Fi; audio <strong>stems</strong> are pulled from a remote GitHub URL over the internet and cached on each headset.</p>
 
       <table>
         <thead><tr><th>Link</th><th>What travels</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td>Brain PC → Headsets</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP across the local Wi-Fi, via <code>proxy.py</code>, to each headset's receiver on <code>:7000</code></td></tr>
-          <tr><td>Brain PC → Headsets</td><td>Audio stems / assets</td><td>Pulled over Wi-Fi (HTTP) and cached on each headset — loader default <code>RemoteWithLocalFallback</code></td></tr>
+          <tr><td>Brain PC → all Headsets</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP across local Wi-Fi, via <code>proxy.py</code>, to <strong>every headset IP</strong> in the controller's list (each on <code>:7000</code>)</td></tr>
+          <tr><td>GitHub → Headsets</td><td>Audio stems + cue CSV</td><td>Pulled over the internet from <code>raw.githubusercontent.com/dlobser/opera-audio</code>, cached on each headset; falls back to bundled if offline</td></tr>
           <tr><td>Headset compute ⇄ Glasses</td><td>Rendered frames out; head tracking in</td><td>Local to the headset (USB-C); the Android build renders here</td></tr>
           <tr><td>Admin → Brain / Headsets</td><td>Management, file moves</td><td>PuTTY / PSFTP <em>(role to confirm)</em></td></tr>
         </tbody>
       </table>
-      <div class="callout warn">
+      <div class="callout note">
         <span class="ci">📡</span>
-        <p>The OSC receiver IP is <strong>hardcoded to <code>10.0.1.32</code></strong> on the scene's OSC Manager — it must be updated per venue network. A single hardcoded address also raises the open question of <strong>how cues currently fan out to multiple headsets</strong> (broadcast? a per-headset target list?).</p>
+        <p><strong>Cue fan-out:</strong> the controller keeps a managed list of headset IPs and sends each cue to <strong>all of them</strong> (one OSC message per headset). The <code>10.0.1.32</code> hardcoded on a scene's OSC Manager is just one headset's own receiver address — update it per device and per venue network.</p>
       </div>
     </section>
 
@@ -92,12 +92,12 @@
       <div class="card-grid">
         <div class="card"><div class="ico">🖼️</div><h4>Render &amp; tracking</h4><p>Each headset renders the scene itself; its glasses report head pose locally. The brain isn't in this loop — no frames cross the network.</p></div>
         <div class="card"><div class="ico">🎬</div><h4>Cues</h4><p>The brain fires cues over OSC across Wi-Fi; each headset's Android build receives them and runs the moment. See <a href="cues.html#osc-control" style="color:var(--gold)">OSC control system</a>.</p></div>
-        <div class="card"><div class="ico">📦</div><h4>Asset / stem pull</h4><p>Headsets download audio stems (and assets) from the brain over Wi-Fi and cache them locally — fetched on demand unless pre-warmed.</p></div>
+        <div class="card"><div class="ico">☁️</div><h4>Audio stem pull</h4><p>Headsets download audio stems + the cue CSV from a <strong>GitHub URL over the internet</strong> and cache them locally — fetched on demand unless pre-warmed.</p></div>
         <div class="card"><div class="ico">🛠️</div><h4>Management</h4><p>Terminal / file access to the brain (and possibly headsets) to start the build, check status, or move files.</p></div>
       </div>
       <div class="callout warn">
         <span class="ci">📥</span>
-        <p><strong>Two separate paths onto a headset.</strong> The <strong>Unity build is put on each headset manually</strong>, one device at a time, while <strong>audio stems &amp; assets are pulled over Wi-Fi at runtime</strong> and cached. Because the build is installed by hand per device, every headset must be on the <strong>same version</strong> — a missed update means one headset runs an old build and diverges from the rest.</p>
+        <p><strong>Two separate paths onto a headset.</strong> The <strong>Unity build is put on each headset manually</strong>, one device at a time, while <strong>audio stems are pulled from a remote GitHub URL at runtime</strong> (over the internet) and cached. Because the build is installed by hand per device, every headset must be on the <strong>same version</strong> — a missed update means one headset runs an old build and diverges from the rest.</p>
       </div>
     </section>
 
@@ -107,7 +107,7 @@
       <p class="lead">The <strong>Android build</strong> (Unity 6, URP, XREAL SDK) runs on each headset and listens for two streams of OSC cues sent from the brain over Wi-Fi. Both arrive at UDP <code>:7000</code> via <code>proxy.py</code>.</p>
       <div class="callout note">
         <span class="ci">🔊</span>
-        <p>Audio stems load via <code>AudioStemLoader</code>, whose default mode is <code>RemoteWithLocalFallback</code> — it <strong>downloads stems from a server URL over Wi-Fi and caches them</strong>, falling back to bundled files only if the download fails. Pre-warm that cache before a show to avoid first-play audio lag.</p>
+        <p>Audio stems load via <code>AudioStemLoader</code>, whose default mode is <code>RemoteWithLocalFallback</code> — it <strong>downloads stems from a GitHub URL</strong> (<code>raw.githubusercontent.com/dlobser/opera-audio</code>) over the internet and caches them, falling back to bundled files only if the download fails. Pre-warm that cache (and make sure the headsets have internet) before a show to avoid first-play audio lag.</p>
       </div>
 
       <h3>Two cue streams</h3>
@@ -142,10 +142,9 @@
       <h2>Open questions</h2>
       <p class="lead">What the code <em>doesn't</em> answer — the operational and multi-user pieces still to pin down.</p>
       <ul>
-        <li><strong>Cue fan-out</strong> — how one controller reaches multiple headsets over Wi-Fi (broadcast, multicast, or a per-headset target list?). The single hardcoded receiver IP makes this the biggest open question.</li>
-        <li><strong>Stem/asset server</strong> — what the <code>AudioStemLoader</code> <code>BaseUrl</code> points to (the brain's HTTP server?), and whether stems are pre-cached before shows.</li>
-        <li><strong>How many headsets</strong> — target count, and whether each has its own compute (assumed) on the shared Wi-Fi.</li>
-        <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has the headroom for several headsets pulling stems at once.</li>
+        <li><strong>Internet vs pre-cache</strong> — stems come from GitHub, so headsets need internet at first run unless the cache is pre-warmed. Confirm the show-day practice (pre-cache vs live fetch).</li>
+        <li><strong>How many headsets</strong> — target count, each with its own compute on the shared Wi-Fi.</li>
+        <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has headroom for cue traffic to all headsets at once.</li>
         <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
@@ -163,7 +162,8 @@
           <tr><td>OSC host/port</td><td>OSC Manager <code>LocalHost 10.0.1.32</code>, port <code>7000</code>; <code>proxy.py</code> on <code>:8765</code></td></tr>
           <tr><td>XREAL stack</td><td><code>Packages/manifest.json</code> — <code>com.xreal.xr</code>, XRI, AR Foundation, XR Hands</td></tr>
           <tr><td>Runs on headset (Android)</td><td><code>ProjectSettings</code> Android player settings + <code>BuildPresets/XReal.preset</code></td></tr>
-          <tr><td>Stems pulled over Wi-Fi</td><td><code>AudioStemLoader.cs</code> — <code>SourceMode.RemoteWithLocalFallback</code>, <code>UnityWebRequest</code> + disk cache</td></tr>
+          <tr><td>Stems pulled from GitHub</td><td><code>AudioStemManager.prefab</code> / <code>MainScene.unity</code> — <code>BaseUrl = raw.githubusercontent.com/dlobser/opera-audio/main/Stems</code></td></tr>
+          <tr><td>Cue fan-out to all headsets</td><td><code>osc-controller.html</code> — <code>sendOsc()</code> loops the saved IP list; <code>proxy.py</code> sends one OSC per IP</td></tr>
           <tr><td>Audio-reactivity</td><td><code>SpectrumExtractor</code> → <code>AmplitudeFloat_VFXBinder</code> → VFX Graph</td></tr>
           <tr><td>Communion radius</td><td><code>CommunionPlacement.cs</code> (bodies arranged in a circle facing center)</td></tr>
         </tbody>
