@@ -97,7 +97,7 @@
       </div>
       <div class="callout warn">
         <span class="ci">📥</span>
-        <p><strong>Two separate paths onto a headset.</strong> The <strong>app build is manually uploaded</strong> to each headset <em>(believed — confirm the method)</em>, while <strong>audio stems &amp; assets are pulled over Wi-Fi at runtime</strong> and cached. Because the build is per-device and manual, every headset must be on the <strong>same version</strong> — a missed upload means one headset runs an old build and diverges from the rest.</p>
+        <p><strong>Two separate paths onto a headset.</strong> The <strong>Unity build is put on each headset manually</strong>, one device at a time, while <strong>audio stems &amp; assets are pulled over Wi-Fi at runtime</strong> and cached. Because the build is installed by hand per device, every headset must be on the <strong>same version</strong> — a missed update means one headset runs an old build and diverges from the rest.</p>
       </div>
     </section>
 
@@ -147,7 +147,6 @@
         <li><strong>How many headsets</strong> — target count, and whether each has its own compute (assumed) on the shared Wi-Fi.</li>
         <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has the headroom for several headsets pulling stems at once.</li>
         <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
-        <li><strong>Build deployment</strong> — the build is <strong>manually uploaded</strong> to each headset (believed). Confirm the method (USB / adb sideload / file copy) and how versions are kept matching across headsets.</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
     </section>
