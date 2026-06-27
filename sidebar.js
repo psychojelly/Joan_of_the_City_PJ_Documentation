@@ -28,6 +28,13 @@
           { title: 'Open questions', href: 'brain-pc.html#unknowns' },
           { title: 'Where this came from', href: 'brain-pc.html#explore' },
         ]},
+        { title: 'How It Works & Recs', href: 'how-it-works.html', children: [
+          { title: 'The whole system, simply', href: 'how-it-works.html#plain' },
+          { title: 'Follow one cue', href: 'how-it-works.html#journey' },
+          { title: 'Running it on Wi-Fi', href: 'how-it-works.html#wifi' },
+          { title: 'Performance & optimization', href: 'how-it-works.html#optimize' },
+          { title: 'Monitoring & tools', href: 'how-it-works.html#monitoring' },
+        ]},
       ]
     },
     {
@@ -100,6 +107,7 @@
     { title: 'Story Overview',             href: 'index.html' },
     { title: 'System Overview',            href: 'system-overview.html' },
     { title: 'Brain PC & Glasses',         href: 'brain-pc.html' },
+    { title: 'How It Works & Recs',        href: 'how-it-works.html' },
     { title: 'System Set Up',              href: 'system-setup.html' },
     { title: 'Cues',                       href: 'cues.html' },
     { title: 'Design Style Guide',         href: 'design-style-guide.html' },

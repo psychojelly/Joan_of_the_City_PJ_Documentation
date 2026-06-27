@@ -11,6 +11,7 @@ little JavaScript. No build step, no dependencies.
 | Story Overview | `index.html` | Story · Pillars · The Movements |
 | System Overview | `system-overview.html` | Architecture · Systems · Events · Data flow · Layout |
 | Brain PC & Glasses | `brain-pc.html` | Two halves · Topology · Data flows · Current · Open questions · Verifying |
+| How It Works & Recs | `how-it-works.html` | Plain-English breakdown · Wi-Fi · Optimization · Monitoring |
 | System Set Up | `system-setup.html` | Prerequisites · Running a Local Test · Larger System Set Up |
 | Cues | `cues.html` | Overview · Editing & Cueing System |
 | Design Style Guide | `design-style-guide.html` | Principles · Color · Typography · Motion · Spatial/AR UX · Review |

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How It Works &amp; Recommendations — Joan of the City</title>
+<meta name="description" content="A plain-English breakdown of the Joan of the City system, plus recommendations for running it on Wi-Fi: optimizations and monitoring tools." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Overview</div>
+      <h1>How It Works &amp; Recommendations</h1>
+      <p>The whole system in plain English — then practical guidance for running it reliably on Wi-Fi: optimizations and monitoring tools. For the deeper detail, see <a href="brain-pc.html" style="color:var(--gold)">Brain PC &amp; Glasses</a> and <a href="system-overview.html" style="color:var(--gold)">System Overview</a>.</p>
+    </div>
+
+    <section id="plain">
+      <div class="section-tag">In plain English</div>
+      <h2>The whole system, simply</h2>
+      <p class="lead">Think of it like a stage manager calling cues to a row of tiny self-contained theaters. Nothing is streamed — each headset already has the whole show and just reacts to calls.</p>
+      <ul>
+        <li><strong>Each headset runs the show itself.</strong> Every pair of XREAL glasses is driven by its own little computer (an Android device) that already has the entire show installed on it.</li>
+        <li><strong>The “brain” is the control desk.</strong> A laptop runs a web page of buttons. Tapping a button shouts a numbered cue across the Wi-Fi — to <em>every</em> headset at once.</li>
+        <li><strong>Cues just flip things on and off.</strong> When a headset hears a cue, it toggles that piece of the show — the video, the droplets, Joan's crown, the communion bodies.</li>
+        <li><strong>Music is handled on each headset.</strong> Each headset downloads the audio tracks ahead of time (from the internet) and plays them locally, reacting to the same cues.</li>
+        <li><strong>The glasses just display and track.</strong> They show what their computer draws and report where the wearer is looking. They don't compute the show.</li>
+        <li><strong>Nothing reports back.</strong> The brain only shouts cues out — it never hears anything back from the headsets.</li>
+      </ul>
+      <div class="callout tip">
+        <span class="ci">🎭</span>
+        <p>The mental model: <strong>the brain calls the cues; each headset performs the whole show on its own.</strong> Keeping them in step is purely a matter of every headset hearing every cue and running the same build.</p>
+      </div>
+    </section>
+
+    <section id="journey">
+      <div class="section-tag">In plain English</div>
+      <h2>Follow one cue</h2>
+      <p class="lead">What actually happens when the operator presses “Cue 5”:</p>
+      <div class="steps">
+        <div class="step"><h4>Operator taps a button</h4><p>In the browser controller on the brain laptop.</p></div>
+        <div class="step"><h4>It goes to a little helper</h4><p>The page hands the cue to <code>proxy.py</code> running on the same laptop.</p></div>
+        <div class="step"><h4>The helper shouts it over Wi-Fi</h4><p>It sends the cue as an OSC message to <strong>every headset's address</strong> on the network.</p></div>
+        <div class="step"><h4>Each headset reacts</h4><p>Every headset toggles the communion bodies on, and its audio responds — all locally, all at once.</p></div>
+      </div>
+    </section>
+
+    <section id="wifi">
+      <div class="section-tag">Recommendations</div>
+      <h2>Running it on Wi-Fi</h2>
+      <p class="lead">Because cues fly over Wi-Fi as <strong>fire-and-forget</strong> messages (no delivery guarantee, no acknowledgement), network quality directly determines whether every headset stays in step. Treat the network as show-critical gear.</p>
+      <div class="card-grid">
+        <div class="card"><div class="ico">📶</div><h4>Dedicated network</h4><p>Run a private router/AP just for the show — never venue or public Wi-Fi. Fewer devices, less congestion, lower jitter.</p></div>
+        <div class="card"><div class="ico">🔌</div><h4>Wire what you can</h4><p>Put the brain laptop on Ethernet to the access point; keep only the headsets on Wi-Fi.</p></div>
+        <div class="card"><div class="ico">📡</div><h4>5/6 GHz, clean channel</h4><p>Use 5 GHz or Wi-Fi 6, not 2.4 GHz. Scan for a quiet channel; avoid crowded venue spectrum.</p></div>
+        <div class="card"><div class="ico">🏷️</div><h4>Fixed IPs</h4><p>Give each headset a static IP / DHCP reservation so the controller's saved IP list keeps working.</p></div>
+      </div>
+      <h3>Reduce the live network's job</h3>
+      <ul>
+        <li><strong>Pre-cache all audio stems onto every headset</strong> before doors. Stems come from GitHub over the internet by default — pre-warming the cache (or shipping them bundled) means the live network only carries tiny cue packets, and removes the internet dependency mid-show.</li>
+        <li><strong>Keep the network light</strong> — disable auto-updates and background traffic on the headsets and the brain; keep unrelated devices off the network.</li>
+        <li><strong>Strong, close signal</strong> — APs near the audience area, minimal walls between AP and headsets. Packet loss = a missed cue.</li>
+      </ul>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>Don't “resend cues to be safe.”</strong> Visual cues are <em>toggles</em> — sending the same cue twice flips it back off. Reliability has to come from a clean network, not from re-sending. If you need a safety net, build an explicit re-sync cue rather than blindly repeating.</p>
+      </div>
+    </section>
+
+    <section id="optimize">
+      <div class="section-tag">Recommendations</div>
+      <h2>Performance &amp; optimization</h2>
+      <p class="lead">Stutter on this rig is almost always local to a headset (it renders on mobile-class Android hardware), and most often it's <strong>loading colliding with playing</strong>. The fix is to separate load from play.</p>
+      <h3>Separate loading from playback</h3>
+      <ul>
+        <li><strong>Pre-warm on load:</strong> pre-instantiate the FlipBook's 31 meshes, activate heavy VFX once to compile shaders, <code>Prepare()</code> video before <code>Play()</code>, and pre-cache audio stems. Do all loading during a standby phase, not on the cue.</li>
+        <li><strong>Toggle visibility, not existence</strong> where activation causes init spikes — keep objects loaded and hide/show them (trade memory for smoothness).</li>
+        <li><strong>Use Local / pre-cached audio</strong> for cue-critical stems so nothing decodes or downloads at the moment of play.</li>
+      </ul>
+      <h3>Hold the frame budget</h3>
+      <ul>
+        <li>Set and enforce <strong>particle &amp; texture budgets</strong> per scene — VFX Graph + SDF particles are GPU-heavy on the headset.</li>
+        <li>Bake lighting; keep real-time lights to a minimum.</li>
+        <li>Target a stable 72–90 fps; if it dips, reduce particle counts, texture sizes, and overdraw before anything else.</li>
+        <li>Watch <strong>thermals</strong> — sustained load throttles mobile chips, which reads as gradual “chugging.” The XREAL notification listener surfaces temperature warnings.</li>
+        <li><strong>Profile on-device</strong> — the Editor under-reports XR cost. And keep every headset on the <strong>same build version</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="monitoring">
+      <div class="section-tag">Recommendations</div>
+      <h2>Monitoring &amp; tools</h2>
+      <p class="lead">Because nothing reports back to the brain, you have to watch the system from the outside. A few tools per layer:</p>
+      <table>
+        <thead><tr><th>Layer</th><th>Tools</th><th>What it tells you</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Headset performance</strong></td><td>Unity Profiler (remote), Unity Frame Debugger</td><td>CPU/GPU/memory spikes, draw calls — confirms load-on-play vs steady saturation.</td></tr>
+          <tr><td><strong>Android runtime</strong></td><td><code>adb logcat</code>, Perfetto/systrace, Snapdragon Profiler or Arm Streamline (per chipset)</td><td>Runtime errors (e.g. NullReference on an unmapped cue), GPU/thermal traces.</td></tr>
+          <tr><td><strong>OSC / cues</strong></td><td>An OSC monitor (e.g. Protokol), Wireshark</td><td>Confirms cue packets are actually sent and arriving; reveals UDP packet loss.</td></tr>
+          <tr><td><strong>Network</strong></td><td>Router/AP admin page, a Wi-Fi analyzer app</td><td>Per-client signal strength, channel congestion, who's hogging the air.</td></tr>
+          <tr><td><strong>Audio cache</strong></td><td>The project's <code>AudioCacheStatusDisplay</code></td><td>Whether each headset has its stems cached (i.e. pre-warmed) before the show.</td></tr>
+          <tr><td><strong>Thermals / battery</strong></td><td>XREAL notification listener; device battery/temperature</td><td>Early warning of throttling or a headset about to drop.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout note">
+        <span class="ci">🩺</span>
+        <p><strong>The missing piece:</strong> there's no health/heartbeat coming back from the headsets, so the operator can't tell if one missed a cue. Two mitigations: keep a <strong>human spotter</strong> watching the headsets during a run, and consider adding a lightweight <strong>heartbeat</strong> (each headset periodically logs or pings a dashboard) so drift is visible rather than discovered by the audience.</p>
+      </div>
+      <div class="callout tip">
+        <span class="ci">✅</span>
+        <p>Minimum show-day kit: an OSC monitor open on the brain to confirm cues fire, the router admin page up to watch signal, and the audio cache confirmed warm on every headset before doors.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.6</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
