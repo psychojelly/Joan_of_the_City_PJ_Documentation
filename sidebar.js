@@ -50,6 +50,7 @@
           { title: 'Overview', href: 'cues.html#cues-overview' },
           { title: 'Editing & Cueing System', href: 'cues.html#cue-editing' },
           { title: 'The OSC control system', href: 'cues.html#osc-control' },
+          { title: 'Sender vs receiver', href: 'cues.html#cue-config' },
         ]},
       ]
     },

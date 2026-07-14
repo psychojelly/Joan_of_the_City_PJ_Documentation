@@ -154,6 +154,52 @@
       </div>
     </section>
 
+    <section id="cue-config">
+      <div class="section-tag">Cues</div>
+      <h2>Configuring cues — sender vs receiver</h2>
+      <p class="lead">Every cue has two sides, configured in two different places. For <strong>visual</strong> cues you keep them in sync by hand; <strong>audio</strong> cues are driven by one shared file.</p>
+
+      <h3>The two sides</h3>
+      <table>
+        <thead><tr><th>Side</th><th>Where it's set</th><th>What it defines</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Receiver</strong></td><td>Unity — <code>SimpleMessageReceiver</code>, Inspector slots <code>cue_1</code>…<code>cue_8</code></td><td>What each cue <em>number</em> actually does (which GameObject it toggles).</td></tr>
+          <tr><td><strong>Sender</strong></td><td>The controller webpage (its own cue list)</td><td>Which buttons the operator sees and what number each one sends.</td></tr>
+        </tbody>
+      </table>
+      <p>The two are linked <strong>only by the cue number</strong> — there is no shared file for visual cues. Change one side and you must change the other, or they drift.</p>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p>Visual cues are limited to <strong>8 hardcoded slots</strong> in Unity (<code>cue_1</code>–<code>cue_8</code>); adding a 9th means editing the C# script, not just the Inspector. In the current build, controller cue numbers <strong>9–16</strong> drive <strong>Shadow animation states</strong> (<code>idle, spawn1, taunt, attack1, standup, deathimpact…</code>) via a <em>separate</em> receiver.</p>
+      </div>
+
+      <h3>Audio cues — one shared source</h3>
+      <p>Audio (<code>/audio/*</code>) is the exception. Cues are defined in a <strong>CSV</strong> (<code>audio_cues.csv</code>, hosted on GitHub) that <em>both</em> Unity and the controller read. Edit it once — via <code>csv-editor.html</code> or on GitHub — and both sides update. No manual double-entry.</p>
+
+      <h3>What the controller saves</h3>
+      <p>The controller persists your setup in the browser (<code>localStorage</code>), and you can <strong>Export / Import Settings</strong> (a JSON file) to back it up or move it to another machine (e.g. the operator tablet). Saved:</p>
+      <ul>
+        <li>Cue <strong>groupings</strong>, group names, and colors</li>
+        <li><strong>Audiences</strong> (which headsets a cue targets) and the target IP list</li>
+        <li>UDP port, OSC addresses, the audio CSV URL, and the fire-forward delay</li>
+      </ul>
+      <div class="callout note">
+        <span class="ci">💾</span>
+        <p><code>localStorage</code> is <strong>per-browser, per-machine</strong>. Use <strong>Export Settings</strong> to save a backup and <strong>Import</strong> it on other devices — otherwise a fresh machine (or cleared browser data) starts blank. Note the individual cue <em>definitions</em> are code-defined (visual) or CSV-defined (audio); the controller saves your organization and targeting, not the cue list itself.</p>
+      </div>
+
+      <h3>Adding or changing a cue</h3>
+      <table>
+        <thead><tr><th>To…</th><th>Do this</th></tr></thead>
+        <tbody>
+          <tr><td>Re-map a visual cue (1–8)</td><td>Reassign the GameObject on the <code>cue_N</code> slot in Unity's Inspector.</td></tr>
+          <tr><td>Add a 9th+ visual cue</td><td>Edit <code>SimpleMessageReceiver.cs</code> (new slot + handler) <em>and</em> add a matching button in the controller.</td></tr>
+          <tr><td>Add / change an audio cue</td><td>Edit the CSV (via <code>csv-editor.html</code>) — both sides pick it up.</td></tr>
+          <tr><td>Re-organize / label / target cues</td><td>Do it in the controller, then Export Settings — persists, no code change.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
     <div class="page-nav" id="pageNav"></div>
 
     <footer>
