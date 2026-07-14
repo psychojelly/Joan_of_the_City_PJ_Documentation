@@ -76,7 +76,7 @@
         <thead><tr><th>Device</th><th>Runs</th><th>Role</th></tr></thead>
         <tbody>
           <tr><td><strong>Cue tablet</strong></td><td>The Joan Cues controller app (or the fused <code>server.py</code>)</td><td>Operator fires that Joan's cues; targets only her group's IPs.</td></tr>
-          <tr><td><strong>Performer tablet</strong></td><td><em>(to confirm)</em> — likely a Unity build as an audio listener; the JoanAudio system supports Android/PC builds, but whether the XR-enabled build runs glasses-free or needs an audio-only variant is a question for the Lead Developer</td><td>The performer hears the show's audio in sync with the cues.</td></tr>
+          <tr><td><strong>Performer tablet</strong></td><td>An installed <strong>APK</strong> (sideloaded) — a browser page can't receive OSC, so the listener must be native. Whether it's the Unity project's Android build (JoanAudio listener), a stripped audio-only Unity build, or a separate native app is <em>(to confirm with the Lead Developer)</em></td><td>The performer hears the show's audio in sync with the cues.</td></tr>
           <tr><td><strong>Headsets (~25)</strong></td><td>The Unity XREAL build</td><td>The audience experience.</td></tr>
         </tbody>
       </table>
@@ -157,7 +157,7 @@
         <li><strong>Internet vs pre-cache</strong> — stems come from GitHub, so headsets need internet at first run unless the cache is pre-warmed. Confirm the show-day practice (pre-cache vs live fetch).</li>
         <li><strong>How many headsets</strong> — target count, each with its own compute on the shared Wi-Fi.</li>
         <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has headroom for cue traffic to all headsets at once.</li>
-        <li><strong>Performer tablet build</strong> — what the performer-listening tablet runs: does the XR-enabled Unity build work glasses-free on a plain tablet, or is an audio-only build variant needed? (Ask the Lead Developer.)</li>
+        <li><strong>Performer tablet app</strong> — it must be a sideloaded APK (browsers can't receive OSC), but which one: the Unity project's Android build, a stripped audio-only Unity build, or a separate native app? And how is it installed/updated? (Ask the Lead Developer.)</li>
         <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
