@@ -70,6 +70,18 @@
       </div>
       <p style="font-size:12.5px;color:var(--text-mute);text-align:center;margin-top:-6px"><code>/cue</code> and <code>/audio/*</code> are cues from the brain over local Wi-Fi; audio <strong>stems</strong> are pulled from a remote GitHub URL over the internet and cached on each headset.</p>
 
+      <h3>Per-Joan kit (planned)</h3>
+      <p>The working plan is <strong>two tablets per Joan</strong> plus her group's headsets. All receivers are just OSC listeners on <code>:7000</code> — the cue tablet targets them by IP.</p>
+      <table>
+        <thead><tr><th>Device</th><th>Runs</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Cue tablet</strong></td><td>The Joan Cues controller app (or the fused <code>server.py</code>)</td><td>Operator fires that Joan's cues; targets only her group's IPs.</td></tr>
+          <tr><td><strong>Performer tablet</strong></td><td><em>(to confirm)</em> — likely a Unity build as an audio listener; the JoanAudio system supports Android/PC builds, but whether the XR-enabled build runs glasses-free or needs an audio-only variant is a question for the Lead Developer</td><td>The performer hears the show's audio in sync with the cues.</td></tr>
+          <tr><td><strong>Headsets (~25)</strong></td><td>The Unity XREAL build</td><td>The audience experience.</td></tr>
+        </tbody>
+      </table>
+      <p>Per-Joan isolation comes from the cue tablet's <strong>IP list</strong> (sends are unicast per-IP) — save one controller settings file per Joan via Export/Import. Roles need no in-app config: a device's role is simply which app is installed on it.</p>
+
       <table>
         <thead><tr><th>Link</th><th>What travels</th><th>How</th></tr></thead>
         <tbody>
@@ -145,6 +157,7 @@
         <li><strong>Internet vs pre-cache</strong> — stems come from GitHub, so headsets need internet at first run unless the cache is pre-warmed. Confirm the show-day practice (pre-cache vs live fetch).</li>
         <li><strong>How many headsets</strong> — target count, each with its own compute on the shared Wi-Fi.</li>
         <li><strong>Network</strong> — the venue Wi-Fi setup, and whether it has headroom for cue traffic to all headsets at once.</li>
+        <li><strong>Performer tablet build</strong> — what the performer-listening tablet runs: does the XR-enabled Unity build work glasses-free on a plain tablet, or is an audio-only build variant needed? (Ask the Lead Developer.)</li>
         <li><strong>PuTTY's role</strong> — terminal and/or file sync to the brain/headsets (not evidenced in the repo).</li>
         <li><strong>Anchoring on XREAL</strong> — plane detection + recenter handlers exist; how anchors hold long-term ties to the <a href="system-overview.html#data-flow" style="color:var(--gold)">anchoring priority</a>.</li>
       </ul>
