@@ -52,6 +52,12 @@
           { title: 'The OSC control system', href: 'cues.html#osc-control' },
           { title: 'Sender vs receiver', href: 'cues.html#cue-config' },
         ]},
+        { title: 'Audio Sync Design (WIP)', href: 'sync-design.html', children: [
+          { title: 'The problem', href: 'sync-design.html#sync-problem' },
+          { title: 'The design — three layers', href: 'sync-design.html#sync-design' },
+          { title: 'Delivery, mobility & multicast', href: 'sync-design.html#sync-delivery' },
+          { title: 'Build order & status', href: 'sync-design.html#sync-phases' },
+        ]},
       ]
     },
     {
@@ -111,6 +117,7 @@
     { title: 'How It Works & Recs',        href: 'how-it-works.html' },
     { title: 'System Set Up',              href: 'system-setup.html' },
     { title: 'Cues',                       href: 'cues.html' },
+    { title: 'Audio Sync Design (WIP)',    href: 'sync-design.html' },
     { title: 'Design Style Guide',         href: 'design-style-guide.html' },
     { title: 'Assets Documentation',       href: 'assets.html' },
     { title: 'Opera Terminology',          href: 'terminology.html' },

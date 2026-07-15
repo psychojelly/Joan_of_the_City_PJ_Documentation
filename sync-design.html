@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Audio Sync Design (WIP) — Joan of the City</title>
+<meta name="description" content="Work-in-progress design for cross-device audio sync: shared clock, scheduled starts, and a position servo over the existing OSC path." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Engineering · Proposal</div>
+      <h1>Audio Sync Design <span class="badge b-wip" style="vertical-align:middle">WIP</span></h1>
+      <p>A proposed three-layer design to bring every device's audio into sync — shared clock, scheduled starts, and a position servo — riding the existing OSC path. Not yet implemented; pending review by the Lead Developer.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="ci">🚧</span>
+      <p><strong>Status: proposal.</strong> The full implementation handoff (message formats, per-phase steps for Unity / the servers / the tablet app, acceptance tests, and ready-to-use Claude Code prompts) lives with the dev team as <code>AUDIO-SYNC-HANDOFF.md</code> in the cue-controller app repo. This page is the summary of record.</p>
+    </div>
+
+    <section id="sync-problem">
+      <div class="section-tag">Sync</div>
+      <h2>The problem</h2>
+      <p class="lead">Today a cue means <em>“play the moment the packet happens to arrive.”</em> Every source of arrival wobble becomes an audio wobble.</p>
+      <ul>
+        <li>Wi-Fi delivery varies per device (jitter, retries)</li>
+        <li>Each device's audio pipeline takes a different time to start</li>
+        <li>A stem not yet preloaded loads <strong>at cue time</strong> — the big one</li>
+        <li>Once started, device clocks drift apart over long stems</li>
+      </ul>
+      <p><strong>Measured side by side: devices land 25&nbsp;ms to 1&nbsp;s apart.</strong> The ~25&nbsp;ms floor is jitter + pipeline variance; the 1&nbsp;s outliers are loading/stalls at cue time. The sync budget is set by the <strong>live singer</strong>, who performs in real air against what every listener hears: target <strong>±10–20&nbsp;ms</strong>.</p>
+    </section>
+
+    <section id="sync-design">
+      <div class="section-tag">Sync</div>
+      <h2>The design — three layers</h2>
+      <p class="lead">Built in order; each is independently shippable and fully backwards-compatible (a cue without a timestamp behaves exactly as today).</p>
+      <div class="steps">
+        <div class="step"><h4>Shared clock</h4><p>Every device pings the master (the operator cue device) NTP-style — offset ≈ <code>ts − (t0+t1)/2</code>, filtered to the lowest-RTT samples — agreeing on “master time” to ~1–5&nbsp;ms. Runs continuously, so it also absorbs crystal drift and survives Wi-Fi dropouts (offsets don't jump when the link does).</p></div>
+        <div class="step"><h4>Scheduled start</h4><p>Cues carry a future timestamp: <code>/audio/cue "B_201" playAt=masterTime+400ms</code>. Each device schedules the start on its <strong>audio thread</strong> (Unity <code>AudioSource.PlayScheduled</code>) — so any packet arriving inside the lead window fires at the identical instant, immune to network jitter <em>and</em> main-thread hitches. Late arrival? Start immediately but <strong>seek in by the overshoot</strong>, landing mid-phrase in sync. 25&nbsp;ms floor → ~5&nbsp;ms.</p></div>
+        <div class="step"><h4>Position servo</h4><p>The master broadcasts <code>/sync stem, position, masterTime</code> 1–2×/sec. Devices compare their playback position to the age-adjusted expectation: small error → inaudible rate nudge; big error → seek; stem not playing but should be → <strong>start it at that position</strong>. This corrects long-stem drift <em>and</em> gives reboot / missed-cue / late-join recovery for free.</p></div>
+      </div>
+      <table>
+        <thead><tr><th>Problem</th><th>Fixed by</th></tr></thead>
+        <tbody>
+          <tr><td>Devices start at different moments</td><td>Scheduled start</td></tr>
+          <tr><td>Start delayed by a main-thread hitch</td><td>Scheduled start (audio-thread scheduling)</td></tr>
+          <tr><td>Drift during long stems</td><td>Position servo</td></tr>
+          <tr><td>Device missed the cue / rejoined late</td><td>Position servo</td></tr>
+          <tr><td>Stem still loading at cue time</td><td><strong>Neither — only preload discipline</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sync-delivery">
+      <div class="section-tag">Sync</div>
+      <h2>Delivery, mobility &amp; multicast</h2>
+      <p class="lead">Design decisions at the network layer, and why.</p>
+      <ul>
+        <li><strong>Stay unicast; no multicast.</strong> Wi-Fi unicast frames get link-layer ACKs and automatic retries; multicast frames get none (sent once, blind, at a low basic rate — and Android filters multicast in firmware by default). This holds under 802.11ax too, where OFDMA effectively parallelizes the per-device sends anyway.</li>
+        <li><strong>Redundant sends as loss insurance:</strong> each scheduled cue is sent 3× at 50&nbsp;ms spacing; receivers dedupe by <code>(cueId, playAt)</code>, which the timestamp makes safe. (Today's visual toggle cues are <em>not</em> idempotent — never blind-resend those.)</li>
+        <li><strong>Moving headsets:</strong> movement changes <em>delay</em> (absorbed by the lead window — size it for the worst route leg, 0.5–1&nbsp;s) but not the clock <em>offset</em> (a property of the clocks, maintained by the continuous filtered sync). If coverage itself is the issue, the network should travel with the group — a carried Wi-Fi 6 travel router per Joan.</li>
+      </ul>
+    </section>
+
+    <section id="sync-phases">
+      <div class="section-tag">Sync</div>
+      <h2>Build order &amp; status</h2>
+      <table>
+        <thead><tr><th>Phase</th><th>Scope</th><th>Effort</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td>~half day</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td>~1 day</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>2 — Position servo</td><td>Master show-clock + <code>/sync</code> broadcast; hysteresis / rate-nudge / seek on receivers</td><td>~1 day</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td>show-day habit</td><td><span class="badge b-done">Adoptable now</span></td></tr>
+        </tbody>
+      </table>
+      <div class="callout tip">
+        <span class="ci">✂️</span>
+        <p><strong>Cut line if time is short:</strong> Phases 0+1 alone take the measured 25&nbsp;ms–1&nbsp;s spread down to ~±10&nbsp;ms. Phase 2 adds robustness, not onset accuracy.</p>
+      </div>
+      <div class="callout note">
+        <span class="ci">🔗</span>
+        <p>Related pages: <a href="cues.html#osc-control" style="color:var(--gold)">The OSC control system</a> · <a href="brain-pc.html" style="color:var(--gold)">Brain PC &amp; Glasses</a> · <a href="how-it-works.html#wifi" style="color:var(--gold)">Running it on Wi-Fi</a>.</p>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.7</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
