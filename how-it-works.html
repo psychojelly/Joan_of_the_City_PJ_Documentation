@@ -28,7 +28,7 @@
       <p class="lead">Think of it like a stage manager calling cues to a row of tiny self-contained theaters. Nothing is streamed — each headset already has the whole show and just reacts to calls.</p>
       <ul>
         <li><strong>Each headset runs the show itself.</strong> Every pair of XREAL glasses is driven by its own little computer (an Android device) that already has the entire show installed on it.</li>
-        <li><strong>The “brain” is the control desk.</strong> A laptop runs a web page of buttons. Tapping a button shouts a numbered cue across the Wi-Fi — to <em>every</em> headset at once.</li>
+        <li><strong>The “brain” is the control desk.</strong> An operator device — a tablet running the <a href="cues.html#cue-app" style="color:var(--gold)">Joan Cues app</a>, or a PC running the cue server (which one the show uses is TBD) — shows a page of buttons. Tapping one shouts the cue across the Wi-Fi to <em>every</em> headset at once.</li>
         <li><strong>Cues just flip things on and off.</strong> When a headset hears a cue, it toggles that piece of the show — the video, the droplets, Joan's crown, the communion bodies.</li>
         <li><strong>Music is handled on each headset.</strong> Each headset downloads the audio tracks ahead of time (from the internet) and plays them locally, reacting to the same cues.</li>
         <li><strong>The glasses just display and track.</strong> They show what their computer draws and report where the wearer is looking. They don't compute the show.</li>
@@ -45,8 +45,8 @@
       <h2>Follow one cue</h2>
       <p class="lead">What actually happens when the operator presses “Cue 5”:</p>
       <div class="steps">
-        <div class="step"><h4>Operator taps a button</h4><p>In the browser controller on the brain laptop.</p></div>
-        <div class="step"><h4>It goes to a little helper</h4><p>The page hands the cue to <code>proxy.py</code> running on the same laptop.</p></div>
+        <div class="step"><h4>Operator taps a button</h4><p>In the cue controller — on the operator tablet (Joan Cues app) or a PC.</p></div>
+        <div class="step"><h4>It goes to a little helper</h4><p>The page hands the cue to the local cue server (built into the tablet app; <code>server.py</code> on a PC).</p></div>
         <div class="step"><h4>The helper shouts it over Wi-Fi</h4><p>It sends the cue as an OSC message to <strong>every headset's address</strong> on the network.</p></div>
         <div class="step"><h4>Each headset reacts</h4><p>Every headset toggles the communion bodies on, and its audio responds — all locally, all at once.</p></div>
       </div>
@@ -70,7 +70,7 @@
       </ul>
       <div class="callout warn">
         <span class="ci">⚠️</span>
-        <p><strong>Don't “resend cues to be safe.”</strong> Visual cues are <em>toggles</em> — sending the same cue twice flips it back off. Reliability has to come from a clean network, not from re-sending. If you need a safety net, build an explicit re-sync cue rather than blindly repeating.</p>
+        <p><strong>Don't manually “resend cues to be safe.”</strong> Visual cues are <em>toggles</em> — sending the same one twice flips it back off. (Audio cues in sync mode are the exception: the system itself sends them 3× with a timestamp and receivers de-duplicate — see the <a href="sync-design.html" style="color:var(--gold)">sync design</a>. That safety is built-in; it doesn't make manual re-firing safe.)</p>
       </div>
     </section>
 

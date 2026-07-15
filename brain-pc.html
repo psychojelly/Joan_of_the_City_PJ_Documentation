@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Brain PC &amp; XREAL Glasses — Joan of the City</title>
-<meta name="description" content="How the XREAL glasses and the host 'brain' PC work together in Joan of the City — render, tracking, cues, and asset sync. Working understanding with open questions." />
+<meta name="description" content="How the XREAL headsets and the operator 'brain' device (PC or tablet) work together in Joan of the City — render, tracking, cues, and audio delivery." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -31,7 +31,7 @@
     <div class="hero compact">
       <div class="hero-eyebrow">Engineering</div>
       <h1>Brain PC &amp; XREAL Glasses</h1>
-      <p>How the headset hardware actually runs the show: the XREAL glasses display and track, while a host <strong>“brain” PC</strong> does the thinking — running the Unity build, holding the synced assets, and receiving cues.</p>
+      <p>How the hardware actually runs the show: each headset's own Android compute runs the Unity build and drives the XREAL glasses, while the operator's <strong>“brain” device</strong> — a PC or a tablet (TBD) — fires the cues.</p>
     </div>
 
     <div class="callout note">
@@ -86,7 +86,7 @@
         <thead><tr><th>Link</th><th>What travels</th><th>How</th></tr></thead>
         <tbody>
           <tr><td>Brain PC → all Headsets</td><td>Visual cues (<code>/cue</code>) &amp; audio cues (<code>/audio/*</code>)</td><td>OSC over UDP across local Wi-Fi, via <code>proxy.py</code>, to <strong>every headset IP</strong> in the controller's list (each on <code>:7000</code>)</td></tr>
-          <tr><td>GitHub → Headsets</td><td>Audio stems + cue CSV</td><td>Pulled over the internet from <code>raw.githubusercontent.com/dlobser/opera-audio</code>, cached on each headset; falls back to bundled if offline</td></tr>
+          <tr><td>GitHub → Headsets</td><td>Audio stems + cue CSV</td><td>Pulled over the internet from <code>raw.githubusercontent.com/dlobser/opera-audio</code> and cached on each device — no bundled fallback in the shipped config, so first-ever run needs internet</td></tr>
           <tr><td>Headset compute ⇄ Glasses</td><td>Rendered frames out; head tracking in</td><td>Local to the headset (USB-C); the Android build renders here</td></tr>
           <tr><td>Admin → Brain / Headsets</td><td>Management, file moves</td><td>PuTTY / PSFTP <em>(role to confirm)</em></td></tr>
         </tbody>
@@ -119,7 +119,7 @@
       <p class="lead">The <strong>Android build</strong> (Unity 6, URP, XREAL SDK) runs on each headset and listens for two streams of OSC cues sent from the brain over Wi-Fi. Both arrive at UDP <code>:7000</code> via <code>proxy.py</code>.</p>
       <div class="callout note">
         <span class="ci">🔊</span>
-        <p>Audio stems load via <code>AudioStemLoader</code>, whose default mode is <code>RemoteWithLocalFallback</code> — it <strong>downloads stems from a GitHub URL</strong> (<code>raw.githubusercontent.com/dlobser/opera-audio</code>) over the internet and caches them, falling back to bundled files only if the download fails. Pre-warm that cache (and make sure the headsets have internet) before a show to avoid first-play audio lag.</p>
+        <p>Audio stems load via <code>AudioStemLoader</code>, set to <code>Remote</code> in the production scene — it <strong>downloads stems from a GitHub URL</strong> (<code>raw.githubusercontent.com/dlobser/opera-audio</code>) over the internet and caches them to disk. There is <strong>no bundled fallback</strong> in the shipped config, so a device's <em>first-ever</em> run needs internet; after that the disk cache makes it offline-safe. Pre-warm that cache before a show to avoid first-play audio lag.</p>
       </div>
 
       <h3>Two cue streams</h3>
@@ -140,7 +140,8 @@
           <tr><td>3</td><td>Water splash (31-frame mesh sequence)</td></tr>
           <tr><td>4</td><td>Joan's crown (SDF particle system)</td></tr>
           <tr><td>5</td><td><strong>Communion bodies</strong> + audio-reactive VFX + BGM</td></tr>
-          <tr><td>6–8</td><td><em>Unassigned</em> — would throw a NullReference if triggered</td></tr>
+          <tr><td>6</td><td>PolygonmakerRig 1-2</td></tr>
+          <tr><td>7–8</td><td><em>Unassigned</em> as of July 2026 — an unmapped slot throws a NullReference if triggered; verify against the current build</td></tr>
         </tbody>
       </table>
       <div class="callout note">

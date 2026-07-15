@@ -97,9 +97,9 @@
 
       <h3>How a button becomes a cue</h3>
       <div class="steps">
-        <div class="step"><h4>Operator clicks a button</h4><p>In <code>osc-controller.html</code>, open in any browser — one button per cue, plus STOP ALL.</p></div>
-        <div class="step"><h4>The page calls the local proxy</h4><p>The browser sends the request to a tiny Python helper, <code>proxy.py</code>, listening on <code>http://localhost:8765</code>.</p></div>
-        <div class="step"><h4>The proxy sends OSC</h4><p><code>proxy.py</code> forwards it as an OSC message to the target host &amp; port (default <code>127.0.0.1 : 7000</code>).</p></div>
+        <div class="step"><h4>Operator clicks a button</h4><p>In the QLab-style controller — on the Joan Cues tablet app or in a browser served by the PC cue server. One button per cue, plus STOP ALL.</p></div>
+        <div class="step"><h4>The page calls the local cue server</h4><p>The page posts the cue to the local server on <code>:8765</code> — built into the tablet app, or <code>server.py</code> on a PC.</p></div>
+        <div class="step"><h4>The server sends OSC</h4><p>It forwards the cue as an OSC/UDP message to <strong>every IP in the selected audience</strong> (each on port <code>7000</code>).</p></div>
         <div class="step"><h4>The show fires the cue</h4><p>The OSC target — the Unity show — receives the message and runs the cue.</p></div>
       </div>
 
@@ -107,12 +107,12 @@
       <table>
         <thead><tr><th>Component</th><th>Role</th></tr></thead>
         <tbody>
-          <tr><td><code>osc-controller.html</code></td><td>The operator's button panel (the front end). Set <strong>Host</strong> and <strong>Port</strong> to the OSC target here.</td></tr>
-          <tr><td><code>proxy.py</code></td><td>A small Python helper that bridges the browser to OSC — listens on <code>localhost:8765</code>, sends OSC out.</td></tr>
+          <tr><td>The controller page</td><td>The operator's QLab-style front end (cue lists, audiences/IP groups, settings). Runs in the tablet app or any browser.</td></tr>
+          <tr><td>The cue server</td><td>Bridges the page to OSC/UDP — built into the Joan Cues app, or <code>server.py</code> on a PC (listens on <code>:8765</code>, also answers clock-sync pings on <code>:9001</code>).</td></tr>
           <tr><td>OSC target</td><td>The Unity show on the brain PC — an <strong>extOSC</strong> receiver on the in-scene <em>OSC Manager</em>, UDP port <code>7000</code> (host IP hardcoded to <code>10.0.1.32</code>, update per venue).</td></tr>
         </tbody>
       </table>
-      <p style="font-size:12.5px;color:var(--text-mute)">Controller files live at <code>Assets/ThirdParty/OSC_Controller/</code> in the Unity project.</p>
+      <p style="font-size:12.5px;color:var(--text-mute)">Canonical controller + server files live in the app repo under <code>pc-server/</code> (<code>psychojelly/joan-cue-controller-android</code>); the copy at <code>Assets/ThirdParty/OSC_Controller/</code> in the Unity project is the original and will drift until the updated files are folded back in.</p>
 
       <h3>Visual cues — <code>/cue</code></h3>
       <p>The controller sends an integer to the OSC address <code>/cue</code>. <code>SimpleMessageReceiver</code> <strong>toggles</strong> the mapped scene element on or off — it's a toggle, not a one-shot.</p>
@@ -124,12 +124,13 @@
           <tr><td>3</td><td>Water splash (31-frame mesh sequence)</td></tr>
           <tr><td>4</td><td>Joan's crown (SDF particle system)</td></tr>
           <tr><td>5</td><td><strong>Communion bodies</strong> + audio-reactive VFX + BGM</td></tr>
-          <tr><td>6–8</td><td><em>Unassigned</em> in the current build</td></tr>
+          <tr><td>6</td><td>PolygonmakerRig 1-2</td></tr>
+          <tr><td>7–8</td><td><em>Unassigned</em> (as of July 2026)</td></tr>
         </tbody>
       </table>
       <div class="callout warn">
         <span class="ci">⚠️</span>
-        <p>Cues <strong>6–8</strong> are not mapped yet — triggering one would throw a NullReference. Don't wire those buttons to live content until they're assigned.</p>
+        <p>This map is a <strong>snapshot (July 2026)</strong> — the Unity scene changes weekly, so verify it against the current build before a show. Triggering an <em>unmapped</em> slot throws a NullReference: don't fire slots the build hasn't assigned.</p>
       </div>
 
       <h3>Audio cues — <code>/audio/*</code></h3>
@@ -150,7 +151,7 @@
       </div>
       <div class="callout warn">
         <span class="ci">🔌</span>
-        <p>The buttons do nothing if the proxy isn't running. Before a show, confirm the terminal running <code>proxy.py</code> shows <code>listening on http://localhost:8765</code> — and that <strong>STOP ALL</strong> reaches the target.</p>
+        <p>The buttons do nothing if the cue server isn't running. Before a show, confirm it shows <code>listening on :8765</code> (on the tablet app: the “Joan cue server running” notification) — and that <strong>STOP ALL</strong> reaches the targets.</p>
       </div>
     </section>
 
@@ -200,6 +201,17 @@
 
       <h3>Audio cues — one shared source</h3>
       <p>Audio (<code>/audio/*</code>) is the exception. Cues are defined in a <strong>CSV</strong> (<code>audio_cues.csv</code>, hosted on GitHub) that <em>both</em> Unity and the controller read. Edit it once — via <code>csv-editor.html</code> or on GitHub — and both sides update. No manual double-entry.</p>
+
+      <h4>Publishing a new CSV, and getting every device onto it</h4>
+      <ol>
+        <li><strong>Publish:</strong> commit the edited CSV to the GitHub repo — GitHub is the single source of truth; there is no push-from-device.</li>
+        <li><strong>Operator:</strong> tap <strong>↻ CSV</strong> to re-fetch and rebuild the buttons — or use <strong>⟳ CSV → ALL</strong>, which reloads locally <em>and</em> sends <code>/audio/reload</code> so every device in the selected audience re-fetches the CSV and preloads any new stems, no restarts.</li>
+        <li><strong>Confirm:</strong> each performer board shows a fresh “config: ready”. Do this while devices have internet (they fetch from GitHub) — after that, everyone is cached and offline-safe.</li>
+      </ol>
+      <div class="callout note">
+        <span class="ci">📴</span>
+        <p><strong>Offline resilience:</strong> the controller caches the last successfully fetched CSV and rebuilds from it if the fetch fails (shown as “offline — using cached CSV from &lt;date&gt;”), and performer devices fall back to their disk cache the same way. A closed show network can no longer lose the cue list to a page reload. <em>Unity does not handle <code>/audio/reload</code> yet — headsets pick up a new CSV at app launch until that handler lands.</em></p>
+      </div>
 
       <h3>What the controller saves</h3>
       <p>The controller persists your setup in the browser (<code>localStorage</code>), and you can <strong>Export / Import Settings</strong> (a JSON file) to back it up or move it to another machine (e.g. the operator tablet). Saved:</p>

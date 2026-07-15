@@ -33,7 +33,7 @@
           <tr><td>Render pipeline</td><td>URP (XR-tuned), Linear color space</td></tr>
           <tr><td>XR SDK packages</td><td>Resolved automatically on first project open</td></tr>
           <tr><td>Git LFS</td><td>Required — audio &amp; model assets are LFS-tracked</td></tr>
-          <tr><td>Headset</td><td><strong>XREAL glasses</strong>, driven by a host “brain” PC, with developer mode enabled</td></tr>
+          <tr><td>Headset</td><td><strong>XREAL glasses</strong> driven by their own Android compute (developer mode enabled for sideloading)</td></tr>
           <tr><td>Python</td><td>3.9+ with <code>python-osc</code> — for the OSC cue controller (see <a href="#osc-controller" style="color:var(--gold)">Running the OSC controller</a>)</td></tr>
         </tbody>
       </table>
@@ -43,8 +43,8 @@
       </div>
       <pre><code><span class="tok-c"># one-time: install LFS, then clone with assets</span>
 git lfs install
-git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</span>
-<span class="tok-k">cd</span> joan-of-the-city &amp;&amp; git lfs pull</code></pre>
+git clone <span class="tok-s">git@github.com:annehiatt/joan-of-the-city-xreal.git</span>
+<span class="tok-k">cd</span> joan-of-the-city-xreal &amp;&amp; git lfs pull</code></pre>
     </section>
 
     <hr/>
@@ -102,7 +102,7 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
         <thead><tr><th>Node</th><th>Role</th></tr></thead>
         <tbody>
           <tr><td><strong>Operator Station</strong></td><td>Runs the show, Show-Control console, <strong>STOP ALL</strong> authority.</td></tr>
-          <tr><td><strong>Audience Headsets</strong></td><td>XREAL glasses + on-board Android compute running the show; receive cues and pull assets/stems from the brain over Wi-Fi, and render locally.</td></tr>
+          <tr><td><strong>Audience Headsets</strong></td><td>XREAL glasses + on-board Android compute running the show; receive cues over Wi-Fi, pull audio stems from GitHub (cached), and render locally.</td></tr>
           <tr><td><strong>Anchor Map</strong></td><td>Pre-scanned spatial map of each scene's stage; shared to all devices.</td></tr>
           <tr><td><strong>Local Network</strong></td><td>Low-latency link carrying cue sync &amp; shared state.</td></tr>
         </tbody>
@@ -155,25 +155,26 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
     <section id="osc-controller">
       <div class="section-tag">Setup · Operating</div>
       <h2>Running the OSC controller</h2>
-      <p class="lead">The OSC controller is how cues are fired during a show — a web page of buttons backed by a small Python proxy. See <a href="cues.html#osc-control" style="color:var(--gold)">Cues → The OSC control system</a> for how it works; this is how to run it.</p>
+      <p class="lead">The OSC controller is how cues are fired during a show — the QLab-style web controller backed by a small cue server. See <a href="cues.html#osc-control" style="color:var(--gold)">Cues → The OSC control system</a> for how it works; this is how to run it.</p>
 
-      <h3>One-time setup</h3>
-      <div class="steps">
-        <div class="step"><h4>Install Python 3.9+</h4><p>From <a href="https://www.python.org/downloads/" target="_blank" rel="noopener" style="color:var(--gold)">python.org/downloads</a>. <strong>Windows:</strong> tick <strong>“Add Python to PATH”</strong> on the first install screen.</p></div>
-        <div class="step"><h4>Confirm it's installed</h4><p>In a terminal: <code>python --version</code> and <code>pip --version</code> (Mac: <code>python3</code> / <code>pip3</code>). You should see version numbers.</p></div>
-        <div class="step"><h4>Install the one dependency</h4><p><code>pip install python-osc</code> (Mac: <code>pip3 install python-osc</code>).</p></div>
-      </div>
+      <p>There are <strong>three ways to run it</strong>, from simplest to most manual. The canonical files live in the app repo (<code>psychojelly/joan-cue-controller-android</code>, folder <code>pc-server/</code>).</p>
 
-      <h3>Every time you run it</h3>
+      <h3>Option A — Operator tablet (the Joan Cues app)</h3>
+      <p>Sideload the APK, launch, tap <strong>Operator</strong> — the controller appears full-screen with the cue server built in; nothing else to install. See <a href="cues.html#cue-app" style="color:var(--gold)">The Joan Cues tablet app</a>. Other devices on the show Wi-Fi can also open <code>http://&lt;tablet-ip&gt;:8765/</code> as thin clients.</p>
+
+      <h3>Option B — PC, one double-click</h3>
+      <p>On a Windows PC with Python 3.9+ installed (tick <em>“Add Python to PATH”</em> during install), double-click <strong><code>start-osc-controller-qlab-version.bat</code></strong> — it installs the one dependency if missing, starts the server, and opens the controller in the browser. Leave the server window open; close it to stop.</p>
+
+      <h3>Option C — PC, manual</h3>
       <div class="steps">
-        <div class="step"><h4>Go to the folder</h4><p><code>cd "C:\path\to\the\osc\files"</code> (use your real path; Mac uses the matching path).</p></div>
-        <div class="step"><h4>Start the proxy</h4><p><code>python proxy.py</code> (Mac: <code>python3 proxy.py</code>). You should see <code>OSC proxy listening on http://localhost:8765</code>. <strong>Leave this terminal open.</strong></p></div>
-        <div class="step"><h4>Open the controller</h4><p>Double-click <code>osc-controller.html</code> (or drag it into a browser).</p></div>
-        <div class="step"><h4>Point it at the target</h4><p>Set <strong>Host</strong> and <strong>Port</strong> to your OSC target (defaults <code>127.0.0.1</code> / <code>7000</code>) and use the buttons.</p></div>
+        <div class="step"><h4>One-time</h4><p>Install Python 3.9+ and run <code>pip install python-osc</code> (Mac: <code>python3</code> / <code>pip3</code>).</p></div>
+        <div class="step"><h4>Start the fused server</h4><p>In the <code>pc-server</code> folder: <code>python server.py</code> — it serves the controller <em>and</em> relays OSC. You should see <code>listening on http://localhost:8765</code>.</p></div>
+        <div class="step"><h4>Open the controller</h4><p>Browse to <code>http://localhost:8765/</code> (or from a tablet on the same network, <code>http://&lt;pc-ip&gt;:8765/</code>).</p></div>
+        <div class="step"><h4>Target the receivers</h4><p>Add each receiving device's IP (port <code>7000</code>) in Settings → IPs &amp; Audiences, select the audience, and fire.</p></div>
       </div>
 
       <h3>Stopping</h3>
-      <p>Close the browser tab, then click the terminal and press <strong>Ctrl+C</strong> to stop the proxy.</p>
+      <p>Close the browser tab, then stop the server (close its window, or <strong>Ctrl+C</strong> in the terminal).</p>
 
       <h3>Troubleshooting</h3>
       <table>
@@ -181,7 +182,8 @@ git clone <span class="tok-s">git@your-host:psychojelly/joan-of-the-city.git</sp
         <tbody>
           <tr><td><code>python is not recognized</code></td><td>Python isn't on PATH. Reinstall and tick <em>Add Python to PATH</em>, then reopen the terminal.</td></tr>
           <tr><td><code>ModuleNotFoundError: No module named 'pythonosc'</code></td><td>Run <code>pip install python-osc</code> again in the same terminal.</td></tr>
-          <tr><td>Buttons in the page do nothing</td><td>The proxy isn't running — confirm the <code>proxy.py</code> terminal is open and shows the “listening” message.</td></tr>
+          <tr><td>Buttons in the page do nothing</td><td>The cue server isn't running — confirm its window shows the “listening” message (on the tablet app, check the “Joan cue server running” notification).</td></tr>
+          <tr><td>Receiver gets nothing</td><td>Check the target IP list and that the receiver is on the same network — and remember Unity's receiver only listens in Play mode.</td></tr>
         </tbody>
       </table>
     </section>
