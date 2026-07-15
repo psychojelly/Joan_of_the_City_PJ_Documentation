@@ -14,7 +14,7 @@ little JavaScript. No build step, no dependencies.
 | How It Works & Recs | `how-it-works.html` | Plain-English breakdown · Wi-Fi · Optimization · Monitoring |
 | System Set Up | `system-setup.html` | Prerequisites · Running a Local Test · Larger System Set Up |
 | Cues | `cues.html` | Overview · Editing & Cueing System |
-| Audio Sync Design (WIP) | `sync-design.html` | Problem · Three layers · Delivery/mobility · Build order |
+| Audio Sync & Debug Mode | `sync-design.html` | Problem · Three layers · Delivery/mobility · Build order · Debug mode (return path, roster, HUD, test tone, mute) |
 | Design Style Guide | `design-style-guide.html` | Principles · Color · Typography · Motion · Spatial/AR UX · Review |
 | Assets Documentation | `assets.html` | Pipeline · Formats · Naming · Visual language |
 | Opera Terminology | `terminology.html` | Text & Score · Solo Forms · Ensemble · Structure · Voices · In Joan |

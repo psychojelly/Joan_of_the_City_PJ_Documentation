@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Audio Sync Design (WIP) — Joan of the City</title>
-<meta name="description" content="Work-in-progress design for cross-device audio sync: shared clock, scheduled starts, and a position servo over the existing OSC path." />
+<title>Audio Sync &amp; Debug Mode — Joan of the City</title>
+<meta name="description" content="Cross-device audio sync (shared clock + scheduled starts, implemented) and the debug observability layer: device reporting, heartbeat roster, in-headset HUD, test tone, and mute." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -17,14 +17,14 @@
   <main class="main">
 
     <div class="hero compact">
-      <div class="hero-eyebrow">Engineering · Proposal</div>
-      <h1>Audio Sync Design <span class="badge b-wip" style="vertical-align:middle">WIP</span></h1>
-      <p>A proposed three-layer design to bring every device's audio into sync — shared clock, scheduled starts, and a position servo — riding the existing OSC path. Not yet implemented; pending review by the Lead Developer.</p>
+      <div class="hero-eyebrow">Engineering · Implementation</div>
+      <h1>Audio Sync &amp; Debug Mode <span class="badge b-done" style="vertical-align:middle">Phases 0+1 built</span></h1>
+      <p>Cross-device audio sync — shared clock + scheduled starts, riding the existing OSC path — now <strong>implemented and verified in-editor</strong>, plus the debug observability layer built on top of it: device reporting, heartbeat roster, in-headset HUD, an audible test tone, and remote mute.</p>
     </div>
 
-    <div class="callout warn">
-      <span class="ci">🚧</span>
-      <p><strong>Status: proposal.</strong> The full implementation handoff (message formats, per-phase steps for Unity / the servers / the tablet app, acceptance tests, and ready-to-use Claude Code prompts) lives with the dev team as <code>AUDIO-SYNC-HANDOFF.md</code> in the cue-controller app repo. This page is the summary of record.</p>
+    <div class="callout tip">
+      <span class="ci">✅</span>
+      <p><strong>Status: Phases 0+1 and debug mode are implemented and verified</strong> (in-editor against MainScene, 2026-07-15: scheduled cues land within ~5&nbsp;ms of a 400&nbsp;ms lead; the full debug loop reports back to the operator page). They live on two branches of the main Unity repo — <code>audio-sync-patch</code> and <code>debug-observability</code> (merge in that order) — awaiting review by the Lead Developer. Controller/server sides are already on <code>main</code> of the cue-controller repo. Source-of-truth docs in that repo: <code>AUDIO-SYNC-HANDOFF.md</code>, <code>DEBUG-MODE.md</code>, and <code>unity-patch/TEST-REPORT-2026-07-15.md</code>.</p>
     </div>
 
     <section id="sync-problem">
@@ -78,10 +78,11 @@
       <table>
         <thead><tr><th>Phase</th><th>Scope</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td><span class="badge b-plan">Proposed</span></td></tr>
-          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
+          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
           <tr><td>2 — Position servo</td><td>Master show-clock + <code>/sync</code> broadcast; hysteresis / rate-nudge / seek on receivers</td><td><span class="badge b-plan">Proposed</span></td></tr>
           <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td><span class="badge b-done">Adoptable now</span></td></tr>
+          <tr><td>D — Debug mode</td><td>Device→controller return path; logger + roster on the operator page; in-headset HUD; test tone + mute</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
         </tbody>
       </table>
       <div class="callout note">
@@ -95,6 +96,64 @@
       <div class="callout note">
         <span class="ci">🔗</span>
         <p>Related pages: <a href="cues.html#osc-control" style="color:var(--gold)">The OSC control system</a> · <a href="brain-pc.html" style="color:var(--gold)">Brain PC &amp; Glasses</a> · <a href="how-it-works.html#wifi" style="color:var(--gold)">Running it on Wi-Fi</a>.</p>
+      </div>
+    </section>
+
+    <section id="debug-mode">
+      <div class="section-tag">Debug</div>
+      <h2>Debug mode — the return path</h2>
+      <p class="lead">Until now data flowed one way (controller → devices) and <em>nothing reported back</em>. Debug mode closes the loop: devices report to the cue server on a second port, and the operator page visualizes it live.</p>
+      <pre><code>Devices ──/debug/*──▶ cue server :9002 (UDP listener)
+                          │ buffers + tags with seq
+Operator page ◀── GET /debug/events?since=&lt;seq&gt; ── server</code></pre>
+      <p>All of it is <strong>opt-in and OFF by default</strong> — until an operator flips the toggle there are no sockets, no log hooks, and no per-frame work. Debug off = byte-identical show behavior. Timestamps are <strong>master-clock seconds</strong> (the same clock the sync uses), so the controller computes true send→receive margins per device per cue.</p>
+
+      <h3>The protocol</h3>
+      <p><strong>Control — controller → all devices</strong> (existing :7000 cue port):</p>
+      <table>
+        <thead><tr><th>Message</th><th>Args</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>/debug/enable</code></td><td><code>0|1</code></td><td>Verbose reporting + in-headset HUD, everywhere</td></tr>
+          <tr><td><code>/debug/heartbeat</code></td><td><code>0|1</code></td><td>The 1&nbsp;Hz roster beacon — separate, so you can run a lightweight “who's alive?” check without log traffic</td></tr>
+          <tr><td><code>/audio/test</code></td><td><code>1</code> (+&nbsp;<code>playAt</code> in sync mode)</td><td>Generated triple beep, outside the cue system — see below</td></tr>
+          <tr><td><code>/audio/mute</code></td><td><code>0|1</code></td><td>Master mute (<code>AudioListener.volume</code>) — stems keep playing silently so unmuting stays in sync</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Reports — devices → server :9002</strong> (only while enabled):</p>
+      <table>
+        <thead><tr><th>Message</th><th>Args</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>/debug/hello</code></td><td><code>id, kind</code></td><td>Announce on enable (kind: headset / editor / performer)</td></tr>
+          <tr><td><code>/debug/rx</code></td><td><code>id, cueId, recvMaster, playAt</code></td><td>Cue received — the controller shows the scheduling margin per device; <code>playAt&nbsp;=&nbsp;0</code> marks the immediate path</td></tr>
+          <tr><td><code>/debug/hb</code></td><td><code>id, masterTime, lastCue, stems, offsetMs</code></td><td>Heartbeat: roster + clock health + what's playing</td></tr>
+          <tr><td><code>/debug/log</code></td><td><code>id, masterTime, level, msg</code></td><td>Warnings, errors, and <code>[JoanAudio]</code> logs — rate-limited to 10/s per device</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The three surfaces</h3>
+      <div class="steps">
+        <div class="step"><h4>Operator page — 🐞 panel</h4><p>Toggles for reporting and heartbeat; a <strong>device roster</strong> (green/yellow/red liveness dot, clock offset, last cue, last-seen age — the “is headset 3 alive?” answer); a scrolling, color-coded <strong>message log</strong> with master-clock stamps; and the <strong>SYNC TEST</strong> row (test tone + mute).</p></div>
+        <div class="step"><h4>Unity headsets — HUD</h4><p><code>DebugReporter</code> sends the reports; <code>DebugHud</code> draws an in-glasses overlay — device id, master IP, clock sync state + offset, heartbeat status, and the recent cue/log feed with margins. Exists only while debug is on; no Canvas, prefab, or scene changes.</p></div>
+        <div class="step"><h4>Performer tablets</h4><p>Already had a status board; now also send <code>/debug/*</code> back with the same arg conventions, so headsets and tablets share one roster.</p></div>
+      </div>
+
+      <h3 id="debug-test">Sync test utilities</h3>
+      <ul>
+        <li><strong>🔊 Test tone:</strong> a procedurally generated triple beep (no audio asset) played <em>outside</em> the cue system — no cue CSV, no stems, no transport state. In sync mode it is scheduled on the master clock exactly like a real cue, so firing it at every device turns your ears into the sync test: <strong>one clean beep-beep-beep = in sync; a flam = trouble</strong>. Deduped against the 3× sends; shows in the logger as cue <code>TEST-TONE</code> with its margin.</li>
+        <li><strong>🔇 Mute / unmute:</strong> silences every targeted device via <code>AudioListener.volume</code> — playback continues underneath, so unmuting drops straight back into sync (pausing would drift).</li>
+      </ul>
+
+      <h3>Safety by construction</h3>
+      <ul>
+        <li><strong>Default OFF, broadcast to enable</strong> — zero debug traffic during a show unless asked for.</li>
+        <li><strong>Heartbeat is its own toggle</strong> — roster without log spam.</li>
+        <li><strong>Reuses the MasterClock</strong> — no second clock; offsets already meaningful.</li>
+        <li><strong>Rate-limited and reentrancy-guarded</strong> — a log storm can't flood the Wi-Fi or recurse.</li>
+        <li>Same rollback story as sync: toggle off = the code paths of today.</li>
+      </ul>
+      <div class="callout note">
+        <span class="ci">🔗</span>
+        <p>Full contracts and the handoff list live in the cue-controller repo: <code>DEBUG-MODE.md</code> (this feature) and <code>AUDIO-SYNC-HANDOFF.md</code> (the sync design it builds on).</p>
       </div>
     </section>
 
