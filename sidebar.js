@@ -50,6 +50,7 @@
           { title: 'Overview', href: 'cues.html#cues-overview' },
           { title: 'Editing & Cueing System', href: 'cues.html#cue-editing' },
           { title: 'The OSC control system', href: 'cues.html#osc-control' },
+          { title: 'The Joan Cues tablet app', href: 'cues.html#cue-app' },
           { title: 'Sender vs receiver', href: 'cues.html#cue-config' },
         ]},
         { title: 'Audio Sync Design (WIP)', href: 'sync-design.html', children: [

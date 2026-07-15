@@ -154,6 +154,31 @@
       </div>
     </section>
 
+    <section id="cue-app">
+      <div class="section-tag">Cues</div>
+      <h2>The Joan Cues tablet app</h2>
+      <p class="lead">A native Android app that puts the whole cue system on a tablet — the show-grade replacement for running <code>proxy.py</code> on a PC. One APK, two roles, chosen at first launch and remembered.</p>
+
+      <table>
+        <thead><tr><th>Mode</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>🎛 Operator</strong></td><td>Hosts the QLab-style controller (the same webpage, unchanged) on an embedded server and fires OSC cues to every target IP — with wake + Wi-Fi locks so Android can't kill it mid-show. Other devices can open <code>http://&lt;tablet-ip&gt;:8765/</code> as thin clients.</td></tr>
+          <tr><td><strong>🎭 Performer</strong></td><td>Listens on <code>:7000</code> exactly like a headset and plays the show audio — a Kotlin port of the JoanAudio engine (CSV cues, stem download + cache, Loop/OneShot/Stop/StopAll, volume ramps) with a glanceable status board: current cue, active stems, log.</td></tr>
+        </tbody>
+      </table>
+
+      <ul>
+        <li><strong>Role memory:</strong> the choice is remembered per tablet; switching requires a confirmed tap (SWITCH MODE in Performer, Back in Operator) so a mis-tap can't change a role mid-show.</li>
+        <li><strong>Per-Joan setup:</strong> configure a Joan's IP list/audiences in the controller, Export Settings to a <code>.json</code>, Import on that Joan's tablet — the settings workflow works fully on-device.</li>
+        <li><strong>Audio sync:</strong> the app implements <a href="sync-design.html" style="color:var(--gold)">sync phases 0+1</a> as a test version — Operator stamps scheduled cues (toggleable, off = old behavior), Performer clock-syncs and schedules starts. Validated end-to-end on the emulator (clock offset 0.1&nbsp;ms; cue scheduled at 1498/1500&nbsp;ms; 3× dedupe working).</li>
+        <li><strong>Source &amp; docs:</strong> private repo <code>psychojelly/joan-cue-controller-android</code> — its README covers dev setup, build, sideload, and the test plan; <code>AUDIO-SYNC-HANDOFF.md</code> there is the sync implementation handoff.</li>
+      </ul>
+      <div class="callout note">
+        <span class="ci">📱</span>
+        <p><strong>Install model:</strong> sideloaded APK, same as the headsets — no Play Store. Runs on Android 7.0+ (incl. Fire HD 8 2018+, with the Fire's weaker Wi-Fi noted for show use).</p>
+      </div>
+    </section>
+
     <section id="cue-config">
       <div class="section-tag">Cues</div>
       <h2>Configuring cues — sender vs receiver</h2>
