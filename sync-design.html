@@ -76,14 +76,18 @@
       <div class="section-tag">Sync</div>
       <h2>Build order &amp; status</h2>
       <table>
-        <thead><tr><th>Phase</th><th>Scope</th><th>Effort</th><th>Status</th></tr></thead>
+        <thead><tr><th>Phase</th><th>Scope</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td>~half day</td><td><span class="badge b-plan">Proposed</span></td></tr>
-          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td>~1 day</td><td><span class="badge b-plan">Proposed</span></td></tr>
-          <tr><td>2 — Position servo</td><td>Master show-clock + <code>/sync</code> broadcast; hysteresis / rate-nudge / seek on receivers</td><td>~1 day</td><td><span class="badge b-plan">Proposed</span></td></tr>
-          <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td>show-day habit</td><td><span class="badge b-done">Adoptable now</span></td></tr>
+          <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>2 — Position servo</td><td>Master show-clock + <code>/sync</code> broadcast; hysteresis / rate-nudge / seek on receivers</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td><span class="badge b-done">Adoptable now</span></td></tr>
         </tbody>
       </table>
+      <div class="callout note">
+        <span class="ci">🧠</span>
+        <p><strong>Master hardware is TBD.</strong> The clock master is whatever device runs the cue server — a <strong>PC</strong> (<code>server.py</code>) or an <strong>operator tablet</strong> (the Joan Cues app). The protocol is identical either way; which the show uses is an open production decision.</p>
+      </div>
       <div class="callout tip">
         <span class="ci">✂️</span>
         <p><strong>Cut line if time is short:</strong> Phases 0+1 alone take the measured 25&nbsp;ms–1&nbsp;s spread down to ~±10&nbsp;ms. Phase 2 adds robustness, not onset accuracy.</p>
