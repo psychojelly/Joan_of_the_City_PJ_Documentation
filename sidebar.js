@@ -262,4 +262,10 @@
       });
     });
   }
+
+  // ---- Docs chat assistant (chat.js) — loaded here so every page gets it ----
+  var chatScript = document.createElement('script');
+  chatScript.src = 'chat.js';
+  chatScript.defer = true;
+  document.head.appendChild(chatScript);
 })();

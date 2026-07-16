@@ -1,0 +1,11 @@
+{
+  "name": "joan-of-the-city-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:context": "node scripts/build-context.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0"
+  }
+}

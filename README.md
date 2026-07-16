@@ -60,11 +60,38 @@ to `main`. To enable it once:
 3. The next push to `main` publishes the site; the live URL appears in the
    workflow run and on the Pages settings screen.
 
-### Vercel (alternative)
+### Vercel (alternative — required for the docs chat)
 
-`vercel.json` is included for a zero-config static deploy. Import the repo at
-[vercel.com/new](https://vercel.com/new) — no framework, no build command, output
-directory is the repo root.
+`vercel.json` is included. Import the repo at [vercel.com/new](https://vercel.com/new)
+— no framework needed; the configured build command just regenerates the chat
+knowledge base.
+
+## Docs chat assistant
+
+Every page has a floating 💬 button — a Claude-backed assistant that answers
+questions **from this documentation only**. The pieces:
+
+- `chat.js` — the widget (injected on every page by `sidebar.js`)
+- `api/chat.js` — Vercel serverless function that calls the Claude API
+  (streaming, prompt-cached, rate-limited 10 req/min/IP)
+- `api/_docs-context.json` — the knowledge base, generated from the HTML pages
+  by `scripts/build-context.mjs`. Re-run it after editing pages
+  (`npm run build:context`); Vercel also regenerates it on every deploy.
+
+**Setup (once, on Vercel):**
+
+1. Import the repo on Vercel.
+2. Project → Settings → Environment Variables → add `ANTHROPIC_API_KEY`
+   (create one at [platform.claude.com](https://platform.claude.com)).
+3. Optional: `CHAT_PASSCODE` — a shared passphrase visitors must enter once
+   (use this if the site is client-shared but you don't want the whole
+   internet spending your tokens). Optional: `CHAT_MODEL` — defaults to
+   `claude-opus-4-8`; set `claude-haiku-4-5` for lower cost.
+
+The chat only works on the Vercel deployment — on the GitHub Pages mirror the
+widget appears but explains chat isn't available there (static hosting can't
+keep the API key secret). Message contracts and other internal details are
+deliberately excluded from the knowledge base.
 
 ---
 
