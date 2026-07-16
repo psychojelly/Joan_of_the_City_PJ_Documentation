@@ -106,7 +106,7 @@
       <pre><code>Devices ──/debug/*──▶ cue server :9002 (UDP listener)
                           │ buffers + tags with seq
 Operator page ◀── GET /debug/events?since=&lt;seq&gt; ── server</code></pre>
-      <p>All of it is <strong>opt-in and OFF by default</strong> — until an operator flips the toggle there are no sockets, no log hooks, and no per-frame work. Debug off = byte-identical show behavior. Timestamps are <strong>master-clock seconds</strong> (the same clock the sync uses), so the controller computes true send→receive margins per device per cue.</p>
+      <p>All of it is <strong>opt-in and OFF by default</strong> — until an operator flips the toggle there are no log hooks and no verbose traffic. One deliberate exception: a <strong>low-rate safety heartbeat</strong> (one small packet per 5&nbsp;s per device once a master is known) keeps the roster answering “is headset 3 alive?” even mid-show with everything off — untick <em>Always On Safety Heartbeat</em> on the receiver for strictly-zero traffic. Timestamps are <strong>master-clock seconds</strong> (the same clock the sync uses), so the controller computes true send→receive margins per device per cue.</p>
 
       <h3>The protocol</h3>
       <p><strong>Control — controller → all devices</strong> (existing :7000 cue port):</p>
@@ -117,6 +117,7 @@ Operator page ◀── GET /debug/events?since=&lt;seq&gt; ── server</code>
           <tr><td><code>/debug/heartbeat</code></td><td><code>0|1</code></td><td>The 1&nbsp;Hz roster beacon — separate, so you can run a lightweight “who's alive?” check without log traffic</td></tr>
           <tr><td><code>/audio/test</code></td><td><code>1</code> (+&nbsp;<code>playAt</code> in sync mode)</td><td>Generated triple beep, outside the cue system — see below</td></tr>
           <tr><td><code>/audio/mute</code></td><td><code>0|1</code></td><td>Master mute (<code>AudioListener.volume</code>) — stems keep playing silently so unmuting stays in sync</td></tr>
+          <tr><td><code>/audio/reload</code></td><td><code>1</code></td><td>Re-fetch the cue CSV live on every device; loads new/version-bumped stems without touching playback (the “⟳ CSV → ALL” button)</td></tr>
         </tbody>
       </table>
       <p><strong>Reports — devices → server :9002</strong> (only while enabled):</p>
@@ -132,7 +133,7 @@ Operator page ◀── GET /debug/events?since=&lt;seq&gt; ── server</code>
 
       <h3>The three surfaces</h3>
       <div class="steps">
-        <div class="step"><h4>Operator page — 🐞 panel</h4><p>Toggles for reporting and heartbeat; a <strong>device roster</strong> (green/yellow/red liveness dot, clock offset, last cue, last-seen age — the “is headset 3 alive?” answer); a scrolling, color-coded <strong>message log</strong>; and the <strong>SYNC TEST</strong> row (test tone + mute). Every line is stamped in <strong>master-clock seconds — sent <em>and</em> reply on one scale</strong>: each control message logs a <code>SENT</code> line at the server's send time (and <code>playAt</code> for scheduled sends), then each device's <code>RX</code> reply lands a few ms later, directly comparable.</p></div>
+        <div class="step"><h4>Operator page — 🐞 panel</h4><p>Toggles for reporting and heartbeat; a <strong>device roster</strong> (green/yellow/red liveness dot, <strong>clock health</strong> — <code>clock ✓ Δ0.2ms</code> offset stability or <code>clock ⚠ unsynced</code> — last cue, last-seen age); a <strong>CUE ACKS</strong> rollup per cue — <code>✔ cue A_SQ201 → 3/3 received (401/399/404ms)</code>, amber until every device reports; a scrolling, color-coded <strong>message log</strong>; and the <strong>SYNC TEST</strong> row (test tone + mute). Every line is stamped in <strong>master-clock seconds — sent <em>and</em> reply on one scale</strong>: each control message logs a <code>SENT</code> line at the server's send time (and <code>playAt</code> for scheduled sends), then each device's <code>RX</code> reply lands a few ms later, directly comparable.</p></div>
         <div class="step"><h4>Unity headsets — HUD</h4><p><code>DebugReporter</code> sends the reports; <code>DebugHud</code> draws an in-glasses overlay — device id, master IP, clock sync state + offset, heartbeat status, and the recent cue/log feed with margins. Exists only while debug is on; no Canvas, prefab, or scene changes.</p></div>
         <div class="step"><h4>Performer tablets</h4><p>Already had a status board; now also send <code>/debug/*</code> back with the same arg conventions, so headsets and tablets share one roster.</p></div>
       </div>
