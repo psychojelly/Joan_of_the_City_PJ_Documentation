@@ -88,6 +88,15 @@ questions **from this documentation only**. The pieces:
    internet spending your tokens). Optional: `CHAT_MODEL` — defaults to
    `claude-opus-4-8`; set `claude-haiku-4-5` for lower cost.
 
+**Knowledge tiers:** everyone gets the public site pages. When `CHAT_PASSCODE`
+is set, entering it unlocks the **team tier** — the assistant additionally
+loads the engineering docs (`AUDIO-SYNC-HANDOFF.md`, `DEBUG-MODE.md`, the
+unity-patch README + test report) live from the cue-controller repo on
+GitHub (refetched ~15 min, so it stays current with no redeploys), and can
+discuss protocols, handoffs, and test results in depth. The public tier never
+sees those. To also index private repos, add a read-only `GITHUB_TOKEN` env
+var and list the files in `TEAM_SOURCES` in `api/chat.js`.
+
 **Who pays — two modes** (visitors switch via the widget's "⚙ key" button):
 
 - **Site key** (default): answers are billed to the `ANTHROPIC_API_KEY` set on
