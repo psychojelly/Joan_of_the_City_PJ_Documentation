@@ -47,7 +47,7 @@
       <div class="steps">
         <div class="step"><h4>Shared clock</h4><p>Every device pings the master (the operator cue device) NTP-style — offset ≈ <code>ts − (t0+t1)/2</code>, filtered to the lowest-RTT samples — agreeing on “master time” to ~1–5&nbsp;ms. Runs continuously, so it also absorbs crystal drift and survives Wi-Fi dropouts (offsets don't jump when the link does).</p></div>
         <div class="step"><h4>Scheduled start</h4><p>Cues carry a future timestamp — “play this cue at master time <em>T</em>”, sent ~400&nbsp;ms ahead. Each device schedules the start on its <strong>audio thread</strong> (Unity <code>AudioSource.PlayScheduled</code>) — so any packet arriving inside the lead window fires at the identical instant, immune to network jitter <em>and</em> main-thread hitches. Late arrival? Start immediately but <strong>seek in by the overshoot</strong>, landing mid-phrase in sync. 25&nbsp;ms floor → ~5&nbsp;ms.</p></div>
-        <div class="step"><h4>Position servo</h4><p>The master broadcasts each stem's expected position 1–2×/sec. Devices compare their playback position to the age-adjusted expectation: small error → inaudible rate nudge; big error → seek; stem not playing but should be → <strong>start it at that position</strong>. This corrects long-stem drift <em>and</em> gives reboot / missed-cue / late-join recovery for free.</p></div>
+        <div class="step"><h4>Position servo <span class="badge b-wip" style="vertical-align:middle">rejected as designed</span></h4><p>The master broadcasts each stem's expected position; devices self-correct. <strong>Rejected for this production (2026-07-15):</strong> the stems are short — every cue start already re-anchors all devices sample-accurately, so drift never accumulates — and rate-nudging pitch-shifts sustained sung material audibly. An optional <em>recovery-only</em> variant (a silent device restarts its stem at the right position; playing audio is never touched) stays on the table pending real-headset cue-miss data.</p></div>
       </div>
       <table>
         <thead><tr><th>Problem</th><th>Fixed by</th></tr></thead>
@@ -80,7 +80,7 @@
         <tbody>
           <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
           <tr><td>1 — Scheduled start</td><td>Timestamped cues; audio-thread scheduling; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
-          <tr><td>2 — Position servo</td><td>Master show-clock + position broadcast; hysteresis / rate-nudge / seek on receivers</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>2 — Position servo</td><td>Master show-clock + position broadcast; continuous self-correction on receivers</td><td><span class="badge b-wip">Rejected as designed — short stems re-anchor at every cue; nudges audible on sung material. Recovery-only variant optional, pending headset test data</span></td></tr>
           <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td><span class="badge b-done">Adoptable now</span></td></tr>
           <tr><td>D — Debug mode</td><td>Device→controller return path; logger + roster on the operator page; in-headset HUD; test tone + mute</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
         </tbody>
