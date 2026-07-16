@@ -58,6 +58,8 @@
     '<div id="joan-chat-settings">' +
     '<label><input type="radio" name="jc-mode" value="site"/> Use the site’s key (may need the team passphrase)</label>' +
     '<label><input type="radio" name="jc-mode" value="own"/> Use my own Anthropic API key (billed to me, stays in my browser)</label>' +
+    '<div style="margin:2px 0 0 22px;"><a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener" ' +
+    'style="color:var(--gold,#d4af6a);font-size:11px;">Create a key at platform.claude.com →</a></div>' +
     '<input type="password" id="joan-chat-ownkey" placeholder="sk-ant-… (stored only in this browser)"/>' +
     '<button class="jc-save" type="button">Save</button>' +
     '</div>' +
