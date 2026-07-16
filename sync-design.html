@@ -46,8 +46,8 @@
       <p class="lead">Built in order; each is independently shippable and fully backwards-compatible (a cue without a timestamp behaves exactly as today).</p>
       <div class="steps">
         <div class="step"><h4>Shared clock</h4><p>Every device pings the master (the operator cue device) NTP-style — offset ≈ <code>ts − (t0+t1)/2</code>, filtered to the lowest-RTT samples — agreeing on “master time” to ~1–5&nbsp;ms. Runs continuously, so it also absorbs crystal drift and survives Wi-Fi dropouts (offsets don't jump when the link does).</p></div>
-        <div class="step"><h4>Scheduled start</h4><p>Cues carry a future timestamp: <code>/audio/cue "B_201" playAt=masterTime+400ms</code>. Each device schedules the start on its <strong>audio thread</strong> (Unity <code>AudioSource.PlayScheduled</code>) — so any packet arriving inside the lead window fires at the identical instant, immune to network jitter <em>and</em> main-thread hitches. Late arrival? Start immediately but <strong>seek in by the overshoot</strong>, landing mid-phrase in sync. 25&nbsp;ms floor → ~5&nbsp;ms.</p></div>
-        <div class="step"><h4>Position servo</h4><p>The master broadcasts <code>/sync stem, position, masterTime</code> 1–2×/sec. Devices compare their playback position to the age-adjusted expectation: small error → inaudible rate nudge; big error → seek; stem not playing but should be → <strong>start it at that position</strong>. This corrects long-stem drift <em>and</em> gives reboot / missed-cue / late-join recovery for free.</p></div>
+        <div class="step"><h4>Scheduled start</h4><p>Cues carry a future timestamp — “play this cue at master time <em>T</em>”, sent ~400&nbsp;ms ahead. Each device schedules the start on its <strong>audio thread</strong> (Unity <code>AudioSource.PlayScheduled</code>) — so any packet arriving inside the lead window fires at the identical instant, immune to network jitter <em>and</em> main-thread hitches. Late arrival? Start immediately but <strong>seek in by the overshoot</strong>, landing mid-phrase in sync. 25&nbsp;ms floor → ~5&nbsp;ms.</p></div>
+        <div class="step"><h4>Position servo</h4><p>The master broadcasts each stem's expected position 1–2×/sec. Devices compare their playback position to the age-adjusted expectation: small error → inaudible rate nudge; big error → seek; stem not playing but should be → <strong>start it at that position</strong>. This corrects long-stem drift <em>and</em> gives reboot / missed-cue / late-join recovery for free.</p></div>
       </div>
       <table>
         <thead><tr><th>Problem</th><th>Fixed by</th></tr></thead>
@@ -79,8 +79,8 @@
         <thead><tr><th>Phase</th><th>Scope</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td>0 — Clock sync</td><td><code>MasterClock</code> in Unity + ping responder in the cue servers + tablet app</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
-          <tr><td>1 — Scheduled start</td><td><code>playAt</code> on <code>/audio/cue</code>; <code>PlayScheduled</code>; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
-          <tr><td>2 — Position servo</td><td>Master show-clock + <code>/sync</code> broadcast; hysteresis / rate-nudge / seek on receivers</td><td><span class="badge b-plan">Proposed</span></td></tr>
+          <tr><td>1 — Scheduled start</td><td>Timestamped cues; audio-thread scheduling; dedupe + 3× sends; late-arrival seek-in</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
+          <tr><td>2 — Position servo</td><td>Master show-clock + position broadcast; hysteresis / rate-nudge / seek on receivers</td><td><span class="badge b-plan">Proposed</span></td></tr>
           <tr><td>3 — Ops discipline</td><td>Wait for “Audio loaded and cached” on every device; pre-show warm-up of every cue; router per group</td><td><span class="badge b-done">Adoptable now</span></td></tr>
           <tr><td>D — Debug mode</td><td>Device→controller return path; logger + roster on the operator page; in-headset HUD; test tone + mute</td><td><span class="badge b-done">Implemented ✓ verified</span></td></tr>
         </tbody>
@@ -103,39 +103,19 @@
       <div class="section-tag">Debug</div>
       <h2>Debug mode — the return path</h2>
       <p class="lead">Until now data flowed one way (controller → devices) and <em>nothing reported back</em>. Debug mode closes the loop: devices report to the cue server on a second port, and the operator page visualizes it live.</p>
-      <pre><code>Devices ──/debug/*──▶ cue server :9002 (UDP listener)
-                          │ buffers + tags with seq
-Operator page ◀── GET /debug/events?since=&lt;seq&gt; ── server</code></pre>
+      <pre><code>Devices ──debug reports──▶ cue server (listener)
+                              │ buffers + orders
+Operator page ◀───── live feed ───── server</code></pre>
       <p>All of it is <strong>opt-in and OFF by default</strong> — until an operator flips the toggle there are no log hooks and no verbose traffic. One deliberate exception: a <strong>low-rate safety heartbeat</strong> (one small packet per 5&nbsp;s per device once a master is known) keeps the roster answering “is headset 3 alive?” even mid-show with everything off — untick <em>Always On Safety Heartbeat</em> on the receiver for strictly-zero traffic. Timestamps are <strong>master-clock seconds</strong> (the same clock the sync uses), so the controller computes true send→receive margins per device per cue.</p>
 
-      <h3>The protocol</h3>
-      <p><strong>Control — controller → all devices</strong> (existing :7000 cue port):</p>
-      <table>
-        <thead><tr><th>Message</th><th>Args</th><th>Meaning</th></tr></thead>
-        <tbody>
-          <tr><td><code>/debug/enable</code></td><td><code>0|1</code></td><td>Verbose reporting + in-headset HUD, everywhere</td></tr>
-          <tr><td><code>/debug/heartbeat</code></td><td><code>0|1</code></td><td>The 1&nbsp;Hz roster beacon — separate, so you can run a lightweight “who's alive?” check without log traffic</td></tr>
-          <tr><td><code>/audio/test</code></td><td><code>1</code> (+&nbsp;<code>playAt</code> in sync mode)</td><td>Generated triple beep, outside the cue system — see below</td></tr>
-          <tr><td><code>/audio/mute</code></td><td><code>0|1</code></td><td>Master mute (<code>AudioListener.volume</code>) — stems keep playing silently so unmuting stays in sync</td></tr>
-          <tr><td><code>/audio/reload</code></td><td><code>1</code></td><td>Re-fetch the cue CSV live on every device; loads new/version-bumped stems without touching playback (the “⟳ CSV → ALL” button)</td></tr>
-        </tbody>
-      </table>
-      <p><strong>Reports — devices → server :9002</strong> (only while enabled):</p>
-      <table>
-        <thead><tr><th>Message</th><th>Args</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td><code>/debug/hello</code></td><td><code>id, kind</code></td><td>Announce on enable (kind: headset / editor / performer)</td></tr>
-          <tr><td><code>/debug/rx</code></td><td><code>id, cueId, recvMaster, playAt</code></td><td>Cue received — the controller shows the scheduling margin per device; <code>playAt&nbsp;=&nbsp;0</code> marks the immediate path</td></tr>
-          <tr><td><code>/debug/hb</code></td><td><code>id, masterTime, lastCue, stems, offsetMs</code></td><td>Heartbeat: roster + clock health + what's playing</td></tr>
-          <tr><td><code>/debug/log</code></td><td><code>id, masterTime, level, msg</code></td><td>Warnings, errors, and <code>[JoanAudio]</code> logs — rate-limited to 10/s per device</td></tr>
-        </tbody>
-      </table>
+      <h3>What flows</h3>
+      <p>Operators broadcast small control toggles (reporting on/off, heartbeat on/off, HUD, test tone, mute, CSV reload); devices reply with an announce, a per-cue receipt with its scheduling margin, a heartbeat carrying clock health and playback state, and rate-limited log lines. <strong>The exact message contracts (addresses, argument schemas, ports) are deliberately not published here</strong> — they live with the dev team in <code>DEBUG-MODE.md</code> in the cue-controller repo, the source of truth for implementers.</p>
 
       <h3>The three surfaces</h3>
       <div class="steps">
         <div class="step"><h4>Operator page — 🐞 panel</h4><p>Toggles for reporting and heartbeat; a <strong>device roster</strong> (green/yellow/red liveness dot, <strong>clock health</strong> — <code>clock ✓ Δ0.2ms</code> offset stability or <code>clock ⚠ unsynced</code> — last cue, last-seen age); a <strong>CUE ACKS</strong> rollup per cue — <code>✔ cue A_SQ201 → 3/3 received (401/399/404ms)</code>, amber until every device reports; a scrolling, color-coded <strong>message log</strong> with a second <strong>delay-graph view</strong> (line chart of each device's heartbeat transit delay over the last 90&nbsp;s, per-device checkboxes to select series, and the log beneath filtered to the selected devices); and the <strong>SYNC TEST</strong> row (test tone + mute). Every line is stamped in <strong>master-clock seconds — sent <em>and</em> reply on one scale</strong>: each control message logs a <code>SENT</code> line at the server's send time (and <code>playAt</code> for scheduled sends), then each device's <code>RX</code> reply lands a few ms later, directly comparable.</p></div>
         <div class="step"><h4>Unity headsets — HUD</h4><p><code>DebugReporter</code> sends the reports; <code>DebugHud</code> draws an in-glasses overlay — device id, master IP, clock sync state + offset, heartbeat status, and the recent cue/log feed with margins. Exists only while debug is on; no Canvas, prefab, or scene changes.</p></div>
-        <div class="step"><h4>Performer tablets</h4><p>Already had a status board; now also send <code>/debug/*</code> back with the same arg conventions, so headsets and tablets share one roster.</p></div>
+        <div class="step"><h4>Performer tablets</h4><p>Already had a status board; now also report back with the same conventions, so headsets and tablets share one roster.</p></div>
       </div>
 
       <h3 id="debug-test">Sync test utilities</h3>

@@ -205,12 +205,12 @@
       <h4>Publishing a new CSV, and getting every device onto it</h4>
       <ol>
         <li><strong>Publish:</strong> commit the edited CSV to the GitHub repo — GitHub is the single source of truth; there is no push-from-device.</li>
-        <li><strong>Operator:</strong> tap <strong>↻ CSV</strong> to re-fetch and rebuild the buttons — or use <strong>⟳ CSV → ALL</strong>, which reloads locally <em>and</em> sends <code>/audio/reload</code> so every device in the selected audience re-fetches the CSV and preloads any new stems, no restarts.</li>
+        <li><strong>Operator:</strong> tap <strong>↻ CSV</strong> to re-fetch and rebuild the buttons — or use <strong>⟳ CSV → ALL</strong>, which reloads locally <em>and</em> tells every device in the selected audience to re-fetch the CSV and preload any new stems, no restarts.</li>
         <li><strong>Confirm:</strong> each performer board shows a fresh “config: ready”. Do this while devices have internet (they fetch from GitHub) — after that, everyone is cached and offline-safe.</li>
       </ol>
       <div class="callout note">
         <span class="ci">📴</span>
-        <p><strong>Offline resilience:</strong> the controller caches the last successfully fetched CSV and rebuilds from it if the fetch fails (shown as “offline — using cached CSV from &lt;date&gt;”), and performer devices fall back to their disk cache the same way. A closed show network can no longer lose the cue list to a page reload. <em>Unity does not handle <code>/audio/reload</code> yet — headsets pick up a new CSV at app launch until that handler lands.</em></p>
+        <p><strong>Offline resilience:</strong> the controller caches the last successfully fetched CSV and rebuilds from it if the fetch fails (shown as “offline — using cached CSV from &lt;date&gt;”), and performer devices fall back to their disk cache the same way. A closed show network can no longer lose the cue list to a page reload. <em>Headsets handle the live reload too (implemented 2026-07-15) — new or version-bumped stems load without touching current playback.</em></p>
       </div>
 
       <h3>What the controller saves</h3>
