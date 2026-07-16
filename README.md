@@ -88,10 +88,18 @@ questions **from this documentation only**. The pieces:
    internet spending your tokens). Optional: `CHAT_MODEL` — defaults to
    `claude-opus-4-8`; set `claude-haiku-4-5` for lower cost.
 
-The chat only works on the Vercel deployment — on the GitHub Pages mirror the
-widget appears but explains chat isn't available there (static hosting can't
-keep the API key secret). Message contracts and other internal details are
-deliberately excluded from the knowledge base.
+**Who pays — two modes** (visitors switch via the widget's "⚙ key" button):
+
+- **Site key** (default): answers are billed to the `ANTHROPIC_API_KEY` set on
+  Vercel. Gate it with `CHAT_PASSCODE` so only the team/client can use it.
+- **Bring-your-own-key**: a visitor pastes *their own* Anthropic API key; it's
+  stored only in their browser and their questions go directly from their
+  browser to Anthropic — nothing is billed to Psychojelly, and this mode even
+  works on the GitHub Pages mirror (no server involved). The knowledge base
+  for this mode is the public `docs-context.json` at the site root.
+
+Message contracts and other internal details are deliberately excluded from
+the knowledge base (they're not in the public pages it's built from).
 
 ---
 

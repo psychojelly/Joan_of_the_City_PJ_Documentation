@@ -44,11 +44,18 @@ const context = pages
   .join("");
 
 mkdirSync(join(root, "api"), { recursive: true });
-writeFileSync(
-  join(root, "api", "_docs-context.json"),
-  JSON.stringify({ generatedAt: null, pages: pages.length, context }, null, 0),
+const payload = JSON.stringify(
+  { generatedAt: null, pages: pages.length, context },
+  null,
+  0,
 );
+// Server copy (bundled with the /api/chat function) …
+writeFileSync(join(root, "api", "_docs-context.json"), payload);
+// … and a public copy at the site root, used by the widget's
+// bring-your-own-key mode (browser → Anthropic directly, no server).
+// The content is just the public pages, so serving it is harmless.
+writeFileSync(join(root, "docs-context.json"), payload);
 
 console.log(
-  `Wrote api/_docs-context.json — ${pages.length} pages, ${context.length.toLocaleString()} chars`,
+  `Wrote api/_docs-context.json + docs-context.json — ${pages.length} pages, ${context.length.toLocaleString()} chars`,
 );
