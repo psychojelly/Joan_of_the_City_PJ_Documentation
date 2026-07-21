@@ -98,6 +98,25 @@ function rateLimited(ip) {
   return list.length > max;
 }
 
+/**
+ * Return the request body as an object, whether the runtime pre-parsed it
+ * (req.body is an object), handed it over as a JSON string, or left it as an
+ * unread stream. Returns null if there's nothing parsable.
+ */
+async function readJsonBody(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  if (typeof req.body === "string" && req.body.trim()) {
+    try { return JSON.parse(req.body); } catch { return null; }
+  }
+  try {
+    let raw = "";
+    for await (const chunk of req) raw += chunk;
+    return raw.trim() ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "POST only" });
@@ -121,9 +140,17 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { question, history } = req.body || {};
+  // Body may arrive already-parsed (Vercel Node runtime) or as a raw stream
+  // depending on runtime/content-type. Handle both so a missing parser can't
+  // masquerade as a missing question.
+  const body = await readJsonBody(req);
+  const { question, history } = body || {};
   if (typeof question !== "string" || !question.trim()) {
-    res.status(400).json({ error: "question required" });
+    res.status(400).json({
+      error: "question required",
+      // Diagnostic: distinguishes "user sent nothing" from "body never parsed".
+      bodyType: req.body === undefined ? "unparsed" : typeof req.body,
+    });
     return;
   }
   if (question.length > MAX_QUESTION_CHARS) {
@@ -168,13 +195,19 @@ export default async function handler(req, res) {
     const final = await stream.finalMessage();
     res.write(`data: ${JSON.stringify({ done: true, stop: final.stop_reason })}\n\n`);
   } catch (err) {
+    // Always log the full error — visible in the Vercel function logs.
+    console.error("chat error:", err?.status, err?.name, err?.message);
+
     let msg = "Something went wrong — try again.";
     if (err instanceof Anthropic.AuthenticationError) {
       msg = "Chat is not configured on this deployment (missing API key).";
     } else if (err instanceof Anthropic.RateLimitError) {
       msg = "The assistant is busy — try again in a moment.";
     } else if (err instanceof Anthropic.APIError) {
-      msg = `Assistant error (${err.status}).`;
+      // Include the API's own message — a bare status code is undiagnosable.
+      msg = `Assistant error (${err.status}): ${err.message || "no detail"}`;
+    } else if (err?.message) {
+      msg = `Assistant error: ${err.message}`;
     }
     res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
   }
