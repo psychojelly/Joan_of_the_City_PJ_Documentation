@@ -21,8 +21,9 @@
     '#joan-chat header{padding:12px 16px;border-bottom:1px solid var(--border,#2a2d3a);display:flex;align-items:center;gap:8px;}' +
     '#joan-chat header b{color:var(--gold,#d4af6a);font-size:13px;letter-spacing:.4px;}' +
     '#joan-chat header span{color:var(--text-soft,#a4a6b8);font-size:11px;flex:1;}' +
-    '#joan-chat-key{background:none;border:1px solid var(--border,#2a2d3a);border-radius:6px;color:var(--text-soft,#a4a6b8);' +
+    '#joan-chat-key,#joan-chat-depth{background:none;border:1px solid var(--border,#2a2d3a);border-radius:6px;color:var(--text-soft,#a4a6b8);' +
     'font-size:11px;cursor:pointer;padding:3px 8px;}' +
+    '#joan-chat-depth.jc-deep{border-color:var(--gold,#d4af6a);color:var(--gold,#d4af6a);}' +
     '#joan-chat-settings{display:none;padding:10px 14px;border-bottom:1px solid var(--border,#2a2d3a);' +
     'font-size:12px;color:var(--text-soft,#a4a6b8);}' +
     '#joan-chat-settings label{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer;}' +
@@ -54,6 +55,7 @@
   panel.id = 'joan-chat';
   panel.innerHTML =
     '<header><b>PROJECT ASSISTANT</b><span>answers from this documentation</span>' +
+    '<button id="joan-chat-depth" title="Answer depth: Quick uses a faster, ~5× cheaper model — right for lookups. Deep uses the strongest model for synthesis questions.">🌱 quick</button>' +
     '<button id="joan-chat-key" title="Choose whose API key answers are billed to">⚙ key</button></header>' +
     '<div id="joan-chat-settings">' +
     '<label><input type="radio" name="jc-mode" value="site"/> Use the site’s key (may need the team passphrase)</label>' +
@@ -83,6 +85,21 @@
   var ownKeyInput = panel.querySelector('#joan-chat-ownkey');
   function getMode() { return localStorage.getItem('joan-chat-mode') || 'site'; }
   function getOwnKey() { return localStorage.getItem('joan-chat-own-key') || ''; }
+
+  // Depth toggle: 'quick' (default — Haiku, ~5× cheaper, fine for lookups)
+  // or 'deep' (Opus, for synthesis). Persisted per browser.
+  function getDepth() { return localStorage.getItem('joan-chat-depth') || 'quick'; }
+  var depthBtn = panel.querySelector('#joan-chat-depth');
+  function renderDepth() {
+    var deep = getDepth() === 'deep';
+    depthBtn.textContent = deep ? '🔍 deep' : '🌱 quick';
+    depthBtn.classList.toggle('jc-deep', deep);
+  }
+  depthBtn.addEventListener('click', function () {
+    localStorage.setItem('joan-chat-depth', getDepth() === 'deep' ? 'quick' : 'deep');
+    renderDepth();
+  });
+  renderDepth();
 
   keyBtn.addEventListener('click', function () {
     var open = settings.style.display === 'block';
@@ -186,8 +203,8 @@
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-8',
-          max_tokens: 2048,
+          model: getDepth() === 'deep' ? 'claude-opus-4-8' : 'claude-haiku-4-5',
+          max_tokens: getDepth() === 'deep' ? 2048 : 1024,
           stream: true,
           system: [{ type: 'text', text: systemPrompt(ctx), cache_control: { type: 'ephemeral' } }],
           messages: history.concat([{ role: 'user', content: question }]),
@@ -266,7 +283,7 @@
       var resp = await fetch('/api/chat', {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ question: question, history: history }),
+        body: JSON.stringify({ question: question, history: history, depth: getDepth() }),
       });
 
       if (resp.status === 401 && !retriedAuth) {

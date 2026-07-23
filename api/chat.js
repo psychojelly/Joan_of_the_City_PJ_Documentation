@@ -15,10 +15,18 @@ import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+// Two depth tiers, chosen per-question by the widget's toggle:
+//   quick (default) — Haiku: ~5× cheaper per token, plenty for lookups.
+//     A cache-miss question costs ~$0.03 instead of ~$0.20 on Opus.
+//   deep — Opus: for synthesis/reasoning questions worth the spend.
+// Note: prompt caches are per-model, so flipping depth mid-conversation
+// re-writes the cache once — fine, just not free.
 const MODEL = process.env.CHAT_MODEL || "claude-opus-4-8";
+const QUICK_MODEL = process.env.CHAT_QUICK_MODEL || "claude-haiku-4-5";
 const MAX_QUESTION_CHARS = 2000;
 const MAX_HISTORY_TURNS = 12; // user+assistant messages kept from the client
 const MAX_TOKENS = 2048; // deliberately short — docs answers, not essays
+const QUICK_MAX_TOKENS = 1024;
 
 // --- knowledge base (bundled with the function) ---------------------------
 const { context: DOCS_CONTEXT } = JSON.parse(
@@ -144,7 +152,8 @@ export default async function handler(req, res) {
   // depending on runtime/content-type. Handle both so a missing parser can't
   // masquerade as a missing question.
   const body = await readJsonBody(req);
-  const { question, history } = body || {};
+  const { question, history, depth } = body || {};
+  const deep = depth === "deep"; // anything else (or absent) = quick/conservative
   if (typeof question !== "string" || !question.trim()) {
     res.status(400).json({
       error: "question required",
@@ -182,8 +191,8 @@ export default async function handler(req, res) {
 
   try {
     const stream = client.messages.stream({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
+      model: deep ? MODEL : QUICK_MODEL,
+      max_tokens: deep ? MAX_TOKENS : QUICK_MAX_TOKENS,
       system: buildSystem(isTeam ? await teamContext() : null),
       messages,
     });
