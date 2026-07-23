@@ -326,6 +326,14 @@
         add('jc-err', 'Passphrase required — or click “⚙ key” to use your own API key instead.');
         return;
       }
+      if (resp.status === 401 && retriedAuth) {
+        // The passphrase just entered was wrong — drop it so state stays
+        // clean, and say so plainly. Asking again re-prompts.
+        bubble.remove();
+        localStorage.removeItem('joan-chat-code');
+        add('jc-err', 'That passphrase wasn’t accepted — ask your question again to retry.');
+        return;
+      }
       if (resp.status === 404 || resp.status === 405 || resp.status === 501) {
         bubble.remove();
         add('jc-err', 'This copy of the site has no chat server — click “⚙ key” and use your own Anthropic API key instead.');
