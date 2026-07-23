@@ -21,9 +21,18 @@
     '#joan-chat header{padding:12px 16px;border-bottom:1px solid var(--border,#2a2d3a);display:flex;align-items:center;gap:8px;}' +
     '#joan-chat header b{color:var(--gold,#d4af6a);font-size:13px;letter-spacing:.4px;}' +
     '#joan-chat header span{color:var(--text-soft,#a4a6b8);font-size:11px;flex:1;}' +
-    '#joan-chat-key,#joan-chat-depth{background:none;border:1px solid var(--border,#2a2d3a);border-radius:6px;color:var(--text-soft,#a4a6b8);' +
+    '#joan-chat-key{background:none;border:1px solid var(--border,#2a2d3a);border-radius:6px;color:var(--text-soft,#a4a6b8);' +
     'font-size:11px;cursor:pointer;padding:3px 8px;}' +
-    '#joan-chat-depth.jc-deep{border-color:var(--gold,#d4af6a);color:var(--gold,#d4af6a);}' +
+    '#joan-chat-depth{display:inline-flex;border:1px solid var(--border,#2a2d3a);border-radius:6px;overflow:hidden;}' +
+    '#joan-chat-depth button{background:none;border:none;color:var(--text-soft,#a4a6b8);font-size:11px;cursor:pointer;padding:3px 8px;opacity:.55;}' +
+    '#joan-chat-depth button.jc-on{opacity:1;background:var(--bg-soft,#1a1c26);color:var(--gold,#d4af6a);font-weight:600;}' +
+    '#joan-chat-help{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;' +
+    'border:1px solid var(--border,#2a2d3a);border-radius:50%;color:var(--text-soft,#a4a6b8);font-size:10px;cursor:help;user-select:none;}' +
+    '#joan-chat-help-pop{display:none;position:absolute;top:22px;right:-8px;width:240px;z-index:10;text-align:left;' +
+    'background:var(--bg-panel,#171821);border:1px solid var(--border,#2a2d3a);border-radius:8px;padding:10px 12px;' +
+    'font-size:11.5px;line-height:1.5;color:var(--text-soft,#c8cad6);box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:auto;}' +
+    '#joan-chat-help:hover #joan-chat-help-pop,#joan-chat-help.jc-show #joan-chat-help-pop{display:block;}' +
+    '#joan-chat-help-pop b{color:var(--text-bright,#e8eaf2);}' +
     '#joan-chat-settings{display:none;padding:10px 14px;border-bottom:1px solid var(--border,#2a2d3a);' +
     'font-size:12px;color:var(--text-soft,#a4a6b8);}' +
     '#joan-chat-settings label{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer;}' +
@@ -55,7 +64,14 @@
   panel.id = 'joan-chat';
   panel.innerHTML =
     '<header><b>PROJECT ASSISTANT</b><span>answers from this documentation</span>' +
-    '<button id="joan-chat-depth" title="Answer depth: Quick uses a faster, ~5× cheaper model — right for lookups. Deep uses the strongest model for synthesis questions.">🌱 quick</button>' +
+    '<span id="joan-chat-depth" role="group" aria-label="Answer depth">' +
+    '<button data-depth="quick">🌱 quick</button><button data-depth="deep">🔍 deep</button></span>' +
+    '<span id="joan-chat-help">?<span id="joan-chat-help-pop">' +
+    '<b>🌱 Quick</b> — a fast, economical model. Best for lookups and factual questions ' +
+    '(“what port does X use?”). About 5× cheaper per question.<br/><br/>' +
+    '<b>🔍 Deep</b> — the strongest model. Worth it for synthesis and reasoning ' +
+    '(“compare…”, “why does…”). Costs more per question.<br/><br/>' +
+    'Both answer from the same documentation.</span></span>' +
     '<button id="joan-chat-key" title="Choose whose API key answers are billed to">⚙ key</button></header>' +
     '<div id="joan-chat-settings">' +
     '<label><input type="radio" name="jc-mode" value="site"/> Use the site’s key (may need the team passphrase)</label>' +
@@ -89,17 +105,29 @@
   // Depth toggle: 'quick' (default — Haiku, ~5× cheaper, fine for lookups)
   // or 'deep' (Opus, for synthesis). Persisted per browser.
   function getDepth() { return localStorage.getItem('joan-chat-depth') || 'quick'; }
-  var depthBtn = panel.querySelector('#joan-chat-depth');
+  var depthSeg = panel.querySelector('#joan-chat-depth');
   function renderDepth() {
-    var deep = getDepth() === 'deep';
-    depthBtn.textContent = deep ? '🔍 deep' : '🌱 quick';
-    depthBtn.classList.toggle('jc-deep', deep);
+    var d = getDepth();
+    depthSeg.querySelectorAll('button').forEach(function (b) {
+      b.classList.toggle('jc-on', b.dataset.depth === d);
+    });
   }
-  depthBtn.addEventListener('click', function () {
-    localStorage.setItem('joan-chat-depth', getDepth() === 'deep' ? 'quick' : 'deep');
-    renderDepth();
+  depthSeg.querySelectorAll('button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      localStorage.setItem('joan-chat-depth', b.dataset.depth);
+      renderDepth();
+    });
   });
   renderDepth();
+
+  // The ? popup: hover on desktop (CSS), tap-to-toggle on touch screens.
+  var help = panel.querySelector('#joan-chat-help');
+  help.addEventListener('click', function (e) {
+    if (e.target.id === 'joan-chat-help') help.classList.toggle('jc-show');
+  });
+  document.addEventListener('click', function (e) {
+    if (!help.contains(e.target)) help.classList.remove('jc-show');
+  });
 
   keyBtn.addEventListener('click', function () {
     var open = settings.style.display === 'block';
