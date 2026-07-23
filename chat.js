@@ -18,9 +18,10 @@
     'height:520px;max-height:calc(100vh - 120px);display:none;flex-direction:column;' +
     'background:var(--bg-card,#15161f);border:1px solid var(--border,#2a2d3a);border-radius:14px;' +
     'box-shadow:0 18px 60px rgba(0,0,0,.55);overflow:hidden;font-size:14px;color:var(--text,#e8e9f0);}' +
-    '#joan-chat header{padding:12px 16px;border-bottom:1px solid var(--border,#2a2d3a);display:flex;align-items:center;gap:8px;}' +
+    '#joan-chat header{padding:10px 16px;border-bottom:1px solid var(--border,#2a2d3a);display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:6px;}' +
     '#joan-chat header b{color:var(--gold,#d4af6a);font-size:13px;letter-spacing:.4px;}' +
-    '#joan-chat header span{color:var(--text-soft,#a4a6b8);font-size:11px;flex:1;}' +
+    '#joan-chat header .jc-sub{color:var(--text-soft,#a4a6b8);font-size:11px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+    '#joan-chat .jc-controls{margin-left:auto;display:inline-flex;gap:8px;align-items:center;}' +
     '#joan-chat-key{background:none;border:1px solid var(--border,#2a2d3a);border-radius:6px;color:var(--text-soft,#a4a6b8);' +
     'font-size:11px;cursor:pointer;padding:3px 8px;}' +
     '#joan-chat-depth{display:inline-flex;border:1px solid var(--border,#2a2d3a);border-radius:6px;overflow:hidden;}' +
@@ -63,7 +64,8 @@
   var panel = document.createElement('div');
   panel.id = 'joan-chat';
   panel.innerHTML =
-    '<header><b>PROJECT ASSISTANT</b><span>answers from this documentation</span>' +
+    '<header><b>PROJECT ASSISTANT</b><span class="jc-sub">answers from this documentation</span>' +
+    '<span class="jc-controls">' +
     '<span id="joan-chat-depth" role="group" aria-label="Answer depth">' +
     '<button data-depth="quick">🌱 quick</button><button data-depth="deep">🔍 deep</button></span>' +
     '<span id="joan-chat-help">?<span id="joan-chat-help-pop">' +
@@ -72,7 +74,7 @@
     '<b>🔍 Deep</b> — the strongest model. Worth it for synthesis and reasoning ' +
     '(“compare…”, “why does…”). Costs more per question.<br/><br/>' +
     'Both answer from the same documentation.</span></span>' +
-    '<button id="joan-chat-key" title="Choose whose API key answers are billed to">⚙ key</button></header>' +
+    '<button id="joan-chat-key" title="Choose whose API key answers are billed to">⚙ key</button></span></header>' +
     '<div id="joan-chat-settings">' +
     '<label><input type="radio" name="jc-mode" value="site"/> Use the site’s key (may need the team passphrase)</label>' +
     '<label><input type="radio" name="jc-mode" value="own"/> Use my own Anthropic API key (billed to me, stays in my browser)</label>' +
