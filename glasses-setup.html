@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glasses Setup — Joan of the City</title>
+<meta name="description" content="Setting up XREAL glasses and their Android host from scratch — provisioning, software, AirCast, and loading a show build." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Setup &amp; Operation</div>
+      <h1>Glasses Setup</h1>
+      <p>Bringing a brand-new (or factory-reset) phone and pair of XREAL glasses into the fleet — from first power-on to a show build running in the glasses.</p>
+    </div>
+
+    <section id="provisioning">
+      <div class="section-tag">Setup · From scratch</div>
+      <h2>Setting up from scratch</h2>
+      <p class="lead">Do these in order — several later steps silently depend on earlier ones.</p>
+
+      <div class="steps">
+        <div class="step">
+          <h4>Turn on the phone and set a PIN — and document it</h4>
+          <p>Complete the Android first-boot setup, set a screen-lock PIN, and <strong>record the PIN in the team's device sheet</strong>. An undocumented PIN on a fleet device is a bricked device on show night.</p>
+        </div>
+        <div class="step">
+          <h4>Download the necessary XREAL / Nebula software</h4>
+          <p>The device should <strong>prompt automatically</strong> once it's on (and/or the first time glasses are connected). Accept the prompts and let everything install.</p>
+        </div>
+        <div class="step">
+          <h4>Plug in the glasses and confirm they work</h4>
+          <p>Verify the glasses actually display, and <strong>update any firmware</strong> they prompt for now — not later, and never mid-show.</p>
+        </div>
+        <div class="step">
+          <h4>Turn on AirCast in the glasses app</h4>
+          <p>Enable <strong>“Default AirCast”</strong>. This removes the auto-starting of the default XREAL startup app — the Nebula environment that uses the phone as a controller — so it stops grabbing the glasses every time they're plugged in.</p>
+        </div>
+        <div class="step">
+          <h4>Download the Glasses Control app (the SDK controller)</h4>
+          <p>Get <strong>Glasses Control</strong> from the app store — it does <em>not</em> ship pre-installed. It's the SDK server / launcher: the app that lists and launches show builds.</p>
+        </div>
+        <div class="step">
+          <h4>Load the APK of the build you want to use</h4>
+          <p>Sideload the show build onto the phone. See the warning below — the build must be made <em>for</em> XREAL.</p>
+        </div>
+        <div class="step">
+          <h4>Plug into the glasses — the app should start</h4>
+          <p>If <strong>Nebula starts instead</strong>: close Nebula, open the <strong>Glasses Control</strong> app, and restart the show app by hitting its <strong>Restart</strong> button.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>The build must include the XREAL plugin.</strong> Make sure the APK was built for XREAL (the XREAL loader enabled in Unity's XR Plug-in Management). A build without it installs and opens normally but has <strong>no head tracking</strong> and <strong>won't appear in the Glasses Control app</strong> — a failure mode that looks like broken hardware and is very easy to lose nights to.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="daily-use">
+      <div class="section-tag">Setup · Operating</div>
+      <h2>Day-to-day launch</h2>
+      <p class="lead">Once a device is provisioned, the reliable launch sequence is:</p>
+      <div class="steps">
+        <div class="step"><h4>Charge the host</h4><p>Make sure the phone is well charged — a low host under-feeds the glasses over USB-C and the link can drop under load.</p></div>
+        <div class="step"><h4>Plug in the glasses and wait</h4><p>Wait until the glasses render in 3D — that confirms the display has negotiated into stereo mode.</p></div>
+        <div class="step"><h4>Launch (or restart) the show app</h4><p>The app should start on its own; if Nebula appears, close it and use <strong>Restart</strong> in Glasses Control.</p></div>
+        <div class="step"><h4>Leave the cable alone</h4><p>Don't plug/unplug the glasses while the app runs. If anything glitches: quit the app → replug the glasses → wait for stereo → relaunch. Worst case, reboot the phone.</p></div>
+      </div>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>

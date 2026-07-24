@@ -46,6 +46,10 @@
           { title: 'Larger System Set Up', href: 'system-setup.html#larger-system' },
           { title: 'Running the OSC controller', href: 'system-setup.html#osc-controller' },
         ]},
+        { title: 'Glasses Setup', href: 'glasses-setup.html', children: [
+          { title: 'Setting up from scratch', href: 'glasses-setup.html#provisioning' },
+          { title: 'Day-to-day launch', href: 'glasses-setup.html#daily-use' },
+        ]},
         { title: 'Cues', href: 'cues.html', children: [
           { title: 'Overview', href: 'cues.html#cues-overview' },
           { title: 'Editing & Cueing System', href: 'cues.html#cue-editing' },
@@ -118,6 +122,7 @@
     { title: 'Brain PC & Glasses',         href: 'brain-pc.html' },
     { title: 'How It Works & Recs',        href: 'how-it-works.html' },
     { title: 'System Set Up',              href: 'system-setup.html' },
+    { title: 'Glasses Setup',              href: 'glasses-setup.html' },
     { title: 'Cues',                       href: 'cues.html' },
     { title: 'Audio Sync & Debug Mode',    href: 'sync-design.html' },
     { title: 'Design Style Guide',         href: 'design-style-guide.html' },
