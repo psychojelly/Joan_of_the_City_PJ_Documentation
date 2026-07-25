@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Builds &amp; Downloads — Joan of the City</title>
+<meta name="description" content="Current Joan of the City APK builds — what each one is, where it came from, and how to install it." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>
+  .dl-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.15rem;border-radius:var(--radius);
+    background:var(--gold);color:#1a1a1a;font-weight:600;text-decoration:none;border:1px solid var(--gold);
+    transition:transform .12s ease,box-shadow .12s ease;}
+  .dl-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+  .dl-btn.secondary{background:transparent;color:var(--gold);}
+  .build-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.25rem 1.4rem;margin:1rem 0;}
+  .build-card h3{margin-top:0;}
+  .build-meta{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin:.6rem 0 1rem;font-size:.9rem;color:var(--text-soft);}
+  .build-meta code{font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Setup &amp; Operation</div>
+      <h1>Builds &amp; Downloads</h1>
+      <p>The current Joan APKs — what each build is, which branch it came from, and how to get it onto a device.</p>
+    </div>
+
+    <section id="current-builds">
+      <div class="section-tag">Builds</div>
+      <h2>Current builds</h2>
+      <p class="lead">All builds live in a shared Google Drive folder. Every build has its own package ID, so they install <em>side by side</em> without overwriting each other.</p>
+
+      <p><a class="dl-btn" href="https://drive.google.com/drive/folders/15BCdBcpD-_9zJ3hf9LBPKPpJxGXTM4AD?usp=sharing" target="_blank" rel="noopener">📁 Open the build folder in Google Drive</a></p>
+
+      <h3>Glasses builds</h3>
+      <p>For the <strong>XREAL glasses</strong> (Beam Pro or supported host). Both appear as separate apps in Glasses Control.</p>
+
+      <div class="build-card">
+        <h3>Joan 7-24 — current main</h3>
+        <p>The current production build from <code>main</code>. This is the one to use unless you specifically need the older shadow work.</p>
+        <div class="build-meta">
+          <span><strong>Branch:</strong> <code>main</code></span>
+          <span><strong>Package:</strong> <code>com.joanofthecity.main724</code></span>
+          <span><strong>Size:</strong> ~394 MB</span>
+          <span><strong>Built:</strong> 24 Jul 2026</span>
+        </div>
+        <p>In Drive, download <code>joan-7-24.apk</code>.</p>
+        <a class="dl-btn secondary" href="https://drive.google.com/drive/folders/15BCdBcpD-_9zJ3hf9LBPKPpJxGXTM4AD?usp=sharing" target="_blank" rel="noopener">⬇ Get from Drive</a>
+      </div>
+
+      <div class="build-card">
+        <h3>Joan LS-Shadow — old shadow branch</h3>
+        <p>Build from the <code>old-shadow</code> branch, kept deliberately on the older shadow work. Includes a fix disabling two stray cameras that were rendering over the XR camera (see note below).</p>
+        <div class="build-meta">
+          <span><strong>Branch:</strong> <code>old-shadow</code></span>
+          <span><strong>Package:</strong> <code>com.joanofthecity.lsshadow</code></span>
+          <span><strong>Size:</strong> ~394 MB</span>
+          <span><strong>Built:</strong> 25 Jul 2026</span>
+        </div>
+        <p>In Drive, download <code>joan-LS-shadow.apk</code>.</p>
+        <a class="dl-btn secondary" href="https://drive.google.com/drive/folders/15BCdBcpD-_9zJ3hf9LBPKPpJxGXTM4AD?usp=sharing" target="_blank" rel="noopener">⬇ Get from Drive</a>
+      </div>
+
+      <h3>Tablet build</h3>
+      <p>A separate, standalone variant for <strong>ARCore Android tablets</strong> — no glasses and no Beam Pro involved. Everything runs on the tablet itself.</p>
+
+      <div class="build-card">
+        <h3>Joan Tablet — ARCore variant</h3>
+        <p>Runs the show on a tablet screen as a “magic window”: move the device to look around the scene. Includes an on-screen <strong>Passthrough</strong> toggle that composites the rear-camera feed behind the content — the tablet's version of the glasses' see-through — while keeping the VFX particles.</p>
+        <div class="build-meta">
+          <span><strong>Branch:</strong> <code>tablet-ar</code></span>
+          <span><strong>Package:</strong> <code>com.joanofthecity.tablet</code></span>
+          <span><strong>Size:</strong> ~395 MB</span>
+          <span><strong>Built:</strong> 24 Jul 2026</span>
+        </div>
+        <p>In Drive, download <code>joan-tablet.apk</code>.</p>
+        <a class="dl-btn secondary" href="https://drive.google.com/drive/folders/15BCdBcpD-_9zJ3hf9LBPKPpJxGXTM4AD?usp=sharing" target="_blank" rel="noopener">⬇ Get from Drive</a>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">📱</span>
+        <p><strong>The tablet build needs ARCore.</strong> It requires an <a href="https://developers.google.com/ar/devices" target="_blank" rel="noopener" style="color:var(--gold)">ARCore-certified device</a> (Galaxy Tab S9 verified) with <strong>Google Play Services for AR</strong> installed — which needs a Google account signed in on the tablet, since it installs through the Play Store. Without it, the app falls back to gyro-only 3DoF (rotate to look, no walking) and passthrough is unavailable.</p>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">📦</span>
+        <p>The APKs are ~394 MB each, so they are <strong>hosted on Google Drive</strong> rather than in this repository — GitHub caps files at 100 MB, and this documentation repo is public. Access is managed through the Drive folder.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="installing">
+      <div class="section-tag">Builds · Installing</div>
+      <h2>Installing a build</h2>
+      <p class="lead">The device needs Developer Mode and USB debugging on first — see <a href="glasses-setup.html#provisioning" style="color:var(--gold)">Glasses Setup → Setting up from scratch</a>.</p>
+
+      <div class="steps">
+        <div class="step">
+          <h4>Download the APK</h4>
+          <p>Grab the file from the Drive links above, onto the computer you'll sideload from.</p>
+        </div>
+        <div class="step">
+          <h4>Connect the device</h4>
+          <p>Plug the Beam Pro into the computer using its <strong>data</strong> USB-C port (the other one is power-only and is invisible to adb). Confirm it appears:</p>
+          <pre><code>adb devices</code></pre>
+        </div>
+        <div class="step">
+          <h4>Install</h4>
+          <p>Sideload the APK. <code>-r</code> updates in place if that build is already present:</p>
+          <pre><code>adb install -r joan-7-24.apk</code></pre>
+        </div>
+        <div class="step">
+          <h4>Launch it</h4>
+          <p><strong>Glasses builds:</strong> plug in the glasses, wait for stereo, then start the app from the Glasses Control app — each build appears separately by name.</p>
+          <p><strong>Tablet build:</strong> just open it from the app drawer. No glasses, no host device, nothing else to connect.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <span class="ci">🧭</span>
+        <p><strong>Telling them apart on-device:</strong> the glasses builds show as <strong>“joan-of-the-city”</strong> (main) and <strong>“Joan LS-Shadow”</strong>. Because every build has its own package ID, installing one never overwrites another — they coexist.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>The build must include the XREAL plugin.</strong> A build made without the XREAL loader enabled installs and opens, but has no head tracking and won't appear in Glasses Control. Both builds above have it enabled.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="build-notes">
+      <div class="section-tag">Builds · Notes</div>
+      <h2>Notes &amp; known issues</h2>
+
+      <h3>Stray cameras can black out the view</h3>
+      <p>If a build shows nothing in the glasses, check for extra <strong>enabled cameras at depth 0</strong> in the scene. The XR camera renders at depth −1, so any screen-rendering camera at depth 0 clears the frame on top of it and wipes out the content. This is what made the first LS-Shadow build appear empty; disabling those cameras fixed it.</p>
+
+      <h3>The scene starts empty by design</h3>
+      <p>Nearly all content — including all of the VFX particle effects — is <strong>cue-gated</strong> and inactive at startup. An empty view before any cue fires is expected, not a broken build. Fire cues from the controller to bring content in.</p>
+
+      <h3>Package IDs vary between builds</h3>
+      <p>Team builds normally use <code>com.joanofthecity.tester</code>. The two builds above were given distinct IDs specifically so they can coexist on one device. If you're checking what's installed, confirm with <code>aapt2 dump packagename &lt;apk&gt;</code> rather than assuming.</p>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
