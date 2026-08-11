@@ -163,7 +163,11 @@ git clone <span class="tok-s">git@github.com:annehiatt/joan-of-the-city-xreal.gi
       <p>Sideload the APK, launch, tap <strong>Operator</strong> — the controller appears full-screen with the cue server built in; nothing else to install. See <a href="cues.html#cue-app" style="color:var(--gold)">The Joan Cues tablet app</a>. Other devices on the show Wi-Fi can also open <code>http://&lt;tablet-ip&gt;:8765/</code> as thin clients.</p>
 
       <h3>Option B — PC, one double-click</h3>
-      <p>On a Windows PC with Python 3.9+ installed (tick <em>“Add Python to PATH”</em> during install), double-click <strong><code>start-osc-controller-qlab-version.bat</code></strong> — it installs the one dependency if missing, starts the server, and opens the controller in the browser. Leave the server window open; close it to stop.</p>
+      <p>On a Windows PC with Python 3.9+ installed (tick <em>“Add Python to PATH”</em> during install), double-click <strong><code>pc-server/start-server.bat</code></strong> — it checks Python is present, installs the one dependency (<code>python-osc</code>) if missing, starts the server, prints every address the controller can be reached on, and opens the controller in your browser automatically. Leave the server window open; close it to stop.</p>
+      <div class="callout warn">
+        <span class="ci">🔌</span>
+        <p><strong>“Only one usage of each socket address…”</strong> means a cue server is <em>already running</em> — the new one then half-starts: the page works, but the clock master (UDP 9001) and debug listener (UDP 9002) fail to bind, so scheduled-sync timing and device reporting break silently. Close the old server window before starting another.</p>
+      </div>
 
       <h3>Option C — PC, manual</h3>
       <div class="steps">
