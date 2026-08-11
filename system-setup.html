@@ -172,7 +172,10 @@ git clone <span class="tok-s">git@github.com:annehiatt/joan-of-the-city-xreal.gi
       <h3>Option C — PC, manual</h3>
       <div class="steps">
         <div class="step"><h4>One-time</h4><p>Install Python 3.9+ and run <code>pip install python-osc</code> (Mac: <code>python3</code> / <code>pip3</code>).</p></div>
-        <div class="step"><h4>Start the fused server</h4><p>In the <code>pc-server</code> folder: <code>python server.py</code> — it serves the controller <em>and</em> relays OSC. You should see <code>listening on http://localhost:8765</code>.</p></div>
+        <div class="step"><h4>Start the fused server</h4><p>In the <code>pc-server</code> folder run <code>python -u server.py</code> — it serves the controller <em>and</em> relays OSC.</p>
+        <pre><code>cd "C:\Psychojelly_Git\joan-cue-controller-android\pc-server"
+python -u server.py</code></pre>
+        <p>Use <strong><code>-u</code></strong>. Without it Python buffers its output, so the <code>OSC -&gt; host:port …</code> lines don't appear as cues fire and the window looks dead while it is actually working. Stop with <strong>Ctrl+C</strong>.</p></div>
         <div class="step"><h4>Open the controller</h4><p>Browse to <code>http://localhost:8765/</code> (or from a tablet on the same network, <code>http://&lt;pc-ip&gt;:8765/</code>).</p></div>
         <div class="step"><h4>Target the receivers</h4><p>Add each receiving device's IP (port <code>7000</code>) in Settings → IPs &amp; Audiences, select the audience, and fire.</p></div>
       </div>
@@ -187,6 +190,10 @@ git clone <span class="tok-s">git@github.com:annehiatt/joan-of-the-city-xreal.gi
           <tr><td><code>python is not recognized</code></td><td>Python isn't on PATH. Reinstall and tick <em>Add Python to PATH</em>, then reopen the terminal.</td></tr>
           <tr><td><code>ModuleNotFoundError: No module named 'pythonosc'</code></td><td>Run <code>pip install python-osc</code> again in the same terminal.</td></tr>
           <tr><td>Buttons in the page do nothing</td><td>The cue server isn't running — confirm its window shows the “listening” message (on the tablet app, check the “Joan cue server running” notification).</td></tr>
+          <tr><td><strong><code>501</code> Unsupported method (&#39;POST&#39;)</strong></td><td>The page is being served by the <em>wrong</em> server — almost always <code>python -m http.server</code>, or the file opened straight from disk. A static server answers <code>GET</code> so the page looks perfect, but it cannot handle the <code>POST /send</code> that fires a cue. Run <code>start-server.bat</code> / <code>python -u server.py</code> instead. <strong>Not</strong> a missing-dependency symptom.</td></tr>
+          <tr><td><code>ModuleNotFoundError: pythonosc</code></td><td>Dependency missing — <code>pip install python-osc</code>. The server won't start at all, so the page won't load (connection refused) rather than 501.</td></tr>
+          <tr><td><code>WinError 10048</code> — “only one usage of each socket address”</td><td>A cue server is <strong>already running</strong>. A second one half-starts: the page works, but the clock master (UDP 9001) and debug listener (UDP 9002) fail to bind, so scheduled-sync timing and device reporting break <em>silently</em>. Close the first window. <code>start-server.bat</code> now refuses to start in this case.</td></tr>
+          <tr><td>Cues fire in the UI but nothing happens on device</td><td>The server only sends where the page tells it. Add each device IP (port 7000) in <strong>Settings → IPs &amp; Audiences</strong> <em>and select an audience</em> — with none selected the page silently sends to nobody. Check for stale IPs after a network change.</td></tr>
           <tr><td>Receiver gets nothing</td><td>Check the target IP list and that the receiver is on the same network — and remember Unity's receiver only listens in Play mode.</td></tr>
         </tbody>
       </table>
