@@ -62,6 +62,14 @@
           { title: 'The Joan Cues tablet app', href: 'cues.html#cue-app' },
           { title: 'Sender vs receiver', href: 'cues.html#cue-config' },
         ]},
+        { title: 'Debug & Optimization', href: 'debug-tools.html', children: [
+          { title: 'The debug build', href: 'debug-tools.html#debug-build' },
+          { title: 'Did every headset get it?', href: 'debug-tools.html#dropped-cues' },
+          { title: 'Live render toggles', href: 'debug-tools.html#perf-toggles' },
+          { title: 'Per-cue audio reactivity', href: 'debug-tools.html#audio-reactivity' },
+          { title: 'Driving from QLab', href: 'debug-tools.html#qlab' },
+          { title: 'Traps worth knowing', href: 'debug-tools.html#gotchas' },
+        ]},
         { title: 'Audio Sync & Debug Mode', href: 'sync-design.html', children: [
           { title: 'The problem', href: 'sync-design.html#sync-problem' },
           { title: 'The design — three layers', href: 'sync-design.html#sync-design' },

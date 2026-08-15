@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Debug &amp; Optimization Tools — Joan of the City</title>
+<meta name="description" content="The instrumented Joan build and the controller tools that go with it — the on-device panel, dropped-cue detection, live render toggles, per-cue audio reactivity, and the QLab bridge." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>
+  .osc-tbl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem;}
+  .osc-tbl th,.osc-tbl td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--border);vertical-align:top;}
+  .osc-tbl th{color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;}
+  .osc-tbl code{font-size:.85rem;white-space:nowrap;}
+  .osc-tbl td.num{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .tbl-wrap{overflow-x:auto;}
+  .win{color:#7ee08a;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Setup &amp; Operation</div>
+      <h1>Debug &amp; Optimization Tools</h1>
+      <p>A second, instrumented build of the show — and the controls that come with it — for answering two questions that are otherwise guesswork: <strong>did every headset get that cue</strong>, and <strong>what is costing the frame rate</strong>.</p>
+    </div>
+
+    <div class="callout note">
+      <span class="ci">✅</span>
+      <p><strong>Measured, not estimated.</strong> Every figure on this page came off a Beam Pro driving XREAL One Pro glasses, in stereo, during a repeated 37-cue rehearsal. Where a number was later found to be wrong it has been corrected rather than quietly kept — see <a href="#gotchas" style="color:var(--gold)">Traps</a>.</p>
+    </div>
+
+    <section id="debug-build">
+      <div class="section-tag">Debug · The build</div>
+      <h2>The debug build</h2>
+      <p class="lead">The show build and the debug build are the same show. The debug build adds a panel on the phone screen, a richer heartbeat back to the cue server, and a set of live render toggles. Nothing it adds is on the audience's side of the glasses.</p>
+
+      <p>It installs as <code>com.joanofthecity.tester</code>, so it sits alongside the production builds rather than replacing them — see <a href="builds.html" style="color:var(--gold)">Builds &amp; Downloads</a>.</p>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>The debug build boots with post-processing already OFF.</strong> The bottom button on the phone panel reads <code>Post FX: OFF</code> at startup. If you measure in that state and call it the baseline, you are measuring the optimised case against itself. Press it until it reads <code>Post FX: ON</code> before taking any baseline reading.</p>
+      </div>
+
+      <h3>The on-device panel</h3>
+      <p>Tapping <strong>DEBUG</strong> on the Beam Pro screen opens the panel. It shows, top to bottom:</p>
+      <ul>
+        <li><strong>Performance</strong> — median and worst frame time in ms, frame rate, active renderers / materials / lights, particle and VFX counts, RAM, and render scale.</li>
+        <li><strong>Current cue</strong> — position in the list and the cue id.</li>
+        <li><strong>Snap · Rec · STOP ALL</strong> — a still, a screen recording, and the panic button.</li>
+        <li><strong>Prev · Next · FIRE</strong> — drive this one headset by hand. It desyncs it from the show, which is the point when you are testing one device.</li>
+        <li><strong>Post FX</strong> — cycles <code>ON → OFF → + shadows OFF → + sky OFF</code>.</li>
+      </ul>
+
+      <div class="callout tip">
+        <span class="ci">📐</span>
+        <p><strong>Frame time in milliseconds, not fps.</strong> The panel leads with ms because fps hides the size of a change: 11→15 fps looks like “+4” but is a 24 ms saving, while the same +4 at 55→59 fps is 1.2 ms. When comparing two configurations, compare the ms.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="dropped-cues">
+      <div class="section-tag">Debug · Cues</div>
+      <h2>Did every headset get the cue?</h2>
+      <p class="lead">Each device acknowledges every cue it accepts. The cue server records what it expects, and anything unacknowledged after a grace period is reported as a <strong>drop</strong> — visible in the controller's debug log, with a “dropped only” filter so it isn't lost in the heartbeat traffic.</p>
+
+      <p>This is how the roster stays honest: a headset that has gone to sleep, dropped off the WiFi, or crashed produces silence, and silence is indistinguishable from a working show until something asks the question.</p>
+
+      <div class="callout note">
+        <span class="ci">📊</span>
+        <p><strong>Current status: no drops.</strong> Across 429 cues in testing — including a 63-minute continuous soak of 244 cues — no device ever failed to acknowledge one. Memory held between 709 and 712 MB with no upward trend, and nothing crashed.</p>
+      </div>
+
+      <h3>Clock and time-since-last-cue</h3>
+      <p>The controller toolbar carries a wall clock and a counter showing how long since a cue last fired <em>anywhere</em> — this page, a second operator's browser, or QLab. It turns amber past two minutes and red past five. A stalled show and a quiet passage look identical until you can see the gap growing.</p>
+    </section>
+
+    <hr/>
+
+    <section id="perf-toggles">
+      <div class="section-tag">Debug · Performance</div>
+      <h2>Live render toggles</h2>
+      <p class="lead">Everything below is sent over OSC to a device while the show runs, so a change can be judged in the glasses in seconds instead of a fifteen-minute rebuild. They are diagnostic instruments, not settings: <code>/debug/restorefx 1</code> puts everything back as authored.</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Address</th><th>Argument</th><th>What it does</th></tr>
+        <tr><td><code>/debug/postfx</code></td><td>0–3</td><td>Post stack: on / off / + shadows off / + sky off</td></tr>
+        <tr><td><code>/debug/bloom</code></td><td>0 | 1</td><td>Bloom only, restoring the authored intensity when re-enabled</td></tr>
+        <tr><td><code>/debug/ca</code></td><td>0 | 1</td><td>Chromatic aberration only</td></tr>
+        <tr><td><code>/debug/hdr</code></td><td>32 | 64</td><td>HDR buffer precision</td></tr>
+        <tr><td><code>/debug/voxels</code></td><td>0 | 1</td><td>The voxel avatar, entirely</td></tr>
+        <tr><td><code>/debug/voxelquad</code></td><td>0 | 1</td><td>Draw each voxel as a camera-facing quad instead of a cube</td></tr>
+        <tr><td><code>/debug/voxelfraction</code></td><td>0.0–1.0</td><td>Fraction of voxel instances drawn</td></tr>
+        <tr><td><code>/debug/voxelscale</code></td><td>0.05–4.0</td><td>Voxel size multiplier — separates fill-rate cost from vertex cost</td></tr>
+        <tr><td><code>/debug/voxelshadow</code></td><td>0 | 1</td><td>The voxel avatar's shadow-caster pass</td></tr>
+        <tr><td><code>/debug/vfxlimit</code></td><td>count</td><td>Keep only the first N communion bodies</td></tr>
+        <tr><td><code>/debug/inventory</code></td><td>1</td><td>Dump what is actually on stage right now</td></tr>
+        <tr><td><code>/debug/restorefx</code></td><td>1</td><td>Put every post value back as authored</td></tr>
+      </table>
+      </div>
+
+      <h3>What actually costs the frame rate</h3>
+      <p>Measured across a full 37-cue rehearsal with cues 15 seconds apart, so the figures include <strong>accumulation</strong> — cues stack during a real run and nothing releases them, which makes a rehearsal roughly twice as heavy as any single cue tested alone. Each row includes the ones above it.</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Configuration</th><th>Control</th><th>Median</th><th>fps</th><th>Worst</th></tr>
+        <tr><td>As shipped</td><td>—</td><td class="num">67.3 ms</td><td class="num">15</td><td class="num">123.3 ms</td></tr>
+        <tr><td>+ bloom off</td><td><code>/debug/bloom 0</code></td><td class="num">33.6 ms</td><td class="num">30</td><td class="num">123.4 ms</td></tr>
+        <tr><td>+ all post off</td><td><code>/debug/postfx 1</code></td><td class="num">27.3 ms</td><td class="num">37</td><td class="num">67.7 ms</td></tr>
+        <tr><td>+ voxel avatar off</td><td><code>/debug/voxels 0</code></td><td class="num">18.2 ms</td><td class="num">55</td><td class="num">62.7 ms</td></tr>
+        <tr><td>+ communion bodies off</td><td><code>/debug/vfxlimit 0</code></td><td class="num win">16.8 ms</td><td class="num win">60</td><td class="num">20.2 ms</td></tr>
+      </table>
+      </div>
+
+      <p>Three findings are worth carrying into art decisions:</p>
+      <ul>
+        <li><strong>Bloom alone is half the problem.</strong> Turning off one effect takes the show from 15 to 30 fps. The rest of the post stack is worth a further 6 ms, and that cost is the off-screen render round-trip rather than the effects themselves.</li>
+        <li><strong>Particle count is not the driver.</strong> Correlation across the whole rehearsal was −0.17: a moment with 9,573 particles ran at 54 fps while one with 5,984 ran at 19. The cost is the number of VFX <em>output contexts</em> being drawn — 13 communion bodies × 4 outputs — not the number of particles.</li>
+        <li><strong>The voxel avatar is a per-instance vertex cost.</strong> Not its shadow pass (0.1 ms) and not fill rate (size makes no difference). Drawing each voxel as a camera-facing quad instead of a cube saves <span class="win">15.2 ms</span> — 31 → 58 fps — at full density. The trade is that lighting flattens, since a quad has no real surface direction.</li>
+      </ul>
+
+      <div class="callout tip">
+        <span class="ci">🎯</span>
+        <p><strong>The configuration worth testing for the show</strong> keeps the art rather than deleting it: <code>/debug/bloom 0</code>, <code>/debug/voxelquad 1</code>, and <code>/debug/vfxlimit</code> swept downward from 13 to find where it breaks — rather than turning whole systems off.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="audio-reactivity">
+      <div class="section-tag">Debug · Audio</div>
+      <h2>Per-cue audio reactivity</h2>
+      <p class="lead">The reactive intensity used to be reachable only from the Unity inspector, which meant judging a value took a guess, a build, and putting the headset back on — so in practice the numbers were set once and never revisited. The controller now has sliders for it, live.</p>
+
+      <ul>
+        <li><strong>Intensity</strong> is relative to the authored value: <strong>100% is exactly what the artists set</strong>, 50% halves it, 250% is two and a half times.</li>
+        <li><strong>Gate (low)</strong> raises the bottom of the analysed range, gating out quiet passages.</li>
+        <li><strong>Ceiling</strong> lowers the top, so the effect saturates sooner.</li>
+        <li><strong>📌 Pin to current cue</strong> remembers the value against whatever cue last fired. It is re-applied automatically the next time that cue runs, and cues without a pinned value go back to as-authored, so one cue's setting cannot leak into the next.</li>
+      </ul>
+
+      <h3>Where the values are kept</h3>
+      <p>On the <strong>cue server</strong>, in <code>audio-presets.json</code> — not on the headset, and <strong>never in the cue sheet</strong>. The cue sheet is the show's shared score, fetched from a repository and read by every device; nothing here writes to it.</p>
+      <p>Server-side means a value found on one headset applies to all of them, survives the app closing, and is applied whether the show is driven from the web page or from QLab. <strong>Export</strong> downloads the file to pass to someone else; <strong>Import</strong> loads theirs.</p>
+
+      <div class="callout note">
+        <span class="ci">🎚️</span>
+        <p>The preset is sent to the device immediately <em>before</em> the cue, so the effect is already correct on the frame the cue lands rather than snapping a moment later. Pinning a cue at 100% deletes its entry rather than storing it — 100% <em>is</em> the authored value, and storing it would freeze that cue to today's number and ignore any later change from the art side.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="qlab">
+      <div class="section-tag">Debug · QLab</div>
+      <h2>Driving the show from QLab</h2>
+      <p class="lead">The cue server listens for QLab on port <strong>53000</strong>, so QLab can drive the headsets without replacing anything. It runs alongside the existing controller rather than instead of it.</p>
+
+      <p>Any of these fire cue <code>B_201</code>:</p>
+      <pre><code>/joan/cue "B_201"
+/joan/cue/B_201
+/audio/cue "B_201"</code></pre>
+
+      <p>Targets come from <code>devices.txt</code>, or from recent heartbeats when that file is absent. If no devices are known the bridge <strong>refuses to fire</strong> rather than sending cues into the void, so a silent room is reported instead of being mistaken for a working one.</p>
+
+      <div class="callout warn">
+        <span class="ci">💻</span>
+        <p><strong>QLab 5 is macOS only</strong> (Big Sur or later). Network cues — the ones needed here — are in the free tier. There is no Windows or iPad version that can send them.</p>
+      </div>
+    </section>
+
+    <hr/>
+
+    <section id="gotchas">
+      <div class="section-tag">Debug · Traps</div>
+      <h2>Traps worth knowing</h2>
+      <p class="lead">Each of these produced a wrong answer at least once. They are recorded because none of them announce themselves.</p>
+
+      <h3>The glasses can be in 2D mode without saying so</h3>
+      <p>At <strong>3840×1080 @ 60 Hz</strong> the glasses are in stereo. At <strong>1920×1080 @ 90 Hz</strong> they are showing the same flat image to both eyes — which looks like “two screens side by side”. There is no on-screen warning. An entire round of measurements was invalidated by this before anyone noticed; check the mode before trusting a reading.</p>
+
+      <h3>Old builds ignore the debug controls silently</h3>
+      <p>The <code>/debug/*</code> control addresses exist only in the instrumented build. A production build discards an address it never bound, without an error — so the sliders would move, the page would report “sent”, and nothing would happen. The controller now detects this from the heartbeat and greys the affected controls out. Presets can still be edited and exported while pointed at a production build.</p>
+
+      <h3>Build Settings is stale</h3>
+      <p>The project's Build Settings scene list has only one enabled entry, <code>Assets/_DL/beepTest.unity</code>, and that file no longer exists; two other listed scenes are missing too. Builds name the scene explicitly instead — the show is <code>Assets/Scenes/MainScene.unity</code>. The dangerous version of this bug is a stale entry pointing at a scene that still exists, where the build succeeds and quietly ships the wrong one.</p>
+
+      <h3>Frame times snap to the refresh rate</h3>
+      <p>Vsync is on, so frame times quantise to multiples of the refresh interval — 16.7, 33.3, 50.0, 66.7 ms at 60 Hz. A saving that doesn't cross one of those boundaries is real but invisible. This is also the answer to the “tearing” seen in the glasses: it is judder and reprojection from low frame rate, not tearing. The tell is that world-locked content jitters while the head-locked HUD does not.</p>
+    </section>
+
+    <div class="page-nav" id="pageNav"></div>
+
+    <footer>
+      <div>© Psychojelly · <strong>Joan of the City</strong></div>
+      <div>Living document · v0.4</div>
+    </footer>
+  </main>
+
+  <aside class="toc"><div class="toc-label">On this page</div><nav id="toc"></nav></aside>
+</div>
+<script src="sidebar.js"></script>
+</body>
+</html>
