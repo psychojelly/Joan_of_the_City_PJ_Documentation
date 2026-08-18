@@ -45,17 +45,17 @@
 
       <div class="callout warn">
         <span class="ci">⚠️</span>
-        <p><strong>The debug build boots with post-processing already OFF.</strong> The bottom button on the phone panel reads <code>Post FX: OFF</code> at startup. If you measure in that state and call it the baseline, you are measuring the optimised case against itself. Press it until it reads <code>Post FX: ON</code> before taking any baseline reading.</p>
+        <p><strong>The debug build ships with post-processing OFF, and that is now the shipping configuration rather than a measuring state.</strong> The <code>Post FX</code> button has been removed from the phone panel: a stray tap in somebody's pocket used to turn post back on mid-rehearsal, and nothing on screen said so. To take a <em>baseline</em> reading with post on, send <code>/debug/postfx 1</code> from the controller, which is deliberate rather than accidental. If you measure with post off and call it the baseline, you are measuring the optimised case against itself.</p>
       </div>
 
       <h3>The on-device panel</h3>
       <p>Tapping <strong>DEBUG</strong> on the Beam Pro screen opens the panel. It shows, top to bottom:</p>
       <ul>
-        <li><strong>Performance</strong> — median and worst frame time in ms, frame rate, active renderers / materials / lights, particle and VFX counts, RAM, and render scale.</li>
+        <li><strong>Performance</strong> — median and worst frame time in ms, frame rate, active renderers / materials / lights, particle and VFX counts, and RAM.</li>
         <li><strong>Current cue</strong> — position in the list and the cue id.</li>
         <li><strong>Snap · Rec · STOP ALL</strong> — a still, a screen recording, and the panic button.</li>
-        <li><strong>Prev · Next · FIRE</strong> — drive this one headset by hand. It desyncs it from the show, which is the point when you are testing one device.</li>
-        <li><strong>Post FX</strong> — cycles <code>ON → OFF → + shadows OFF → + sky OFF</code>.</li>
+        <li><strong>Cue list · FIRE</strong> — a scrollable list of every cue. Tap a row to select it, then <code>FIRE</code>. Firing marks that row <strong>green</strong> (playing) and moves the selection to the next row in <strong>blue</strong> (selected), so a run-through is one tap per cue. The two colours answer different questions, and conflating them is how an operator fires the same cue twice. Same meaning as the web controller. Driving from here desyncs this headset from the show, which is the point when testing one device.</li>
+        <li><strong>Post FX and Scale buttons are gone.</strong> Both are still reachable over OSC — see <a href="#perf-toggles" style="color:var(--gold)">Live render toggles</a>.</li>
       </ul>
 
       <div class="callout tip">
@@ -78,6 +78,29 @@
         <p><strong>Current status: no drops.</strong> Across 429 cues in testing — including a 63-minute continuous soak of 244 cues — no device ever failed to acknowledge one. Memory held between 709 and 712 MB with no upward trend, and nothing crashed.</p>
       </div>
 
+      <h3>Played, or just received?</h3>
+      <p>A green tick used to mean only that the packet arrived. The headset acknowledged the cue
+      <em>before</em> checking whether it existed, so a typo came back green and looked fine. The
+      device now reports what it actually did, and the controller shows one of two things next to
+      the cue:</p>
+      <ul>
+        <li><strong>PLAYING</strong> — the cue resolved and its stems started.</li>
+        <li><strong>NO SUCH CUE</strong> — the id arrived intact but matches nothing in the sheet.</li>
+      </ul>
+      <p>Worth knowing that cue matching is <strong>case-sensitive and exact</strong>. A trailing
+      space or a lower-case letter produces <code>NO SUCH CUE</code>, not a near miss.</p>
+      <p>You can prove the path works end to end by firing a cue you know is fake, such as
+      <code>B_SQ9999</code>, and watching <code>NO SUCH CUE</code> come back. That is a healthy
+      system, not a broken one.</p>
+
+      <div class="callout note">
+        <span class="ci">✅</span>
+        <p><strong>Repeated log lines are folded.</strong> A tween warning firing ten times a second
+        used to bury exactly these messages. Identical lines are now collapsed and re-sent at most
+        once every five seconds with a repeat count, so <code>PLAYING</code> and
+        <code>NO SUCH CUE</code> stay visible.</p>
+      </div>
+
       <h3>Clock and time-since-last-cue</h3>
       <p>The controller toolbar carries a wall clock and a counter showing how long since a cue last fired <em>anywhere</em> — this page, a second operator's browser, or QLab. It turns amber past two minutes and red past five. A stalled show and a quiet passage look identical until you can see the gap growing.</p>
     </section>
@@ -97,7 +120,7 @@
         <tr><td><code>/debug/ca</code></td><td>0 | 1</td><td>Chromatic aberration only</td></tr>
         <tr><td><code>/debug/hdr</code></td><td>32 | 64</td><td>HDR buffer precision</td></tr>
         <tr><td><code>/debug/voxels</code></td><td>0 | 1</td><td>The voxel avatar, entirely</td></tr>
-        <tr><td><code>/debug/voxelquad</code></td><td>0 | 1</td><td>Draw each voxel as a camera-facing quad instead of a cube</td></tr>
+        <tr><td><code>/debug/voxelquad</code></td><td>0 | 1</td><td>Draw each voxel as a camera-facing quad instead of a cube — <strong>now ON by default</strong>, send <code>0</code> to see the original cubes</td></tr>
         <tr><td><code>/debug/voxelfraction</code></td><td>0.0–1.0</td><td>Fraction of voxel instances drawn</td></tr>
         <tr><td><code>/debug/voxelscale</code></td><td>0.05–4.0</td><td>Voxel size multiplier — separates fill-rate cost from vertex cost</td></tr>
         <tr><td><code>/debug/voxelshadow</code></td><td>0 | 1</td><td>The voxel avatar's shadow-caster pass</td></tr>
@@ -130,7 +153,7 @@
 
       <div class="callout tip">
         <span class="ci">🎯</span>
-        <p><strong>The configuration worth testing for the show</strong> keeps the art rather than deleting it: <code>/debug/bloom 0</code>, <code>/debug/voxelquad 1</code>, and <code>/debug/vfxlimit</code> swept downward from 13 to find where it breaks — rather than turning whole systems off.</p>
+        <p><strong>Two of these are now the shipping defaults</strong>, so the build you install already has them: post-processing off, and quad voxels on. The remaining lever is <code>/debug/vfxlimit</code>, swept downward from 13 to find where it breaks, rather than turning whole systems off.</p><p>The quad voxels are worth understanding before judging them. Each voxel becomes a camera-facing quad, so from any angle it still reads as a solid form rather than a flat rectangle — what is lost is surface direction, so lighting across the avatar flattens. Send <code>/debug/voxelquad 0</code> to put the cubes back and compare them directly.</p>
       </div>
     </section>
 
@@ -193,6 +216,19 @@
 
       <h3>Build Settings is stale</h3>
       <p>The project's Build Settings scene list has only one enabled entry, <code>Assets/_DL/beepTest.unity</code>, and that file no longer exists; two other listed scenes are missing too. Builds name the scene explicitly instead — the show is <code>Assets/Scenes/MainScene.unity</code>. The dangerous version of this bug is a stale entry pointing at a scene that still exists, where the build succeeds and quietly ships the wrong one.</p>
+
+      <h3>The Beam Pro has one USB-C port, so debugging and the glasses are mutually exclusive</h3>
+      <p>The glasses and the USB cable want the same socket. Unplug the glasses to attach a cable
+      and the app <strong>exits</strong>, because the XR session ends with them. This is the single
+      most common way an afternoon disappears: the app looks like it crashed, and it did not.</p>
+      <p>The way through is wireless debugging, which has to be armed <em>while the cable is
+      attached</em>:</p>
+      <pre><code>adb tcpip 5555
+adb shell ip route          # read the device IP
+adb connect &lt;device-ip&gt;:5555</code></pre>
+      <p><strong>This resets on every reboot of the device.</strong> After a restart the wireless
+      link is gone and can only be re-armed over USB, which means unplugging the glasses again.
+      Arm it at the start of a session, before anyone is wearing anything.</p>
 
       <h3>Frame times snap to the refresh rate</h3>
       <p>Vsync is on, so frame times quantise to multiples of the refresh interval — 16.7, 33.3, 50.0, 66.7 ms at 60 Hz. A saving that doesn't cross one of those boundaries is real but invisible. This is also the answer to the “tearing” seen in the glasses: it is judder and reprojection from low frame rate, not tearing. The tell is that world-locked content jitters while the head-locked HUD does not.</p>

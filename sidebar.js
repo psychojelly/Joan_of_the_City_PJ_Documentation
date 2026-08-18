@@ -253,16 +253,77 @@
   // ---- Scroll spy (TOC + sidebar sub-nav) ----
   var tocLinks = toc ? Array.prototype.slice.call(toc.querySelectorAll('a')) : [];
   var subLinks = sidebar ? Array.prototype.slice.call(sidebar.querySelectorAll('.nav-sub a')) : [];
+  var activeId = null;
   function setActive(id) {
-    tocLinks.forEach(function (l) { l.classList.toggle('active', l.dataset.id === id); });
-    subLinks.forEach(function (l) { l.classList.toggle('active', l.dataset.anchor === id); });
+    if (id === activeId) return;          // scroll fires far more often than the section changes
+    activeId = id;
+    tocLinks.forEach(function (l) {
+      var on = l.dataset.id === id;
+      l.classList.toggle('active', on);
+      if (on) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current');
+    });
+    subLinks.forEach(function (l) {
+      var on = l.dataset.anchor === id;
+      l.classList.toggle('active', on);
+      if (on) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current');
+    });
   }
-  if (sections.length) {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id); });
-    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-    sections.forEach(function (s) { observer.observe(s); });
+  // Which section am I in?
+  //
+  // This used to be an IntersectionObserver that called setActive() for every
+  // entry that reported isIntersecting. With two sections in the band at once
+  // the last callback won, which is arbitrary rather than topmost, so the
+  // highlight would sometimes name the section you had just scrolled past. It
+  // also went stale at the very top and very bottom of a page, where no section
+  // sits inside the band at all and nothing fires.
+  //
+  // Picking the section whose top is nearest above a reading line is simpler,
+  // and it is defined everywhere on the page.
+  function pickCurrent() {
+    if (!sections.length) return;
+    var line = window.innerHeight * 0.3;
+    var best = null, bestTop = -Infinity;
+    sections.forEach(function (sec) {
+      var top = sec.getBoundingClientRect().top;
+      if (top <= line && top > bestTop) { bestTop = top; best = sec; }
+    });
+    // Above the first heading, the first section is the honest answer.
+    if (!best) best = sections[0];
+    // At the end of the page the last section can never reach the line, so it
+    // would otherwise be unreachable no matter how far you scrolled.
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+      best = sections[sections.length - 1];
+    }
+    setActive(best.id);
   }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () { ticking = false; pickCurrent(); });
+  }
+
+  // Listen on the document in CAPTURE mode, not just on window.
+  //
+  // Scroll events do not bubble. This layout puts overflow-y on <body>, and a
+  // future layout could put it on a wrapper, in which case a window-only
+  // listener hears nothing at all and the highlight simply stops moving.
+  // Capturing at the document sees the event whichever element scrolls.
+  document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('hashchange', function () { window.setTimeout(pickCurrent, 60); });
+
+  // And keep an IntersectionObserver as a second trigger. It needs no scroll
+  // event of any kind, so between the two the highlight cannot get stuck.
+  // It only asks pickCurrent() to recompute; the choice of section is made in
+  // one place, by measurement, rather than by whichever callback fired last.
+  if (sections.length && 'IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(onScroll, { threshold: [0, 0.25, 0.5, 1] });
+    sections.forEach(function (sec) { obs.observe(sec); });
+  }
+
+  pickCurrent();
 
   // ---- Sidebar search filter ----
   var search = document.getElementById('search');

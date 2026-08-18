@@ -85,12 +85,35 @@
         <li><strong>Use Local / pre-cached audio</strong> for cue-critical stems so nothing decodes or downloads at the moment of play.</li>
       </ul>
       <h3>Hold the frame budget</h3>
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>Corrected against measurement.</strong> The advice here used to be
+        “reduce particle counts first” and “target 72–90 fps”. Both were wrong on this rig, and
+        following them costs days. The figures below were measured on a Beam Pro driving
+        XREAL One Pro glasses in stereo, with the headset stationary — see
+        <a href="debug-tools.html" style="color:var(--gold)">Debug &amp; Optimization Tools</a>.</p>
+      </div>
       <ul>
-        <li>Set and enforce <strong>particle &amp; texture budgets</strong> per scene — VFX Graph + SDF particles are GPU-heavy on the headset.</li>
-        <li>Bake lighting; keep real-time lights to a minimum.</li>
-        <li>Target a stable 72–90 fps; if it dips, reduce particle counts, texture sizes, and overdraw before anything else.</li>
+        <li><strong>Particle count is not the cost. Instances are.</strong> A VFX graph costs
+        roughly its number of <em>instances</em> multiplied by its number of <em>output
+        contexts</em>. Halving particle counts inside a graph changes little; deleting duplicate
+        copies of the graph changes a lot. Removing 13 duplicated communion bodies was worth
+        <strong>20–38 ms</strong>. Raise instance counts with the art team, not particle counts.</li>
+        <li><strong>Post-processing was the single largest lever</strong>, at about
+        <strong>14–17 ms</strong> regardless of which effects were enabled, because the cost is the
+        off-screen round-trip rather than the effects themselves. It is now <em>off by default</em>
+        in the build, so this saving is already banked — do not spend it twice.</li>
+        <li><strong>Real-time lights and shadows are not the problem here.</strong> Measured:
+        directional soft shadows <strong>0.4 ms</strong>, the voxel shadow pass <strong>0.1 ms</strong>.
+        Turning them off buys nothing and costs the look, so leave them alone.</li>
+        <li><strong>Expect 20–30 fps in the heavy moments, not 72–90.</strong> The communion and
+        shadow overlap has been measured down to 5–12 fps, while a lighter moment such as
+        <code>B_801</code> holds 60 fps at 16.7 ms. Quote a target against the moment, not the show.</li>
+        <li><strong>Audio-reactive systems never reach a steady state</strong> — particle counts
+        pulse with the music, so a single reading of a reactive scene is not a measurement. Take a
+        median and a worst over a sustained pass.</li>
         <li>Watch <strong>thermals</strong> — sustained load throttles mobile chips, which reads as gradual “chugging.” The XREAL notification listener surfaces temperature warnings.</li>
-        <li><strong>Profile on-device</strong> — the Editor under-reports XR cost. And keep every headset on the <strong>same build version</strong>.</li>
+        <li><strong>Profile on-device, and keep the headset still.</strong> The Editor under-reports XR cost, and head movement is the dominant confound in XR measurement: the same scene varied by about <strong>2%</strong> with the rig stationary and by roughly <strong>300%</strong> while worn and moving. A measurement taken while looking around is not a measurement. Keep every headset on the <strong>same build version</strong>.</li>
       </ul>
     </section>
 

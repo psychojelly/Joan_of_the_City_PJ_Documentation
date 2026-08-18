@@ -93,8 +93,19 @@ a { color: inherit; text-decoration: none; }
 .nav-sub { margin: 2px 0 4px 14px; padding-left: 8px; border-left: 1px solid var(--border); }
 .nav-sub a { font-size: 12.5px; padding: 5px 12px; color: var(--text-mute); }
 .nav-sub a:hover { color: var(--text-soft); background: transparent; }
-.nav-sub a.active { background: transparent; color: var(--gold); font-weight: 500; }
-.nav-sub a.active::before { display: none; }
+.nav-sub a { position: relative; transition: background .15s, color .15s; }
+/* The current section. Deliberately stronger than before: a gold word among grey
+   words is easy to miss at a glance, so it also gets a tint and a marker. */
+.nav-sub a.active {
+  background: rgba(212,175,106,0.09); color: var(--gold); font-weight: 600; border-radius: 6px;
+}
+.nav-sub a.active::before {
+  content:""; display:block; position:absolute; left:-9px; top:50%;
+  transform:translateY(-50%); width:2px; height:14px; border-radius:2px; background: var(--gold);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-sub a, .nav-group a, .toc a { transition: none; }
+}
 
 .sidebar-foot { margin-top: 26px; padding: 14px 12px 0; border-top: 1px solid var(--border-soft); font-size: 11.5px; color: var(--text-mute); }
 .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:11px; color: var(--cyan); }
