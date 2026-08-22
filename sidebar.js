@@ -62,6 +62,12 @@
           { title: 'The Joan Cues tablet app', href: 'cues.html#cue-app' },
           { title: 'Sender vs receiver', href: 'cues.html#cue-config' },
         ]},
+        { title: 'Cue Performance', href: 'cue-performance.html', children: [
+          { title: 'What the numbers say', href: 'cue-performance.html#headline' },
+          { title: 'Every cue, in show order', href: 'cue-performance.html#table' },
+          { title: 'Sustained-run stability', href: 'cue-performance.html#stability' },
+          { title: 'How to reproduce this', href: 'cue-performance.html#method' },
+        ]},
         { title: 'Debug & Optimization', href: 'debug-tools.html', children: [
           { title: 'The debug build', href: 'debug-tools.html#debug-build' },
           { title: 'Did every headset get it?', href: 'debug-tools.html#dropped-cues' },
@@ -138,6 +144,7 @@
     { title: 'Glasses Setup',              href: 'glasses-setup.html' },
     { title: 'Builds & Downloads',         href: 'builds.html' },
     { title: 'Cues',                       href: 'cues.html' },
+    { title: 'Cue Performance',            href: 'cue-performance.html' },
     { title: 'Audio Sync & Debug Mode',    href: 'sync-design.html' },
     { title: 'Design Style Guide',         href: 'design-style-guide.html' },
     { title: 'Assets Documentation',       href: 'assets.html' },
