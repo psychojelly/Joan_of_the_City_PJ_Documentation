@@ -37,7 +37,9 @@
 
     <div class="callout note">
       <span class="ci">&#9989;</span>
-      <p><strong>Build tested: v1.7.0</strong> (commit <code>611abf8</code>), 21 August 2026. Beam Pro X4000 driving XREAL One Pro glasses in <strong>stereo</strong>, and a Galaxy Tab S9 (SM-X710) in mono. Both read audio from <code>psychojelly/opera-audio</code>. Figures come from the build&rsquo;s own <code>PerfProbe</code>, which waits 2.5&nbsp;seconds after each cue so the content has actually spawned.</p>
+      <p><strong>Current build: v1.14.0</strong> (commit <code>9fa22e1</code>, branch <code>director-mode</code>), 23&nbsp;August&nbsp;2026. This is the build the soak results and the before/after comparison below were measured on. It contains Nina&rsquo;s VFX optimisation work, the stem-name fix that restored audio to <code>B_SQ601.5</code>, and director mode.</p>
+      <p><strong>&#9888;&#65039; The per-cue table further down is older</strong> &mdash; it was measured on <strong>v1.7.0</strong> (commit <code>611abf8</code>) on 21&nbsp;August and has <em>not</em> been re-measured since. Instance counts in particular have changed: Nina&rsquo;s work took the heaviest cues from 32 VFX instances to 28. Treat that table as the shape of the problem, not as current numbers.</p>
+      <p>Hardware throughout: 21 August 2026. Beam Pro X4000 driving XREAL One Pro glasses in <strong>stereo</strong>, and a Galaxy Tab S9 (SM-X710) in mono. Both read audio from <code>psychojelly/opera-audio</code>. Figures come from the build&rsquo;s own <code>PerfProbe</code>, which waits 2.5&nbsp;seconds after each cue so the content has actually spawned.</p>
     </div>
 
     <section id="headline">
@@ -65,9 +67,80 @@
       <p><strong>The tablet is not the constraint.</strong> Every cue holds 30&nbsp;fps on the Tab S9, which renders mono at full resolution while the Beam Pro renders the scene twice for stereo on phone-class hardware. Everything below is a Beam Pro limit.</p>
     </section>
 
+    <section id="nina">
+      <div class="section-tag">Performance &middot; Before and after</div>
+      <h2>Did Nina&rsquo;s optimisation make it faster?</h2>
+      <p class="lead">Mixed. The counts came down as intended and most cues are unchanged or better &mdash; but the three heaviest cues in the show got substantially <em>slower</em>.</p>
+
+      <p>Measured as two full 50-cue passes on the same Beam Pro, same cue order, 15&nbsp;second spacing. Both open at 17&nbsp;ms and follow the same thermal curve, so they are like for like.</p>
+
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Across all 50 cues</th><th>Before (v1.10.0)</th><th>After (v1.14.0)</th></tr></thead>
+        <tbody>
+          <tr><td>Median settled frame time</td><td class="num">50.8 ms</td><td class="num">49.2 ms</td></tr>
+          <tr><td>VFX instances (total)</td><td class="num">848</td><td class="num">818</td></tr>
+          <tr><td>Particles (total)</td><td class="num">1,429,734</td><td class="num">1,345,930</td></tr>
+          <tr><td>Cues better / same / worse</td><td class="num">&mdash;</td><td class="num">20 / 25 / 5</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p><strong>The optimisation itself worked.</strong> The heaviest cues dropped from 32 VFX instances to 28 and from 50 renderers to 48, and total particles fell by about 6%. That is real, and it is the lever this page has always said matters.</p>
+
+      <p><strong>But the endings regressed sharply.</strong></p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Cue</th><th>Before</th><th>After</th><th>Change</th><th>Instances</th><th>Particles</th></tr></thead>
+        <tbody>
+          <tr class="bad"><td><code>B_VQ503.11</code></td><td class="num">32 ms</td><td class="num">85 ms</td><td class="num">+169%</td><td class="num">32 &rarr; 28</td><td class="num">52,579 &rarr; 37,346</td></tr>
+          <tr class="bad"><td><code>B_VQ901</code></td><td class="num">68 ms</td><td class="num">150 ms</td><td class="num">+119%</td><td class="num">32 &rarr; 28</td><td class="num">40,661 &rarr; 45,272</td></tr>
+          <tr class="bad"><td><code>B_SQ901</code></td><td class="num">96 ms</td><td class="num">155 ms</td><td class="num">+61%</td><td class="num">32 &rarr; 28</td><td class="num">41,744 &rarr; 43,947</td></tr>
+          <tr><td><code>B_VQ801</code></td><td class="num">115 ms</td><td class="num">114 ms</td><td class="num">&mdash;</td><td class="num">32 &rarr; 28</td><td class="num">42,872 &rarr; 43,064</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong><code>B_VQ503.11</code> is the one to look at.</strong> It got <strong>2.7&times; slower</strong> while using <em>fewer</em> instances (32&rarr;28) and <em>fewer</em> particles (52,579&rarr;37,346). Every counter this page tracks went down and the cost went up, which means the expense moved somewhere the counters cannot see &mdash; almost certainly per-pixel shading rather than instance count.</p>
+        <p>That is the same signature as the Lit/Unlit regression: particle and instance counts barely moved while frame time went 3&ndash;19&times; worse. Worth checking whether the new crown work reintroduced per-pixel cost of that kind.</p>
+      </div>
+
+      <p><strong>Net effect on the show:</strong> the median is flat, so a rehearsal will feel about the same for most of the run &mdash; but the ending, already the most expensive stretch, is now materially worse.</p>
+    </section>
+
+    <section id="soak">
+      <div class="section-tag">Performance &middot; Soak</div>
+      <h2>Sustained runs on v1.14.0</h2>
+      <p>Three independent trials, each from a fresh process, 50 cues at 15&nbsp;second spacing.</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Trial</th><th>Result</th><th>Median</th><th>Worst frame</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>completed 50/50 in 12.6 min</td><td class="num">49.2 ms (20 fps)</td><td class="num">414.6 ms</td></tr>
+          <tr><td class="num">2</td><td>completed 50/50 in 12.6 min</td><td class="num">45.7 ms (22 fps)</td><td class="num">493.9 ms</td></tr>
+          <tr class="warn"><td class="num">3</td><td>ended at cue 37 &mdash; <strong>glasses disconnect, not a crash</strong></td><td class="num">34.8 ms (29 fps)</td><td class="num">131.6 ms</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Every trial opens at <strong>17&nbsp;ms (~59&nbsp;fps)</strong> and closes around <strong>34&ndash;38&nbsp;ms</strong>. That degradation is reproducible across runs, so it can be planned around rather than treated as noise. The heavy cues are the same three every time: <code>B_VQ801</code>, <code>B_SQ901</code>, <code>B_VQ901</code>.</p>
+
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Distinguish a crash from a disconnect before drawing conclusions.</strong> On 23&nbsp;August the glasses disconnected <strong>six times</strong>, each time killing the app. That is more lost test time than the crash caused. Android records the difference: <code>reason=5 APP CRASH (NATIVE) status=11</code> is a real SIGSEGV; <code>reason=2 SIGNALED status=9</code> is a SIGKILL from session loss. Read it with:</p>
+        <pre><code>adb shell dumpsys activity exit-info com.joanofthecity.xreal</code></pre>
+        <p>Inferring the cause from logs alone produced three wrong calls in one day. Ask Android instead.</p>
+      </div>
+    </section>
+
     <section id="table">
       <div class="section-tag">Performance &middot; Per cue</div>
       <h2>Every cue, in show order</h2>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>These figures are from v1.7.0 (21 August) and have not been re-measured.</strong> The instance counts here predate Nina&rsquo;s optimisation &mdash; cues shown at 32 instances now run at 28. Use this table for the <em>ranking</em> of cues by cost, not for absolute numbers.</p>
+      </div>
       <div class="keyrow">
         <span><i class="sw" style="background:rgba(220,70,70,.5)"></i> under 20 fps</span>
         <span><i class="sw" style="background:rgba(230,170,60,.45)"></i> 20&ndash;28 fps</span>
@@ -150,7 +223,13 @@
   #08      art_jni_trampoline
   #09      com.unity3d.player.z0.handleMessage</code></pre>
       <p>The whole stack sits inside <code>libunity.so</code>. There are no <code>libil2cpp.so</code> frames, so it is <strong>not the show&rsquo;s C# code</strong>, and no XREAL frames, so it is not the glasses SDK. It is a null dereference inside Unity&rsquo;s own engine.</p>
-      <p>That does not make it somebody else&rsquo;s problem to wait on. Engine faults of this kind are usually <em>triggered</em> by resource pressure, and the device was sustaining 13&ndash;15&nbsp;fps at 47&nbsp;&deg;C when it happened. Reducing the load is still the practical fix. The tablet ran the same cues at the same time and did not crash.</p>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Correction, 23 August: the load theory does not hold.</strong> This page previously said the crash was triggered by resource pressure and that reducing load was the practical fix. Three crashes measured on 23&nbsp;August contradict that. They landed at <code>B_SQ719</code> and twice around <code>B_VQ701</code>, and in every case the device was <em>comfortable</em> &mdash; 35&nbsp;ms frame times, and one occurred during the fastest trial of its set. Do not optimise against this theory.</p>
+      </div>
+      <p>What the three crashes do share is <strong>location</strong>: all of them fall inside the SQ7xx &ldquo;How Long&rdquo; chord sequence, matching the earlier cluster at cues 21, 22, 25, 26, 32 and 34. That, not load, is where to look.</p>
+      <p>It is also <strong>intermittent</strong>: across valid passes on 23&nbsp;August there were 2 native crashes in roughly 6 clean traversals of the same sequence, so a single clean run proves nothing.</p>
+      <p>The tablet ran the same cues throughout and did not crash.</p>
       <p><strong>Memory is not the cause.</strong> Across 300 cues and six passes the pass-start figure drifted by 1.1&nbsp;MB and the native heap held at 84.7&nbsp;MB. There is no leak.</p>
     </section>
 
