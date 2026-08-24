@@ -134,6 +134,78 @@
       </div>
     </section>
 
+    <section id="targets">
+      <div class="section-tag">Performance &middot; Where the cost actually is</div>
+      <h2>Three targets, named and ranked</h2>
+      <p class="lead">Measured on 24&nbsp;August against v1.14.0. Every conclusion here comes from switching things off on the device and watching the number move, not from reading counters.</p>
+
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>#</th><th>Target</th><th>Worth</th><th>Whose job</th></tr></thead>
+        <tbody>
+          <tr class="bad"><td class="num">1</td><td><code>CommunionWings_Unlit</code> &mdash; 4 instances, 35,072 particles</td><td class="num">sets the cost of 23 cues</td><td>art / VFX</td></tr>
+          <tr class="warn"><td class="num">2</td><td>Cue spacing through the endings</td><td class="num">339&nbsp;ms &rarr; 33&nbsp;ms</td><td>cue timing</td></tr>
+          <tr class="warn"><td class="num">3</td><td><code>CommunionBodyAudioReactive</code> &mdash; 5&ndash;7 instances</td><td class="num">~21&ndash;26% per 20% cut</td><td>art / VFX</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>1. The wings set the cost of the entire 7xx block</h3>
+      <p>The &ldquo;How Long&rdquo; chord sequence is 23 cues &mdash; the longest continuous stretch in the show. Walked cue by cue, it is <strong>completely flat</strong>: everything from <code>B_VQ701</code> to <code>B_SQ721</code> costs 31&ndash;33&nbsp;ms with identical renderer, material and instance counts. The 21 chord cues add <em>nothing</em>.</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Cue</th><th>Settled</th><th>Rend</th><th>Particles</th><th>VFX</th></tr></thead>
+        <tbody>
+          <tr><td><code>B_SQ701</code></td><td class="num">28.2 ms</td><td class="num">28</td><td class="num">18,210</td><td class="num">15</td></tr>
+          <tr class="bad"><td><code>B_VQ701.1</code></td><td class="num">30.0 ms</td><td class="num">33</td><td class="num">55,352</td><td class="num">20</td></tr>
+          <tr><td><code>B_VQ701</code> &hellip; <code>B_SQ721</code> (21 cues)</td><td class="num">31&ndash;33 ms</td><td class="num">33</td><td class="num">~61&ndash;65k</td><td class="num">20</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>All the cost arrives in one step at <code>B_VQ701.1</code>: <strong>+5 instances and +37,000 particles</strong>. The inventory at the end of the block names what is live:</p>
+      <pre><code>CommunionWings_Unlit                        4 instances   35,072 particles
+CommunionBodyAudioReactive                  7 instances    7,756 particles
+260521CircleAudioReactiveCommunionRipples   3 instances    3,087 particles</code></pre>
+      <p><strong>The wings are 58% of every particle in the block</strong>, spawned once and held for 23 cues. Reducing them improves several minutes of stage time, not one moment. Nothing accumulates chord by chord &mdash; that theory is dead.</p>
+
+      <h3>2. Cue spacing through the endings is a 10&times; lever, for free</h3>
+      <p>Firing the heavy run (<code>B_VQ801</code> &rarr; <code>B_SQ901</code> &rarr; <code>B_VQ901</code>) and then probing the next cue at increasing gaps:</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Gap</th><th>Settled</th><th>Worst</th><th>VFX</th></tr></thead>
+        <tbody>
+          <tr class="bad"><td class="num">5 s</td><td class="num">339.1 ms</td><td class="num">900.8 ms</td><td class="num">29</td></tr>
+          <tr><td class="num">15 s</td><td class="num">33.3 ms</td><td class="num">54.9 ms</td><td class="num">29</td></tr>
+          <tr><td class="num">30 s</td><td class="num">33.0 ms</td><td class="num">47.3 ms</td><td class="num">29</td></tr>
+          <tr><td class="num">60 s</td><td class="num">33.4 ms</td><td class="num">61.0 ms</td><td class="num">29</td></tr>
+          <tr><td class="num">90 s</td><td class="num">33.6 ms</td><td class="num">55.1 ms</td><td class="num">29</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Identical content &mdash; 29 instances at every gap.</strong> It is a cliff, not a curve: everything expensive lives in the first few seconds and is gone by fifteen. <strong>Nothing leaks.</strong> If content were being held, 90&nbsp;s would still be costly; it is not.</p>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><code>B_VQ503.11</code> (&ldquo;SHADOW ATTACK 1&rdquo;) follows <code>B_VQ901</code> (&ldquo;Crown lowers for performer&rdquo;) with <strong>five more cues between them</strong>. An attack beat after a reveal tends to be played tight &mdash; which lands it in the 5-second window. That single piece of timing may account for the worst frames in the piece.</p>
+        <p>The real spacing in performance is <strong>not recorded anywhere</strong>. Run the cue server during a rehearsal and it timestamps every fan-out; that would settle it.</p>
+      </div>
+      <p>This also re-explains <code>B_VQ503.11</code>, previously reported here as regressing 2.7&times;. It is a <em>cheap</em> cue &mdash; 29&nbsp;ms in isolation &mdash; standing in the wake of the three most expensive ones. What got worse was the residue in front of it, not its own content.</p>
+
+      <h3>3. What does <em>not</em> help</h3>
+      <p>Two sweeps with baselines interleaved between every condition, on <code>B_VQ801</code> and <code>B_VQ503.11</code>:</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Toggle</th><th><code>B_VQ801</code></th><th><code>B_VQ503.11</code></th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>voxels OFF</td><td class="num">no effect</td><td class="num">&minus;7% (noise)</td><td>not a factor</td></tr>
+          <tr><td>voxel fraction 0%</td><td class="num">no effect</td><td class="num">&minus;9% (noise)</td><td><strong>not fill or geometry</strong></td></tr>
+          <tr class="warn"><td>VFX instances 29&rarr;23</td><td class="num">&minus;26%</td><td class="num">&minus;21%</td><td><strong>the only lever</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Drawing <strong>0%</strong> of the baked voxels costs the same as drawing all of them &mdash; so this is fixed per-draw overhead, not fill rate. And the second term of &ldquo;instances &times; output contexts&rdquo; is not available to attack: <strong>almost every graph has exactly one output context</strong>. Cost is instances, and consolidation is the whole job.</p>
+      <p>Post-processing is also ruled out: it defaults to <strong>off</strong> (<code>StartMode = 1</code>), every crash log confirms <code>Post FX: OFF</code>, and no post effects were added anywhere between the pre-optimisation baseline and v1.14.0.</p>
+    </section>
+
     <section id="table">
       <div class="section-tag">Performance &middot; Per cue</div>
       <h2>Every cue, in show order</h2>
@@ -230,6 +302,27 @@
       <p>What the three crashes do share is <strong>location</strong>: all of them fall inside the SQ7xx &ldquo;How Long&rdquo; chord sequence, matching the earlier cluster at cues 21, 22, 25, 26, 32 and 34. That, not load, is where to look.</p>
       <p>It is also <strong>intermittent</strong>: across valid passes on 23&nbsp;August there were 2 native crashes in roughly 6 clean traversals of the same sequence, so a single clean run proves nothing.</p>
       <p>The tablet ran the same cues throughout and did not crash.</p>
+
+      <h3>The stack, captured 24 August</h3>
+      <p>A crash was finally caught with both logcat buffers streaming to disk. <code>/data/tombstones</code> is <code>Permission denied</code> on this unrooted device and the app is not debuggable, but the <strong>crash buffer carries the full backtrace and needs no permissions</strong>.</p>
+      <pre><code>signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0
+tid (UnityMain)
+
+#00-#07  libunity.so            (BuildId b5d0433965df40ad)
+#08      art_jni_trampoline
+#09      com.unity3d.player.z0.handleMessage +456
+#10-#12  android.os.Handler.dispatchMessage -&gt; Looper.loop
+#13      com.unity3d.player.B0.run</code></pre>
+      <p><strong>A null dereference</strong> &mdash; <code>fault addr 0x0</code> with <code>SEGV_MAPERR</code> means reading through a null, not a corrupted or dangling pointer. Eight frames inside <code>libunity.so</code> and <strong>no <code>libil2cpp.so</code> frames at all</strong>, so it is not the show&rsquo;s C# code. Entered from the Java message loop via JNI &mdash; Unity&rsquo;s own frame pump. The last managed activity was <code>VisualCueScheduler:RaiseCueReady</code>, about half a second earlier.</p>
+      <p>The offsets plus the BuildId and editor 6000.0.26f1 are what Unity would need to symbolicate. <strong>No symbols build is required</strong> to report it.</p>
+
+      <h3>Reproduction rate, and where it is not</h3>
+      <p>Roughly <strong>1 crash in 3 full passes</strong>. But <strong>88 traversals of the 7xx block alone produced none</strong>, so the chord material is not faulty by itself &mdash; it needs the state a full pass leaves behind. That also explains the intermittency, and why it does not track frame time.</p>
+
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>The connection is the larger risk.</strong> On 23&ndash;24 August the glasses disconnected <strong>ten times</strong> against <strong>two</strong> real crashes, cost five test runs and one phone restart. A fault that fires once in three passes loses a run occasionally; a link that drops every twenty minutes will end a performance. Check the cable and the Beam Pro&rsquo;s USB-C port before optimising anything.</p>
+      </div>
       <p><strong>Memory is not the cause.</strong> Across 300 cues and six passes the pass-start figure drifted by 1.1&nbsp;MB and the native heap held at 84.7&nbsp;MB. There is no leak.</p>
     </section>
 
@@ -243,6 +336,18 @@
         <li>Fire cues at 15&nbsp;second intervals. Under about 4&nbsp;seconds measures the spawn rather than the settled scene.</li>
         <li>Read <code>cost &lt;cue&gt;: &lt;median&gt; -&gt; &lt;settled&gt; ms (worst &lt;worst&gt;, &hellip;)</code> from the log.</li>
       </ol>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Warm up before measuring anything.</strong> A cue fired on a freshly launched app measures a different show. <code>B_VQ503.11</code> reports <strong>2 VFX instances and 661 particles</strong> cold against <strong>29 and 37,346</strong> after the sequence has run &mdash; 16.7&nbsp;ms against 85&nbsp;ms. Many earlier cues are <code>{ENABLE}</code> cues that add figures and never remove them, so the scene the show renders only exists after the cues before it have fired. This invalidates any single-cue measurement taken cold, including parts of the v1.7.0 table below.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Measure a baseline between every condition, not just at the ends.</strong> One sweep opened at 186&nbsp;ms and closed at 24&nbsp;ms on the same measurement &mdash; warm-up transients decaying through the run. Everything between two baselines that far apart is worthless. Interleaved baselines make each toggle comparable to the one nearest it in time.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Ask Android why a process ended.</strong> <code>dumpsys activity exit-info</code> distinguishes <code>reason=5 APP CRASH (NATIVE) status=11</code> (a real SIGSEGV) from <code>reason=2 SIGNALED status=9</code> (SIGKILL on glasses disconnect). Inferring it from logs produced three wrong calls in one day, including two &ldquo;crashes&rdquo; that were adb timeouts against a process that never died.</p>
+      </div>
       <div class="callout warn">
         <span class="ci">&#9888;&#65039;</span>
         <p><strong>The median alone is useless here.</strong> The display caps at 30&nbsp;fps, so a cue coasting and a cue barely coping both read 33.4&nbsp;ms. The <em>worst</em> frame is what separates headroom from none, which is why it was added to the log.</p>
