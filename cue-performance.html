@@ -227,9 +227,36 @@ CommunionBodyAudioReactive                  7 instances    7,756 particles
         <p><strong>For anyone optimising: reduce the number of live VFX instances.</strong> Do not spend time on particle budgets, and do not remove the wings or the audio reactivity for performance reasons &mdash; both were tested and both are nearly free.</p>
       </div>
 
-      <h3>4. The ~31&nbsp;ms floor</h3>
-      <p>Every condition converges on the same place. Wings out, reactivity off, voxels zeroed &mdash; all land at <strong>30.8&ndash;32.2&nbsp;ms</strong>, and 15 instances still hit it.</p>
-      <p>That floor, not the content on top of it, is what caps the block at roughly 32&nbsp;fps. Candidates the data has not excluded: fixed per-instance overhead (15 instances &times; ~2&nbsp;ms would account for it, which is consistent with instance count being the only effective lever), the 28 renderers / 28 materials that never varied in any test, and stereo rendering itself &mdash; the tablet holds 30&nbsp;fps on the same content in mono.</p>
+      <h3>4. There is no floor &mdash; it is 1.6&nbsp;ms per instance, all the way down</h3>
+      <p>An earlier version of this section proposed a fixed ~31&nbsp;ms floor, because wings-out, reactivity-off and voxels-zeroed all converged there. They converged because <em>none of them actually reduced instance count</em>. Walking <code>vfxlimit</code> down shows what is really happening:</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Live VFX instances</th><th>Settled</th><th>Implied fps</th></tr></thead>
+        <tbody>
+          <tr><td class="num">20 (as shipped)</td><td class="num">33.1 ms</td><td class="num">30</td></tr>
+          <tr><td class="num">18</td><td class="num">33.8 ms</td><td class="num">30</td></tr>
+          <tr><td class="num">14</td><td class="num">30.3 ms</td><td class="num">33</td></tr>
+          <tr class="warn"><td class="num">11</td><td class="num">18.8 ms</td><td class="num">53</td></tr>
+          <tr class="warn"><td class="num">10</td><td class="num">18.5 ms</td><td class="num">54</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>About 1.6&nbsp;ms per live VFX instance, with roughly 3&nbsp;ms fixed.</strong> Cost keeps falling to the lowest count the toggle can reach &mdash; there is no ceiling underneath waiting to stop you.</p>
+      <p>Note the step between 14 and 11 instances (30.3&nbsp;&rarr;&nbsp;18.8&nbsp;ms). Not perfectly linear, so there may be a threshold worth finding; the slope and direction are solid regardless.</p>
+
+      <h4>The renderer is not the problem</h4>
+      <pre><code>bare XR (post + shadows + sky OFF), 20 instances -&gt; 35.7 ms   (baseline 33.2)  no gain
+bare XR,                           10 instances -&gt; 18.1 ms   (vs 18.5)        no gain</code></pre>
+      <p>Stripping post-processing, shadows and the skybox changes <strong>nothing</strong> at either instance count. Whatever the show costs, it is not the render pipeline configuration.</p>
+
+      <div class="callout note">
+        <span class="ci">&#9989;</span>
+        <p><strong>A budget you can plan against.</strong> At ~1.6&nbsp;ms per instance: 20&nbsp;&rarr;&nbsp;30&nbsp;fps, 14&nbsp;&rarr;&nbsp;38&nbsp;fps, 10&nbsp;&rarr;&nbsp;52&nbsp;fps, 6&nbsp;&rarr;&nbsp;77&nbsp;fps. That is consistent with the three tiers this page has carried since v1.7.0, now with a slope instead of bands.</p>
+      </div>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>The low end is extrapolated.</strong> <code>/debug/vfxlimit 0</code> still leaves <strong>10 instances</strong> live &mdash; it only bounds <code>CommunionBody</code> graphs. So 18.5&nbsp;ms is &ldquo;10 instances&rdquo;, not zero, and the 3&nbsp;ms intercept is fitted rather than measured. Going below 10 needs a build.</p>
+      </div>
 
       <h3>5. What does <em>not</em> help</h3>
       <p>Two sweeps with baselines interleaved between every condition, on <code>B_VQ801</code> and <code>B_VQ503.11</code>:</p>
