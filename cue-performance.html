@@ -143,14 +143,32 @@
       <table class="perf-tbl">
         <thead><tr><th>#</th><th>Target</th><th>Worth</th><th>Whose job</th></tr></thead>
         <tbody>
-          <tr class="bad"><td class="num">1</td><td><code>CommunionWings_Unlit</code> &mdash; 4 instances, 35,072 particles</td><td class="num">sets the cost of 23 cues</td><td>art / VFX</td></tr>
-          <tr class="warn"><td class="num">2</td><td>Cue spacing through the endings</td><td class="num">339&nbsp;ms &rarr; 33&nbsp;ms</td><td>cue timing</td></tr>
-          <tr class="warn"><td class="num">3</td><td><code>CommunionBodyAudioReactive</code> &mdash; 5&ndash;7 instances</td><td class="num">~21&ndash;26% per 20% cut</td><td>art / VFX</td></tr>
+          <tr class="warn"><td class="num">1</td><td>Cue spacing through the endings</td><td class="num">339&nbsp;ms &rarr; 33&nbsp;ms</td><td>cue timing</td></tr>
+          <tr class="warn"><td class="num">2</td><td><code>CommunionBodyAudioReactive</code> &mdash; 9 instances</td><td class="num">~21&ndash;26% per 20% cut</td><td>art / VFX</td></tr>
+          <tr><td class="num">&mdash;</td><td><code>CommunionWings_Unlit</code> &mdash; 4 instances, 35,072 particles</td><td class="num"><strong>2.8% &mdash; tested, nearly free</strong></td><td>leave alone</td></tr>
         </tbody>
       </table>
       </div>
 
-      <h3>1. The wings set the cost of the entire 7xx block</h3>
+      <div class="callout warn">
+        <span class="ci">&#9888;&#65039;</span>
+        <p><strong>Correction, 24 August: the wings are not the lever.</strong> This section originally named <code>CommunionWings_Unlit</code> as the single biggest win, inferred from cost stepping up at the same cue that spawns them. That inference was then tested by running the block with that cue omitted. The wings disappeared from the inventory &mdash; and the frame time did not move.</p>
+        <div class="tbl-wrap">
+        <table class="perf-tbl">
+          <thead><tr><th></th><th>With the cue</th><th>Without</th></tr></thead>
+          <tbody>
+            <tr><td>VFX instances</td><td class="num">20</td><td class="num">15</td></tr>
+            <tr><td>Particles</td><td class="num">~63,000</td><td class="num">~20,000</td></tr>
+            <tr><td>Renderers / materials</td><td class="num">33 / 38</td><td class="num">28 / 28</td></tr>
+            <tr class="bad"><td><strong>Median cost</strong></td><td class="num"><strong>32.2 ms</strong></td><td class="num"><strong>31.3 ms</strong></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>Removing 5 instances and 68% of all particles bought 2.8%</strong> &mdash; inside the noise. This is the same trap as <code>B_VQ503.11</code>: content arriving alongside a cost increase is not the same as content causing it. And it is another instance of the rule this page has carried since v1.7.0 &mdash; <em>particle count does not predict cost</em>. The wings were a particle-count argument wearing an instance-count coat.</p>
+        <p>One real finding survives. Without the wings the block goes <strong>bimodal</strong>: six cues drop to ~18&nbsp;ms while the rest hold at 31&ndash;33&nbsp;ms. With them it is a uniform 32&nbsp;ms. So the wings are not adding cost, they are <em>masking variance</em> &mdash; something else sets a ~31&nbsp;ms floor that 15 instances still hit. <strong>That floor is the real target.</strong></p>
+      </div>
+
+      <h3>1. The 7xx block is flat, and one cue steps it</h3>
       <p>The &ldquo;How Long&rdquo; chord sequence is 23 cues &mdash; the longest continuous stretch in the show. Walked cue by cue, it is <strong>completely flat</strong>: everything from <code>B_VQ701</code> to <code>B_SQ721</code> costs 31&ndash;33&nbsp;ms with identical renderer, material and instance counts. The 21 chord cues add <em>nothing</em>.</p>
       <div class="tbl-wrap">
       <table class="perf-tbl">
@@ -166,7 +184,7 @@
       <pre><code>CommunionWings_Unlit                        4 instances   35,072 particles
 CommunionBodyAudioReactive                  7 instances    7,756 particles
 260521CircleAudioReactiveCommunionRipples   3 instances    3,087 particles</code></pre>
-      <p><strong>The wings are 58% of every particle in the block</strong>, spawned once and held for 23 cues. Reducing them improves several minutes of stage time, not one moment. Nothing accumulates chord by chord &mdash; that theory is dead.</p>
+      <p>The wings are 58% of every particle in the block &mdash; and, as the correction above shows, removing them changes almost nothing. What the walk does establish is that <strong>nothing accumulates chord by chord</strong>: the 21 chord cues add no renderers, no materials and no instances. That theory is dead, and the cost is set before the block begins.</p>
 
       <h3>2. Cue spacing through the endings is a 10&times; lever, for free</h3>
       <p>Firing the heavy run (<code>B_VQ801</code> &rarr; <code>B_SQ901</code> &rarr; <code>B_VQ901</code>) and then probing the next cue at increasing gaps:</p>
@@ -190,7 +208,30 @@ CommunionBodyAudioReactive                  7 instances    7,756 particles
       </div>
       <p>This also re-explains <code>B_VQ503.11</code>, previously reported here as regressing 2.7&times;. It is a <em>cheap</em> cue &mdash; 29&nbsp;ms in isolation &mdash; standing in the wake of the three most expensive ones. What got worse was the residue in front of it, not its own content.</p>
 
-      <h3>3. What does <em>not</em> help</h3>
+      <h3>3. Particle count is not the metric &mdash; four tests</h3>
+      <p>Every attempt to reduce cost by reducing particles has failed, and the one change that worked <em>raised</em> the particle count. Measured on the 7xx block, same protocol each time:</p>
+      <div class="tbl-wrap">
+      <table class="perf-tbl">
+        <thead><tr><th>Change</th><th>Particles</th><th>Instances</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>voxel fraction 0%</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">no effect</td></tr>
+          <tr><td>wings cue omitted</td><td class="num"><strong>&minus;68%</strong></td><td class="num">20 &rarr; 15</td><td class="num">&minus;4.3%</td></tr>
+          <tr><td>audio reactivity gain 0</td><td class="num">&minus;19%</td><td class="num">20</td><td class="num">&minus;4.3%</td></tr>
+          <tr class="warn"><td><strong>VFX instances 29 &rarr; 23</strong></td><td class="num"><em>rose</em></td><td class="num"><strong>&minus;21%</strong></td><td class="num"><strong>&minus;21 to &minus;26%</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Cutting more than two thirds of every particle in the block bought <strong>4%</strong>. Turning audio reactivity off entirely &mdash; which drops <code>CommunionBodyAudioReactive</code> from ~1,000 particles per instance to <strong>72</strong> &mdash; also bought 4%. Only instance count has ever moved the number.</p>
+      <div class="callout note">
+        <span class="ci">&#9989;</span>
+        <p><strong>For anyone optimising: reduce the number of live VFX instances.</strong> Do not spend time on particle budgets, and do not remove the wings or the audio reactivity for performance reasons &mdash; both were tested and both are nearly free.</p>
+      </div>
+
+      <h3>4. The ~31&nbsp;ms floor</h3>
+      <p>Every condition converges on the same place. Wings out, reactivity off, voxels zeroed &mdash; all land at <strong>30.8&ndash;32.2&nbsp;ms</strong>, and 15 instances still hit it.</p>
+      <p>That floor, not the content on top of it, is what caps the block at roughly 32&nbsp;fps. Candidates the data has not excluded: fixed per-instance overhead (15 instances &times; ~2&nbsp;ms would account for it, which is consistent with instance count being the only effective lever), the 28 renderers / 28 materials that never varied in any test, and stereo rendering itself &mdash; the tablet holds 30&nbsp;fps on the same content in mono.</p>
+
+      <h3>5. What does <em>not</em> help</h3>
       <p>Two sweeps with baselines interleaved between every condition, on <code>B_VQ801</code> and <code>B_VQ503.11</code>:</p>
       <div class="tbl-wrap">
       <table class="perf-tbl">
