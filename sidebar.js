@@ -74,6 +74,7 @@
           { title: 'Named position sets', href: 'object-movement.html#saving' },
           { title: 'Why shadows are different', href: 'object-movement.html#shadows' },
           { title: 'What propagates', href: 'object-movement.html#propagation' },
+          { title: 'What the cue server must be', href: 'object-movement.html#server' },
           { title: 'Traps worth knowing', href: 'object-movement.html#gotchas' },
         ]},
         { title: 'Debug & Optimization', href: 'debug-tools.html', children: [

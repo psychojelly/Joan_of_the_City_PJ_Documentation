@@ -161,6 +161,39 @@
       </div>
     </section>
 
+    <section id="server">
+      <div class="section-tag">Movement · Setup</div>
+      <h2>What the cue server has to be</h2>
+      <p class="lead">Saving and loading positions is a call from the headset <strong>straight to the cue server</strong> over HTTP. The controller page is not involved — it cannot cause or fix a problem here.</p>
+
+      <p>That means the machine answering on port <code>8765</code> has to be a cue server that knows these routes. There are two things that can answer on that port, and they are not equivalent:</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Running as the cue server</th><th>Positions save &amp; load</th><th>Director moves &amp; shadow pins reach every device</th></tr>
+        <tr><td><code>python server.py</code> on a PC</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>The Android cue app in Operator mode</td><td>Only from the parity build onward</td><td>Only from the parity build onward</td></tr>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">🚑</span>
+        <p><strong>404 on Save or Load?</strong> The server is answering but does not know the route — it predates the position endpoints. Pull and restart it:</p>
+        <p><code>cd joan-cue-controller-android &amp;&amp; git pull</code> then restart <code>python pc-server/server.py</code>.</p>
+        <p>To confirm which you have, ask it directly: <code>curl http://&lt;server-ip&gt;:8765/positions</code>. A current server answers <code>{"sets": [...]}</code>. A stale one 404s. So does the Android app's built-in server — but its <code>/debug/events</code> still answers, which distinguishes it from a server that is not running at all.</p>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">📋</span>
+        <p><strong>The messages you get on failure are deliberate, not breakage.</strong> <em>"Saved to this device only… no other device can see them"</em> means the positions were written locally as <code>ObjectTransforms.json</code> rather than discarded, and <em>"No sets to offer: cue server unreachable"</em> means the picker refused to show a list it could not verify. Both are the fallbacks doing their job and saying so.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>Fire one cue through the server before saving on a freshly launched device.</strong> A device learns the server's address from the announcement that rides with scheduled cues. Until then a save reports <em>"no cue server known yet"</em>. Firing cues straight at a device bypasses this — it matters most on an isolated test rig.</p>
+      </div>
+    </section>
+
     <section id="gotchas">
       <div class="section-tag">Movement · Traps</div>
       <h2>Traps worth knowing</h2>
