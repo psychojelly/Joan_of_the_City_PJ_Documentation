@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moving Objects — Joan of the City</title>
+<meta name="description" content="Placing show objects from the Beam Pro panel — what can be moved, how a move reaches every device, named position sets, and why shadows behave differently from everything else." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){try{if(localStorage.getItem('joan-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>
+  .osc-tbl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem;}
+  .osc-tbl th,.osc-tbl td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--border);vertical-align:top;}
+  .osc-tbl th{color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;}
+  .osc-tbl code{font-size:.85rem;white-space:nowrap;}
+  .tbl-wrap{overflow-x:auto;}
+  .yes{color:#7ee08a;font-weight:600;}
+  .no{color:#e08a8a;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="hero compact">
+      <div class="hero-eyebrow">Setup &amp; Operation</div>
+      <h1>Moving Objects</h1>
+      <p>Placing show objects from the panel on the Beam Pro — what can be moved, how a move reaches every device, how a placement is saved, and why <strong>shadows do not behave like anything else</strong>.</p>
+    </div>
+
+    <div class="callout note">
+      <span class="ci">✅</span>
+      <p><strong>Verified on hardware.</strong> Everything described here was tested on a Beam Pro driving XREAL One Pro glasses with a Galaxy Tab S9 alongside, both running the same build. Where something is built but <em>not</em> yet confirmed by a physical button press, it says so rather than being written as working.</p>
+    </div>
+
+    <section id="what-moves">
+      <div class="section-tag">Movement · The objects</div>
+      <h2>What can be moved</h2>
+      <p class="lead">An object is movable when it carries a <code>TargetModelDisplayCtrl</code> component with its <code>modelTarget</code> wired. There is no tag and no layer — the component <em>is</em> the marker, and everything that moves objects finds them the same way.</p>
+
+      <p>The panel deliberately lists <strong>only what is currently active</strong>, because a list offering objects that are not in the scene yet is a list of things that will appear to do nothing. Objects come and go as <code>{ ENABLE }</code> cues fire, so the set changes through the show.</p>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong><code>ShadowCommunion</code> is a decoy.</strong> It carries a movable component but is <em>inactive at every point in the show</em> — measured at seven checkpoints across a full pass. It appears in the greyed inactive list and can never be selected. The shadow you can actually move is <code>ShadowFInal_07132026</code>. Removing the component from <code>ShadowCommunion</code> would end the confusion, but that is a prefab edit.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>Object names are the wire protocol.</strong> Move sync and saved positions both key on <code>gameObject.name</code>, so a rename in the editor silently breaks sync for that object — the only sign is a <code>[DirectorMove] no target named …</code> warning in the log. <code>CommunionBodies_Sound_05/13/2026</code> is especially fragile: slashes and a date in a key that must match exactly on every device.</p>
+      </div>
+    </section>
+
+    <section id="director-sync">
+      <div class="section-tag">Movement · Sharing</div>
+      <h2>Getting a move onto every device</h2>
+      <p class="lead">A move made on the panel changes that headset only, until director sync is armed. Then it is fanned out by the cue server and every device applies it.</p>
+
+      <p><strong>Sync is off by default, everywhere</strong> — including the director build. Sharing a move to every device is something an operator opts into, not a state inherited from which APK happens to be installed. With it off, a move logs <code>move NOT shared — director sync is off</code> rather than quietly doing nothing.</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Command</th><th>What it does</th></tr>
+        <tr><td><code>/debug/directorsync 1</code></td><td>Arm sharing. Absolute, not a toggle, so a repeat is idempotent and the sender always knows the resulting state.</td></tr>
+        <tr><td><code>/debug/directorsync 0</code></td><td>Back to local-only.</td></tr>
+        <tr><td><code>/joan/move &lt;name&gt; x y z rx ry rz scale</code></td><td>Place an object on every device. Absolute values, never deltas.</td></tr>
+        <tr><td><code>/debug/targets</code></td><td>Log what is movable right now, active and inactive, with each transform.</td></tr>
+      </table>
+      </div>
+
+      <p>Moves are sent as <strong>absolute</strong> transforms and repeated three times. The transport is UDP: a dropped delta would leave one device permanently offset with nothing to correct it, whereas a dropped absolute is fixed by the next message, and applying the same absolute twice is a no-op.</p>
+
+      <div class="callout note">
+        <span class="ci">📐</span>
+        <p><strong>Positions travel as <code>localPosition</code>.</strong> That is deliberate: each headset has its own tracking origin, so world coordinates are not comparable between devices. It holds while movables have identity-ish parents — give one a rotated or scaled parent and the same nudge will produce a different local offset on each device.</p>
+      </div>
+    </section>
+
+    <section id="saving">
+      <div class="section-tag">Movement · Saving</div>
+      <h2>Named position sets</h2>
+      <p class="lead">Positions live on the cue server, not on the headset that happened to make them, so every device loads the same answer and a set can be kept alongside the cue sheet.</p>
+
+      <p>The panel's <strong>Save</strong> button asks for a name and confirms before overwriting an existing one. <strong>Load</strong> is a picker of saved sets. <strong>Reset</strong> asks before putting an object back to its authored position. Each device also keeps a local cache, so a set survives the server being unreachable — and says out loud when it is falling back to it, because believing you loaded the shared set while actually loading a private copy is worse than knowing you are offline.</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Command</th><th>What it does</th></tr>
+        <tr><td><code>/positions/save &lt;name&gt;</code></td><td>Snapshot every movable to the server under this name.</td></tr>
+        <tr><td><code>/positions/load &lt;name&gt;</code></td><td>Fetch a named set and apply it.</td></tr>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>Overwrite protection is best-effort.</strong> The dialog checks the name against the set list <em>that device</em> last fetched, but the server does not refuse duplicates — so a set created on another device since then is still overwritten without warning.</p>
+      </div>
+    </section>
+
+    <section id="shadows">
+      <div class="section-tag">Movement · Shadows</div>
+      <h2>Why shadows are different</h2>
+      <p class="lead">Shadows are not placed once and left. They are re-placed from a table every time a shadow cue fires — which is why moving one used to look like it worked and then undo itself.</p>
+
+      <p>Two separate faults made shadow movement impossible, and fixing either alone would have left it broken:</p>
+
+      <ol>
+        <li><strong>The movable object was never active.</strong> The component sat on <code>ShadowCommunion</code>, which is inactive throughout the show, so the shadow could not be selected at all.</li>
+        <li><strong>Placements overwrote the move.</strong> <code>ShadowPositionRandomizer</code> — misleadingly named, since every instance has <code>low == high</code> and so returns a fixed value — re-applies an authored position on each shadow cue. <code>ObjectMover</code> does the same at <strong>VQ2101</strong>, the late reprise that repeats the 301 shadow system near the end of the show.</li>
+      </ol>
+
+      <p>Both now consult a placement store first. Authored values <strong>seed</strong> that store on first use, so nothing looks different until somebody deliberately pins a change, and the authored positions become the starting point rather than an override that always wins.</p>
+
+      <p>Placements are keyed by the placement object's own name, which already encodes the cue — <code>ShadowRandomizer_2101_FrontOfCommunion</code>, <code>ShadowRandomizer_2201_NearJoan1</code> — so they are cue-scoped without anything having to track which cue is playing.</p>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Command</th><th>What it does</th></tr>
+        <tr><td><code>/shadow/pin</code></td><td>Record where the shadow stands now, against whichever placement fired last. The panel's <strong>Save</strong> button does this too.</td></tr>
+        <tr><td><code>/shadow/save &lt;name&gt;</code></td><td>Store the placement set on the server.</td></tr>
+        <tr><td><code>/shadow/load &lt;name&gt;</code></td><td>Fetch a set; it applies on the next shadow cue, not immediately.</td></tr>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>A shadow move that is not pinned will revert.</strong> That is the design, not a bug — the placement re-applies on the next shadow cue. Verified: moved and unpinned, the shadow returned to its authored spot; pinned, it held, including through the VQ2101 reprise.</p>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">🌍</span>
+        <p><strong>Shadow placements are world-space</strong>, unlike every other position here. The existing placement code writes <code>t.position</code>, and converting it to local would move every shadow the moment that parent is not at the origin — a silent change to how the show looks, made while fixing something else. The two stores never touch the same transform.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>There is only one shadow transform.</strong> All the placements drive the same object, so "move the shadow per cue" means moving one shadow to a different stored spot per cue — not several independent shadows. If several were intended, that is a wiring question in the prefab.</p>
+      </div>
+    </section>
+
+    <section id="propagation">
+      <div class="section-tag">Movement · What reaches what</div>
+      <h2>What propagates, and what does not</h2>
+
+      <div class="tbl-wrap">
+      <table class="osc-tbl">
+        <tr><th>Action</th><th>Reaches every device?</th><th>Needs sync armed?</th></tr>
+        <tr><td>Object move (<code>/joan/move</code>)</td><td class="yes">Yes — verified simultaneously on Beam Pro and tablet</td><td>Yes</td></tr>
+        <tr><td>Shadow pin</td><td class="yes">Yes — verified, tablet stored the same placement</td><td>Yes</td></tr>
+        <tr><td>Saved position set</td><td>Only when each device loads it</td><td>No</td></tr>
+        <tr><td>Reset to authored</td><td class="no">No — stays on that device</td><td>—</td></tr>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">⚠️</span>
+        <p><strong>A device must have received a cue <em>through the cue server</em> before it can share anything.</strong> That is when it learns the server's address, via the announcement that rides with scheduled cues. Firing cues straight at a device bypasses it. In a real show cues always come from the server so this resolves itself, but on a freshly launched device the first pin reports <code>pin not shared — no cue server known yet</code>.</p>
+      </div>
+    </section>
+
+    <section id="gotchas">
+      <div class="section-tag">Movement · Traps</div>
+      <h2>Traps worth knowing</h2>
+
+      <div class="callout warn">
+        <span class="ci">🕳️</span>
+        <p><strong>A success message is not proof.</strong> extOSC's <code>OSCTransmitter.Send</code> begins <code>if (!_transmitterBackend.IsAvailable) return;</code> and the socket only opens once <code>Start()</code> has called <code>Connect()</code>. Creating the transmitter and sending in the <em>same frame</em> therefore sends nothing — while the calling code happily logs that it did. This cost an hour to find, and it affected both broadcast paths. Both now call <code>Connect()</code> explicitly and check <code>IsAvailable</code> before claiming anything. <strong>If you add another broadcast, do the same.</strong></p>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">🕳️</span>
+        <p><strong>Scale sync flattens non-uniform scale.</strong> The wire carries one scale value and the receiver applies it uniformly, while save/load preserves the full vector. Every movable is uniform today, so it does not bite — but an object authored with a non-uniform scale would silently lose it the moment a director touched it.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="ci">🕳️</span>
+        <p><strong>The rotation slider is yaw-only and destructive.</strong> It writes a whole new vector with X and Z hard-zeroed, so touching it flattens any tilt — locally first, then on every device. All objects are yaw-only today.</p>
+      </div>
+
+      <div class="callout note">
+        <span class="ci">🧪</span>
+        <p><strong>Not yet confirmed by a button press.</strong> Everything above was driven by sending OSC. The panel's own <em>send</em> path — <code>BroadcastSelectedTransform</code>, fired by nudging on the Beam Pro — has not been exercised by hand. Nudge an object with sync armed and confirm the tablet follows; that closes the last untested step.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script src="sidebar.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>

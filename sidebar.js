@@ -68,6 +68,14 @@
           { title: 'Sustained-run stability', href: 'cue-performance.html#stability' },
           { title: 'How to reproduce this', href: 'cue-performance.html#method' },
         ]},
+        { title: 'Moving Objects', href: 'object-movement.html', children: [
+          { title: 'What can be moved', href: 'object-movement.html#what-moves' },
+          { title: 'Getting a move everywhere', href: 'object-movement.html#director-sync' },
+          { title: 'Named position sets', href: 'object-movement.html#saving' },
+          { title: 'Why shadows are different', href: 'object-movement.html#shadows' },
+          { title: 'What propagates', href: 'object-movement.html#propagation' },
+          { title: 'Traps worth knowing', href: 'object-movement.html#gotchas' },
+        ]},
         { title: 'Debug & Optimization', href: 'debug-tools.html', children: [
           { title: 'The debug build', href: 'debug-tools.html#debug-build' },
           { title: 'Did every headset get it?', href: 'debug-tools.html#dropped-cues' },
